@@ -1,0 +1,126 @@
+########################################################################
+# Makefile (macosx)
+########################################################################
+
+########################################################################
+# Directories
+#
+PLATFORM = macosx
+DIST_DIR = ./dist/$(PLATFORM)/bin
+CDIR  = ./c
+CXXDIR  = ./cxx
+IDIR  = ./h
+
+MODULE_NAME = meshlink
+MODULE_SUFFIX=.a
+
+#
+# Check for a valid build type.  If none is specified, use Debug
+#
+ifndef BUILD
+    BUILD := Debug
+endif
+
+KNOWN_BUILD_TYPES := Release Debug
+
+ifeq ($(findstring $(BUILD),$(KNOWN_BUILD_TYPES)),)
+    $(error BUILD type ($(BUILD)) is not valid ($(KNOWN_BUILD_TYPES)))
+endif
+
+#
+# Common defines
+#
+ifeq ($(BUILD),Debug)
+	  DBG_SUFFIX := d
+	  DBG_EXE_SUFFIX := _dbg
+else
+	  DBG_SUFFIX :=
+	  DBG_EXE_SUFFIX :=
+endif
+
+ODIR := ./$(BUILD)
+MODULE_NAME := ${MODULE_NAME}${DBG_SUFFIX}${MODULE_SUFFIX}
+$(info $$MODULE_NAME is [${MODULE_NAME}])
+
+
+CFILES := \
+	Types_c.c \
+	$(NULL)
+
+CXXFILES := \
+	GeometryGroup.cxx \
+	GeometryKernel.cxx \
+	MeshAssociativity_c.cxx \
+	MeshAssociativity.cxx \
+	MeshModel.cxx \
+	MeshSheet.cxx \
+	MeshString.cxx \
+	MeshTopo.cxx \
+	Types.cxx \
+	$(NULL)
+
+
+CXXSRC := $(patsubst %,$(CXXDIR)/%,$(CXXFILES))
+CXXOBJS := $(patsubst %.cxx,$(ODIR)/%.o,$(CXXFILES))
+
+CSRC := $(patsubst %,$(CDIR)/%,$(CFILES))
+COBJS := $(patsubst %.c,$(ODIR)/%.o,$(CFILES))
+
+OBJS := ${CXXOBJS} ${COBJS}
+
+$(info $$CXXSRC is [${CXXSRC}])
+$(info $$CXXOBJS is [${CXXOBJS}])
+
+$(info $$CSRC is [${CSRC}])
+$(info $$COBJS is [${COBJS}])
+
+$(info $$OBJS is [${OBJS}])
+
+########################################################################
+# Tool Macros
+#
+AR = ar rcs
+CC = clang
+CXX = clang++
+MKDIR = mkdir -p
+CP = cp -f
+
+########################################################################
+# Compiler defines
+#
+DEFINE = -D IS64BIT  
+ifeq ($(BUILD),Debug)
+	COPTS = -g 
+	CXXOPTS = -g 
+else
+endif
+
+########################################################################
+# Rules
+#
+.PHONY: dist
+
+#all: ${DIST_DIR} $(DIST_DIR)/meshlink.a
+
+meshlink: ${DIST_DIR} $(DIST_DIR)/${MODULE_NAME}
+
+dist: ${DIST_DIR}
+
+${ODIR}:
+	${MKDIR} ${ODIR}
+
+${DIST_DIR}:
+	${MKDIR} ${DIST_DIR}
+
+$(ODIR)/%.o:	$(CDIR)/%.c
+	$(CC)  $(COPTS) $(DEFINE) -I$(IDIR) -o $@  -c $<
+
+$(ODIR)/%.o:	$(CXXDIR)/%.cxx
+	$(CXX)  $(CXXOPTS) $(DEFINE) -I$(IDIR) -o $@  -c $<
+
+$(DIST_DIR)/${MODULE_NAME}: ${ODIR} $(OBJS) ${DIST_DIR}
+	$(AR) $(DIST_DIR)/${MODULE_NAME}  ${OBJS} 
+
+clean:
+	-rm -f $(OBJS)
+	-rm -f ${DIST_DIR}/${MODULE_NAME}

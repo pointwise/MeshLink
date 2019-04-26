@@ -1,0 +1,185 @@
+########################################################################
+# Makefile (linux_x86_64)
+########################################################################
+
+#
+# Check for a valid build type.  If none is specified, use Debug
+#
+ifndef BUILD
+    BUILD := Debug
+endif
+
+KNOWN_BUILD_TYPES := Release Debug
+
+ifeq ($(findstring $(BUILD),$(KNOWN_BUILD_TYPES)),)
+    $(error BUILD type ($(BUILD)) is not valid ($(KNOWN_BUILD_TYPES)))
+endif
+
+#
+# Common defines
+#
+ifeq ($(BUILD),Debug)
+	  DBG_SUFFIX := d
+	  DBG_EXE_SUFFIX := _dbg
+else
+	  DBG_SUFFIX :=
+	  DBG_EXE_SUFFIX :=
+endif
+
+########################################################################
+# Directories
+#
+PLATFORM = linux_x86_64
+DIST_DIR = ./dist/$(PLATFORM)/bin
+TEST_DIR = ./test
+CDIR  = .
+F90DIR  = .
+IDIR  = .
+MESHLINK_IDIR  = ../../src/meshlink/h
+MESHLINK_LIBDIR  = ../../src/meshlink/dist/$(PLATFORM)/bin
+MESHLINK_LIB  = meshlink
+MLKERNEL_GEODE_IDIR  = ../../src/mlkernel_geode
+MLKERNEL_GEODE_LIBDIR  = ../../src/mlkernel_geode/dist/$(PLATFORM)/bin
+MLKERNEL_GEODE_LIB = mlkernel_geode
+MLPARSER_XERCES_IDIR  = ../../src/mlparser_xerces
+MLPARSER_XERCES_LIBDIR  = ../../src/mlparser_xerces/dist/$(PLATFORM)/bin
+MLPARSER_XERCES_LIB = mlparser_xerces
+
+GE_IDIR  = ../../external/gelite/include
+GELIBDIR = ../../external/gelite/$(PLATFORM)/lib
+ifdef HAVE_GEODE
+GEODE_DEFINE := -D HAVE_GEODE
+GEODE_LIBS := $(MLKERNEL_GEODE_LIBDIR)/$(MLKERNEL_GEODE_LIB)$(DBG_SUFFIX).a \
+-L$(GELIBDIR) -lnmb -lgeom -lvmath  
+endif
+
+HAVE_XERCES := 1
+
+ifdef HAVE_XERCES
+XERCES_DEFINE := -D HAVE_XERCES
+XERCES_IDIR  = ../../external/xerces/include
+XERCES_PLATFORM_IDIR  = ../../external/xerces/$(PLATFORM)/include
+XERCES_LIBDIR := ../../external/xerces/$(PLATFORM)/lib
+XERCES_LIB := -lxerces-c
+else
+XERCES_DEFINE :=
+XERCES_LIBDIR :=
+XERCES_CXX :=
+XERCES_IDIR  :=
+XERCES_PLATFORM_IDIR :=
+endif
+
+MODULE_NAME = harness_f
+
+ODIR := ./$(BUILD)
+MODULE_FULLNAME := ${MODULE_NAME}${DBG_EXE_SUFFIX}
+$(info $$MODULE_FULLNAME is [${MODULE_FULLNAME}])
+
+
+SRCFILES := \
+	harness_f.f90 \
+	$(NULL)
+
+MESHLINK_SRCFILES := \
+	MeshAssociativity_f.f90 \
+	$(NULL)
+
+MLPARSER_SRCFILES := \
+	MeshLinkParser_xerces_f.f90 \
+	$(NULL)
+
+MLKERNEL_SRCFILES := \
+	GeomKernel_Geode_f.f90 \
+	$(NULL)
+
+
+SRC := $(patsubst %,$(F90DIR)/%,$(SRCFILES))
+LOBJS := $(patsubst %.f90,$(ODIR)/%.o,$(SRCFILES))
+
+MESHLINK_SRC := $(patsubst %,$(MESHLINK_IDIR)/%,$(MESHLINK_SRCFILES))
+MESHLINK_OBJS := $(patsubst %.f90,$(ODIR)/%.o,$(MESHLINK_SRCFILES))
+
+MLPARSER_SRC := $(patsubst %,$(MLPARSER_XERCES_IDIR)/%,$(MLPARSER_SRCFILES))
+MLPARSER_OBJS := $(patsubst %.f90,$(ODIR)/%.o,$(MLPARSER_SRCFILES))
+
+MLKERNEL_SRC := $(patsubst %,$(MLKERNEL_GEODE_IDIR)/%,$(MLKERNEL_SRCFILES))
+MLKERNEL_OBJS := $(patsubst %.f90,$(ODIR)/%.o,$(MLKERNEL_SRCFILES))
+
+OBJS := ${MESHLINK_OBJS} ${MLPARSER_OBJS} ${MLKERNEL_OBJS} ${LOBJS}
+
+$(info $$OBJS is [${OBJS}])
+
+########################################################################
+# Tool Macros
+#
+FORT = gfortran 
+CC = gcc 
+CXX = g++ -std=c++11
+MKDIR = mkdir -p
+CP = cp -f
+
+########################################################################
+# Compiler defines
+#
+DEFINE = -D IS64BIT  $(XERCES_DEFINE) $(GEODE_DEFINE)
+ifeq ($(BUILD),Debug)
+	FOPTS = -g  -cpp
+	COPTS = -g 
+	CXXOPTS = -g 
+else
+	FOPTS =  -cpp
+endif
+
+########################################################################
+# Rules
+#
+.PHONY: dist
+
+
+${MODULE_NAME}: $(DIST_DIR)/${MODULE_FULLNAME}
+
+dist: ${DIST_DIR}
+
+${ODIR}:
+	${MKDIR} ${ODIR}
+
+${DIST_DIR}:
+	${MKDIR} ${DIST_DIR}
+
+$(ODIR)/%.o:	$(F90DIR)/%.f90
+	$(FORT)  $(FOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) \
+	-I$(GE_IDIR) -I$(MLKERNEL_GEODE_IDIR) -I$(MLPARSER_XERCES_IDIR) \
+	-o $@  -c $<
+
+$(ODIR)/%.o:	$(MESHLINK_IDIR)/%.f90
+	$(FORT)  $(FOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) \
+	-I$(GE_IDIR) -I$(MLKERNEL_GEODE_IDIR) -I$(MLPARSER_XERCES_IDIR) \
+	-o $@  -c $<
+
+$(ODIR)/%.o:	$(MLPARSER_XERCES_IDIR)/%.f90
+	$(FORT)  $(FOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) \
+	-I$(GE_IDIR) -I$(MLKERNEL_GEODE_IDIR) -I$(MLPARSER_XERCES_IDIR) \
+	-o $@  -c $<
+
+$(ODIR)/%.o:	$(MLKERNEL_GEODE_IDIR)/%.f90
+	$(FORT)  $(FOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) \
+	-I$(GE_IDIR) -I$(MLKERNEL_GEODE_IDIR) -I$(MLPARSER_XERCES_IDIR) \
+	-o $@  -c $<
+
+$(DIST_DIR)/${MODULE_FULLNAME}: ${ODIR} $(OBJS) ${DIST_DIR}
+	$(FORT) -o $(DIST_DIR)/$(MODULE_FULLNAME) \
+	   	  ${OBJS} \
+		  $(GEODE_LIBS) \
+		 $(MLPARSER_XERCES_LIBDIR)/$(MLPARSER_XERCES_LIB)$(DBG_SUFFIX).a \
+		 $(MESHLINK_LIBDIR)/$(MESHLINK_LIB)$(DBG_SUFFIX).a \
+		 -lstdc++ "-Wl,-rpath,\$$ORIGIN" \
+		 -L$(XERCES_LIBDIR) $(XERCES_LIB)
+	$(CP) $(XERCES_LIBDIR)/* $(DIST_DIR)/
+
+
+
+clean:
+	-rm -f $(OBJS)
+	-rm -f ${DIST_DIR}/${MODULE_FULLNAME}
+
+

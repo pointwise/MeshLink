@@ -1,0 +1,140 @@
+########################################################################
+# Makefile (linux_x86_64)
+########################################################################
+
+########################################################################
+# Directories
+#
+PLATFORM = linux_x86_64
+DIST_DIR = ./dist/$(PLATFORM)/bin
+CDIR  = ./
+CXXDIR  = ./
+IDIR  = ./
+MESHLINK_IDIR  = ../meshlink/h
+
+HAVE_XERCES := 1
+
+ifdef HAVE_XERCES
+XERCES_DEFINE := -D HAVE_XERCES
+XERCES_IDIR  = ../../external/xerces/include
+XERCES_PLATFORM_IDIR  = ../../external/xerces/$(PLATFORM)/include
+XERCES_LIBDIR := ../../external/xerces/$(PLATFORM)/lib
+XERCES_LIB := -lxerces-c
+else
+XERCES_DEFINE :=
+XERCES_LIBDIR :=
+XERCES_CXX :=
+XERCES_IDIR  :=
+XERCES_PLATFORM_IDIR :=
+endif
+
+
+MODULE_NAME = mlparser_xerces
+MODULE_SUFFIX=.a
+
+#
+# Check for a valid build type.  If none is specified, use Debug
+#
+ifndef BUILD
+    BUILD := Debug
+endif
+
+KNOWN_BUILD_TYPES := Release Debug
+
+ifeq ($(findstring $(BUILD),$(KNOWN_BUILD_TYPES)),)
+    $(error BUILD type ($(BUILD)) is not valid ($(KNOWN_BUILD_TYPES)))
+endif
+
+#
+# Common defines
+#
+ifeq ($(BUILD),Debug)
+	  DBG_SUFFIX := d
+	  DBG_EXE_SUFFIX := _dbg
+else
+	  DBG_SUFFIX :=
+	  DBG_EXE_SUFFIX :=
+endif
+
+ODIR := ./$(BUILD)
+MODULE_NAME := ${MODULE_NAME}${DBG_SUFFIX}${MODULE_SUFFIX}
+$(info $$MODULE_NAME is [${MODULE_NAME}])
+
+
+CFILES := \
+	$(NULL)
+
+CXXFILES := \
+	MeshLinkParser_xerces_c.cxx \
+	MeshLinkParser_xerces.cxx \
+	$(NULL)
+
+
+CXXSRC := $(patsubst %,$(CXXDIR)/%,$(CXXFILES))
+CXXOBJS := $(patsubst %.cxx,$(ODIR)/%.o,$(CXXFILES))
+
+CSRC := $(patsubst %,$(CDIR)/%,$(CFILES))
+COBJS := $(patsubst %.c,$(ODIR)/%.o,$(CFILES))
+
+OBJS := ${CXXOBJS} ${COBJS}
+
+$(info $$CXXSRC is [${CXXSRC}])
+$(info $$CXXOBJS is [${CXXOBJS}])
+
+$(info $$CSRC is [${CSRC}])
+$(info $$COBJS is [${COBJS}])
+
+$(info $$OBJS is [${OBJS}])
+
+########################################################################
+# Tool Macros
+#
+AR = ar rcs
+CC = gcc 
+CXX = g++ -std=c++11
+MKDIR = mkdir -p
+CP = cp -f
+
+########################################################################
+# Compiler defines
+#
+DEFINE = -D IS64BIT  
+ifeq ($(BUILD),Debug)
+	COPTS = -g 
+	CXXOPTS = -g 
+else
+endif
+
+########################################################################
+# Rules
+#
+.PHONY: dist
+
+
+mlparser_xerces: ${DIST_DIR} $(DIST_DIR)/${MODULE_NAME}
+
+dist: ${DIST_DIR}
+
+${ODIR}:
+	${MKDIR} ${ODIR}
+
+${DIST_DIR}:
+	${MKDIR} ${DIST_DIR}
+
+$(ODIR)/%.o:	$(CDIR)/%.c
+	$(CC)  $(COPTS) $(DEFINE) -I$(IDIR) -o $@  -c $<
+
+$(ODIR)/%.o:	$(CXXDIR)/%.cxx
+	$(CXX)  $(CXXOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) -I$(XERCES_IDIR) -I$(XERCES_PLATFORM_IDIR) -o $@  -c $<
+
+
+$(DIST_DIR)/${MODULE_NAME}: ${ODIR} $(OBJS) ${DIST_DIR}
+	$(AR) $(DIST_DIR)/${MODULE_NAME}  ${OBJS} 
+
+
+
+clean:
+	-rm -f $(OBJS)
+	-rm -f ${DIST_DIR}/${MODULE_NAME}
+
+

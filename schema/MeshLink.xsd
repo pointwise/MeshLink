@@ -1,0 +1,560 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="MeshLinkSchema"
+    targetNamespace="https://pointwise.com"
+    elementFormDefault="qualified"
+    xmlns:ml="https://pointwise.com"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <!-- Define reference types -->
+
+  <xs:simpleType name="AttributeIDType">
+    <xs:annotation>
+      <xs:documentation>
+        An attribute reference ID is a positive integer that must be unique for all
+        Attribute elements within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger"/>
+  </xs:simpleType>
+  <xs:simpleType name="AttributeIDListType">
+    <xs:annotation>
+      <xs:documentation>
+        This type is a list of unique integers that must refer to Attribute or
+        AttributeGroup elements within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:list>
+      <xs:simpleType>
+        <xs:restriction base="ml:AttributeIDType"/>
+      </xs:simpleType>
+    </xs:list>
+  </xs:simpleType>
+
+  <xs:simpleType name="GeometryReferenceIDType">
+    <xs:annotation>
+      <xs:documentation>
+        A geometry reference ID is a positive integer that must be unique for the
+        set of all GeometryReference and GeometryGroup elements within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger"/>
+  </xs:simpleType>
+  <xs:attributeGroup name="GeometryReferenceAttributes">
+    <xs:annotation>
+      <xs:documentation>
+        This attribute group is applied to GeometryReference and GeometryGroup elements.
+        A geometry reference must be unique and addressable by 'ref' within a geometry file,
+        and is mapped to a unique geometry reference ID within a MeshLink file. If specified,
+        the 'name' attribute may be used in an application-specific way to identify
+        a geometric element; if not specified, the 'name' of the element may default to
+        the required 'ref' attribute value.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="gid" type="ml:GeometryReferenceIDType" use="required"/>
+    <xs:attribute name="ref" type="xs:string" use="required"/>
+    <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+    <xs:attribute name="name" type="xs:string" use="optional"/>
+  </xs:attributeGroup>
+  <xs:simpleType name="GeometryReferenceIDListType">
+    <xs:annotation>
+      <xs:documentation>
+        This type is a list of unique integers that must refer to GeometryReference or
+        GeometryGroup elements within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:list>
+      <xs:simpleType>
+        <xs:restriction base="ml:GeometryReferenceIDType"/>
+      </xs:simpleType>
+    </xs:list>
+  </xs:simpleType>
+
+  <xs:simpleType name="MeshReferenceIDType">
+    <xs:annotation>
+      <xs:documentation>
+        A mesh reference ID is a positive integer that must be unique for the
+        set of all mesh elements (except for points) within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger"/>
+  </xs:simpleType>
+
+  <xs:attributeGroup name="MeshElementAttributes">
+    <xs:attribute name="mid" type="ml:MeshReferenceIDType" use="optional"/>
+    <xs:attribute name="name" type="xs:string" use="optional"/>
+    <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+    <xs:attribute name="gref" type="ml:GeometryReferenceIDType" use="optional"/>
+  </xs:attributeGroup>
+
+  <!-- Define parameter vertex element type -->
+
+  <xs:complexType name="ParamVertexType">
+    <xs:annotation>
+      <xs:documentation>
+        A ParamVertex links a mesh point to a geometry element and
+        provides parametric coordinate information in an application-
+        specific manner as the content. For example, the content
+        of a coordinate in the parameter space of a surface element
+        could be represented as U/V coordinates, where a curvilinear
+        coordinate might be expressed as an arc-length parameter.
+
+        The vertex is referenced through the 'vref' attribute, also
+        in an application-specific manner. For example, this could
+        be a reference to a point index within the mesh file,
+        or a reference to a PointReference element within the mesh
+        link file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="mid" type="ml:MeshReferenceIDType" use="optional"/>
+        <xs:attribute name="vref" type="xs:string" use="required"/>
+        <xs:attribute name="gref" type="ml:GeometryReferenceIDType" use="required"/>
+        <xs:attribute name="dim" type="xs:positiveInteger" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Define MeshLink schema, top-level node -->
+
+  <xs:element name="MeshLink">
+    <xs:annotation>
+      <xs:documentation>
+        MeshLink is the top-most element in a MeshLink file. It defines
+        all arbitrary attributes, geometry references and links mesh
+        elements to geometry or attributes.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Attribute">
+            <xs:annotation>
+              <xs:documentation>
+                An Attribute allows definition of an arbitrary, application-defined
+                attribute that can be linked to any element within the MeshLink file.
+                It must have a unique ID, and may have an optional name attribute and may
+                contain content of any type that the application may require.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="xs:string">
+                  <xs:attribute name="attid" type="ml:AttributeIDType" use="required"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="AttributeGroup">
+            <xs:annotation>
+              <xs:documentation>
+                An AttributeGroup provides a mechanism for grouping Attribute
+                elements for the convenience of the application. This allows a
+                single element to link to an arbitrarily-defined set of attributes.
+
+                The content of an AttributeGroup element is a list of 'aref' values
+                defined by Attribute elements. The group element itself
+                must also be a unique 'aref' within the set of Attribute
+                and AttributeGroup elements of a MeshLink file. An AttributeGroup
+                may contain references to other AttributeGroup elements (i.e.,
+                they may be nested).
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="ml:AttributeIDListType">
+                  <xs:attribute name="attid" type="ml:AttributeIDType" use="required"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="GeometryFile">
+            <xs:annotation>
+              <xs:documentation>
+                A GeometryFile defines a set of named geometric elements, obtained from
+                the file indicated by the 'filename' property, that can be linked to by any
+                mesh element in a MeshLink file. GeometryReference elements can be
+                arbitrarily grouped together for use in an implementation-specific manner.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="GeometryReference" minOccurs="0" maxOccurs="unbounded">
+                  <xs:annotation>
+                    <xs:documentation>
+                      A GeometryReference maps a geometry element from the geometry
+                      file to a unique numeric ID, which can be used to link mesh elements
+                      to geometry.
+                    </xs:documentation>
+                  </xs:annotation>
+                  <xs:complexType>
+                    <xs:attributeGroup ref="ml:GeometryReferenceAttributes"/>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+              <xs:attribute name="filename" type="xs:string" use="required"/>
+              <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="GeometryGroup">
+            <xs:annotation>
+              <xs:documentation>
+                A GeometryGroup provides a mechanism for grouping GeometryReference
+                elements for the convenience of the application. This allows a
+                single mesh element to link to a defined set of geometric entities
+                without dependency on, or need for, grouping constructs in the
+                geometry format itself.
+
+                The content of a GeometryGroup element is a list of 'gref' values
+                defined by GeometryReference elements. The group element itself
+                must also be a unique 'gref' within the set of GeometryReference
+                and GeometryGroup elements of a MeshLink file. A GeometryGroup
+                may not contain references to other GeometryGroup elements (i.e.,
+                they may not be nested).
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="ml:GeometryReferenceIDListType">
+                  <xs:attribute name="gid" type="ml:GeometryReferenceIDType" use="required"/>
+                  <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="MeshFile" type="ml:MeshFileType">
+            <xs:annotation>
+              <xs:documentation>
+                A MeshFile element maps mesh elements from an external mesh
+                file to GeometryReference or GeometryGroup elements by 'gref'.
+                See MeshFileType for a complete description.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <!-- Enforce uniqueness constraints within the entire MeshLink element structure -->
+
+    <xs:unique name="AttributeReferenceKey">
+      <xs:selector xpath=".//ml:Attribute | .//ml:AttributeGroup"/>
+      <xs:field xpath="@attid"/>
+    </xs:unique>
+    <xs:keyref name="AttributeReferenceKeyRef" refer="ml:AttributeReferenceKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@aref"/>
+    </xs:keyref>
+
+    <xs:unique name="GeometryReferenceKey">
+        <xs:selector xpath=".//ml:GeometryReference | .//ml:GeometryGroup"/>
+      <xs:field xpath="@gid"/>
+    </xs:unique>
+    <xs:keyref name="GeometryReferenceKeyRef" refer="ml:GeometryReferenceKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@gref"/>
+    </xs:keyref>
+
+    <xs:unique name="MeshElementIDKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@mid"/>
+    </xs:unique>
+    <xs:keyref name="MeshElementIDKeyRef" refer="ml:MeshElementIDKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@mref"/>
+    </xs:keyref>
+
+    <xs:unique name="PointReferenceKey">
+      <xs:selector xpath=".//ml:MeshPointReference"/>
+      <xs:field xpath="@pid"/>
+    </xs:unique>
+    <xs:keyref name="PointReferenceKeyRef" refer="ml:PointReferenceKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@pref"/>
+    </xs:keyref>
+  </xs:element>
+
+  <xs:complexType name="MeshFileType">
+    <xs:annotation>
+      <xs:documentation>
+        Multiple MeshFile elements may occur in a MeshLink file, where
+        each file may contain any number of MeshModelReference elements,
+        each of which refer to a collection of unique mesh elements.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="MeshModelReference" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            A MeshModelReference provides a context for mesh elements that can
+            be linked to geometry. A MeshModelReference typically refers to
+            a contiguous mesh structure (a block). The mesh points defined
+            within such a structure must all be uniquely identifiable for
+            the application. A MeshModelReference is mapped to the structure
+            in the mesh file in an application-specific way through the 'ref'
+            attribute.
+
+            Within a MeshModelReference, a variety of mesh elements can be
+            identified or defined, and mapped to a geometry element or group.
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element name="MeshSheetReference">
+                <xs:annotation>
+                  <xs:documentation>
+                    A MeshSheetReference element maps a set of surface cells
+                    in the mesh file that can be clearly identified in an
+                    application-specific way through the 'ref' attribute.
+                    That is, the set of surface cells must be defined in an
+                    addressable manner in the context of the mesh model (or
+                    mesh file).
+
+                    Within a MeshSheetReference, parametric coordinates can
+                    be defined for each vertex in an application-specific way
+                    using zero or more ParamVertex elements.
+
+                    All surface cells within a MeshSheetReference may be linked to
+                    a single geometry element or group through the 'gref'
+                    attribute. If the 'gref' attribute is not present,
+                    it is expected that the ParamVertex elements will
+                    provide the necessary geometry linkage information.
+                  </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="ParamVertex" type="ml:ParamVertexType" minOccurs="0" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                  <xs:attribute name="ref" type="xs:string" use="required"/>
+                  <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="MeshSheet">
+                <xs:annotation>
+                  <xs:documentation>
+                    A MeshSheet element provides a way to define a set 
+                    of surface cells to be linked to geometry, but the
+                    set is not defined or uniquely identifiable within the
+                    mesh file itself. A MeshSheet, like MeshSheetReference,
+                    also allows parametric coordinates to be defined in an
+                    application-specific way.
+
+                    A MeshSheet is defined as either a sequence of MeshFace
+                    or MeshFaceReference elements. A MeshFace allows a surface
+                    cell to be completely defined in an application-specific
+                    way. A MeshFaceReference element maps a surface cell
+                    from the mesh file that can be uniquely identified.
+
+                    All surface cells within a MeshSheet may be linked to
+                    a single geometry element or group through the 'gref'
+                    attribute. If the 'gref' attribute is not present,
+                    it is expected that the ParamVertex elements will
+                    provide the necessary geometry linkage information.
+                  </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="ParamVertex" type="ml:ParamVertexType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:choice>
+                      <xs:element name="MeshFace" minOccurs="1" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            The content of a MeshFace element defines a one or more mesh surface
+                            cells in a manner that is application-defined, with the restriction that
+                            only one type of face may be defined, as indicated by the etype
+                            attribute. The value of etype attribute will be per the convention
+                            of the application. When the count attribute is not defined, it is
+                            assumed that only one face of the given type is defined. The format
+                            attribute, when specified, indicates application-defined information
+                            about how the content of the element is structured or encoded.
+                            If specified, the 'gref' attribute will apply to all mesh faces
+                            defined in the content. If 'gref' is not specified, the geometry
+                            link reference will be inherited from the containing MeshSheet element.
+                          </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                              <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                              <xs:attribute name="etype" type="xs:string" use="required"/>
+                              <xs:attribute name="format" type="xs:string" use="optional"/>
+                              <xs:attribute name="count" type="xs:positiveInteger" use="optional"/>
+                            </xs:extension>
+                          </xs:simpleContent>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="MeshFaceReference" minOccurs="1" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            One or more MeshFace elements are mapped from the mesh file
+                            through the content of a MeshFaceReference in an
+                            application-specific way. In all other ways, a MeshFaceReference
+                            is defined the same way as a MeshFace.
+                          </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                              <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                              <xs:attribute name="etype" type="xs:string" use="required"/>
+                              <xs:attribute name="format" type="xs:string" use="optional"/>
+                              <xs:attribute name="count" type="xs:positiveInteger" use="optional"/>
+                            </xs:extension>
+                          </xs:simpleContent>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:choice>
+                  </xs:sequence>
+                  <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="MeshStringReference">
+                <xs:annotation>
+                  <xs:documentation>
+                    A MeshStringReference element maps a point-connected
+                    series of mesh edge elements (i.e., a mesh curve) in the
+                    mesh file that can be clearly identified in an application-
+                    specific way through the 'ref' attribute. That is, the sequence
+                    of edges must be defined in an addressable manner in the
+                    context of the mesh model (or mesh file).
+
+                    Within a MeshStringReference, parametric coordinates can
+                    be defined for each vertex in an application-specific way
+                    using zero or more ParamVertex elements.
+
+                    All edges within a MeshStringReference may be linked to
+                    a single geometry element or group through the 'gref'
+                    attribute. If the 'gref' attribute is not present,
+                    it is expected that the ParamVertex elements will
+                    provide the necessary geometry linkage information.
+                  </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="ParamVertex" type="ml:ParamVertexType" minOccurs="0" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                  <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                  <xs:attribute name="ref" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="MeshString">
+                <xs:annotation>
+                  <xs:documentation>
+                    A MeshString element provides a way to define a point-connected
+                    set of edges to be linked to geometry, where the set is not
+                    defined or uniquely identifiable within the mesh file
+                    itself. A MeshString, like MeshStringReference,
+                    also allows parametric coordinates to be defined in an
+                    application-specific way.
+
+                    A MeshString is defined as either a sequence of MeshEdge
+                    elements, MeshEdgeReference elements, or a list of
+                    mesh point vertex IDs. A MeshEdge allows an edge
+                    to be completely defined in an application-specific
+                    way. A MeshEdgeReference element maps an edge
+                    from the mesh file that can be uniquely identified.
+                    A list of mesh points refers to MeshPoint element IDs
+                    that comprise an implied point-connected string of edges.
+
+                    All edges within a MeshString may be linked to
+                    a single geometry element or group through the 'gref'
+                    attribute. If the 'gref' attribute is not present,
+                    it is expected that the ParamVertex elements will
+                    provide the necessary geometry linkage information.
+                  </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="ParamVertex" type="ml:ParamVertexType" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:choice>
+                      <xs:element name="MeshEdge" minOccurs="1" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            The content of a MeshEdge element defines one or more mesh edges
+                            in a manner that is application-defined, with the restriction that
+                            only one type of edge may be defined, as indicated by the etype
+                            attribute. The value of etype attribute will be per the convention
+                            of the application. When the count attribute is not defined, it is
+                            assumed that only one edge of the given type is defined. The format
+                            attribute, when specified, indicates application-defined information
+                            about how the content of the element is structured or encoded.
+                          </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                              <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                              <xs:attribute name="etype" type="xs:string" use="required"/>
+                              <xs:attribute name="format" type="xs:string" use="optional"/>
+                              <xs:attribute name="count" type="xs:positiveInteger" use="optional"/>
+                            </xs:extension>
+                          </xs:simpleContent>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="MeshEdgeReference" minOccurs="1" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            One or more MeshEdge elements are mapped from the mesh file
+                            through the content of a MeshEdgeReference in an
+                            application-specific way. In all other ways, a MeshEdgeReference
+                            is defined the same way as a MeshEdge.
+                          </xs:documentation>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:simpleContent>
+                            <xs:extension base="xs:string">
+                              <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                              <xs:attribute name="etype" type="xs:string" use="required"/>
+                              <xs:attribute name="format" type="xs:string" use="optional"/>
+                              <xs:attribute name="count" type="xs:positiveInteger" use="optional"/>
+                            </xs:extension>
+                          </xs:simpleContent>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:choice>
+                  </xs:sequence>
+                  <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="MeshPointReference">
+                <xs:annotation>
+                  <xs:documentation>
+                    One ore more vertices are mapped from the mesh file through the content
+                    of a MeshPointReference in an application-specific way. A MeshPointReference
+                    is used to link vertices in a MeshModel directly to geometry without
+                    the need to construct a mesh string or mesh sheet.
+                  </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+                      <xs:attribute name="format" type="xs:string" use="optional"/>
+                      <xs:attribute name="count" type="xs:positiveInteger" use="optional"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="ParamVertex" type="ml:ParamVertexType" minOccurs="0" maxOccurs="unbounded"/>
+
+            </xs:choice>
+          </xs:sequence>
+          <xs:attributeGroup ref="ml:MeshElementAttributes"/>
+          <xs:attribute name="ref" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="filename" type="xs:string" use="required"/>
+    <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,163 @@
+########################################################################
+# Makefile (linux_x86_64)
+########################################################################
+
+########################################################################
+# Directories
+#
+PLATFORM = linux_x86_64
+DIST_DIR = ./dist/$(PLATFORM)/bin
+TEST_DIR = ./test
+CDIR  = .
+CXXDIR  = .
+IDIR  = .
+MESHLINK_IDIR  = ../../src/meshlink/h
+MESHLINK_LIBDIR  = ../../src/meshlink/dist/$(PLATFORM)/bin
+MESHLINK_LIB  = meshlink
+MLKERNEL_GEODE_IDIR  = ../../src/mlkernel_geode
+MLKERNEL_GEODE_LIBDIR  = ../../src/mlkernel_geode/dist/$(PLATFORM)/bin
+MLKERNEL_GEODE_LIB = mlkernel_geode
+MLPARSER_XERCES_IDIR  = ../../src/mlparser_xerces
+MLPARSER_XERCES_LIBDIR  = ../../src/mlparser_xerces/dist/$(PLATFORM)/bin
+MLPARSER_XERCES_LIB = mlparser_xerces
+
+GE_IDIR  = ../../external/gelite/include
+GELIBDIR = ../../external/gelite/$(PLATFORM)/lib
+GEODE_DEFINE := -D HAVE_GEODE
+
+HAVE_XERCES := 1
+
+ifdef HAVE_XERCES
+XERCES_DEFINE := -D HAVE_XERCES
+XERCES_IDIR  = ../../external/xerces/include
+XERCES_PLATFORM_IDIR  = ../../external/xerces/$(PLATFORM)/include
+XERCES_LIBDIR := ../../external/xerces/$(PLATFORM)/lib
+XERCES_LIB := -lxerces-c
+else
+XERCES_DEFINE :=
+XERCES_LIBDIR :=
+XERCES_CXX :=
+XERCES_IDIR  :=
+XERCES_PLATFORM_IDIR :=
+endif
+
+MODULE_NAME = refine_uns
+
+#
+# Check for a valid build type.  If none is specified, use Debug
+#
+ifndef BUILD
+    BUILD := Debug
+endif
+
+KNOWN_BUILD_TYPES := Release Debug
+
+ifeq ($(findstring $(BUILD),$(KNOWN_BUILD_TYPES)),)
+    $(error BUILD type ($(BUILD)) is not valid ($(KNOWN_BUILD_TYPES)))
+endif
+
+#
+# Common defines
+#
+ifeq ($(BUILD),Debug)
+	  DBG_SUFFIX := d
+	  DBG_EXE_SUFFIX := _dbg
+else
+	  DBG_SUFFIX :=
+	  DBG_EXE_SUFFIX :=
+endif
+
+ODIR := ./$(BUILD)
+MODULE_FULLNAME := ${MODULE_NAME}${DBG_EXE_SUFFIX}
+$(info $$MODULE_FULLNAME is [${MODULE_FULLNAME}])
+
+
+CFILES := \
+	$(NULL)
+
+CXXFILES := \
+	edge.cxx \
+	main.cxx \
+	quality.cxx \
+	queue.cxx \
+	surf_mesh.cxx \
+	vrml.cxx \
+	$(NULL)
+
+
+CXXSRC := $(patsubst %,$(CXXDIR)/%,$(CXXFILES))
+CXXOBJS := $(patsubst %.cxx,$(ODIR)/%.o,$(CXXFILES))
+
+CSRC := $(patsubst %,$(CDIR)/%,$(CFILES))
+COBJS := $(patsubst %.c,$(ODIR)/%.o,$(CFILES))
+
+OBJS := ${CXXOBJS} ${COBJS}
+
+$(info $$CXXSRC is [${CXXSRC}])
+$(info $$CXXOBJS is [${CXXOBJS}])
+
+$(info $$CSRC is [${CSRC}])
+$(info $$COBJS is [${COBJS}])
+
+$(info $$OBJS is [${OBJS}])
+
+########################################################################
+# Tool Macros
+#
+CC = gcc 
+CXX = g++ -std=c++11
+MKDIR = mkdir -p
+CP = cp -f
+
+########################################################################
+# Compiler defines
+#
+DEFINE = -D IS64BIT  $(XERCES_DEFINE) $(GEODE_DEFINE)
+ifeq ($(BUILD),Debug)
+	COPTS = -g 
+	CXXOPTS = -g 
+else
+endif
+
+########################################################################
+# Rules
+#
+.PHONY: dist
+
+
+${MODULE_NAME}: $(DIST_DIR)/${MODULE_FULLNAME}
+
+dist: ${DIST_DIR}
+
+${ODIR}:
+	${MKDIR} ${ODIR}
+
+${DIST_DIR}:
+	${MKDIR} ${DIST_DIR}
+
+$(ODIR)/%.o:	$(CDIR)/%.c
+	$(CC)  $(COPTS) $(DEFINE) -I$(IDIR) -o $@  -c $<
+
+$(ODIR)/%.o:	$(CXXDIR)/%.cxx
+	$(CXX)  $(CXXOPTS) $(DEFINE) -I$(IDIR) -I$(MESHLINK_IDIR) \
+	-I$(GE_IDIR) -I$(MLKERNEL_GEODE_IDIR) -I$(MLPARSER_XERCES_IDIR) \
+	-o $@  -c $<
+
+$(DIST_DIR)/${MODULE_FULLNAME}: ${ODIR} $(OBJS) ${DIST_DIR}
+	$(CXX) -o $(DIST_DIR)/$(MODULE_FULLNAME) \
+	   	  ${OBJS} \
+		 $(MLKERNEL_GEODE_LIBDIR)/$(MLKERNEL_GEODE_LIB)$(DBG_SUFFIX).a \
+		 -L$(GELIBDIR) -lnmb -lgeom -lvmath  \
+		 $(MLPARSER_XERCES_LIBDIR)/$(MLPARSER_XERCES_LIB)$(DBG_SUFFIX).a \
+		 $(MESHLINK_LIBDIR)/$(MESHLINK_LIB)$(DBG_SUFFIX).a \
+		 "-Wl,-rpath,\$$ORIGIN" \
+		 -L$(XERCES_LIBDIR) $(XERCES_LIB)
+	$(CP) $(XERCES_LIBDIR)/* $(DIST_DIR)/
+
+
+
+clean:
+	-rm -f $(OBJS)
+	-rm -f ${DIST_DIR}/${MODULE_FULLNAME}
+
+

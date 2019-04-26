@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MeshLink version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://pointwise.com ../schema/MeshLink.xsd" xmlns="https://pointwise.com">
+  <!-- Mon Feb 11 16:23:46 2019 -->
+  <Attribute attid="1" name="mesh generator">Pointwise V18.3A1</Attribute>
+  <Attribute attid="2" name="geometry format">NMB</Attribute>
+
+  <!--  sphere mesh file attributes -->
+  <Attribute attid="3" name="mesh format">PLOT3D</Attribute>
+  <Attribute attid="4" name="mesh filetype">ASCII</Attribute>
+  
+  <!--  sphere block refinement attributes -->
+  <Attribute attid="5" name="refine_block">TRUE</Attribute>
+  <Attribute attid="6" name="refine_multiple_I">4</Attribute>
+  <Attribute attid="7" name="refine_multiple_J">5</Attribute>
+  <Attribute attid="8" name="refine_multiple_K">6</Attribute>
+
+  <AttributeGroup attid="9" name="sphere block file atts">3 4</AttributeGroup>
+  
+  <AttributeGroup attid="10" name="sphere block refine atts">5 6 7 8</AttributeGroup>
+  
+  <GeometryFile filename="sphere_ml.nmb" aref="2">
+    <GeometryReference gid="1" ref="surface-6"/>
+    <GeometryReference gid="2" ref="surface-3"/>
+    <GeometryReference gid="3" ref="surface-1"/>
+    <GeometryReference gid="4" ref="surface-4"/>
+    <GeometryReference gid="5" ref="surface-5"/>
+    <GeometryReference gid="6" ref="surface-2"/>
+    <GeometryReference gid="7" ref="con-1_1"/>
+    <GeometryReference gid="8" ref="con-8_1"/>
+    <GeometryReference gid="9" ref="con-6_1"/>
+    <GeometryReference gid="10" ref="con-7_1"/>
+    <GeometryReference gid="11" ref="con-3_1"/>
+    <GeometryReference gid="12" ref="con-9_1"/>
+    <GeometryReference gid="13" ref="con-13_1"/>
+    <GeometryReference gid="14" ref="con-12_1"/>
+    <GeometryReference gid="15" ref="bottom_con_1"/>
+    <GeometryReference gid="16" ref="con-15_1"/>
+    <GeometryReference gid="17" ref="con-5_1"/>
+    <GeometryReference gid="18" ref="con-14_1"/>
+    <GeometryReference gid="19" ref="con-4_1"/>
+    <GeometryReference gid="20" ref="con-10_1"/>
+    <GeometryReference gid="21" ref="con-2_1"/>
+  </GeometryFile>
+  <GeometryGroup gid="22">21 15</GeometryGroup>
+  
+  <MeshFile filename="sphere.x" aref="9">
+    <!-- STRUCTURED EXPORT -->
+    <MeshModelReference ref="/Base/sphere" aref="10">
+      <!-- STRUCTURED -->
+	  
+	  <!-- my special points defined at the MeshModel topology level -->
+	  <MeshPointReference gref="15" count="2">18 17 </MeshPointReference>
+      <ParamVertex vref="17" gref="15" dim="1">0.1234</ParamVertex>
+	  <ParamVertex vref="18" gref="15" dim="1">0.567</ParamVertex>
+	  
+      <MeshSheet name="root/dom-2" gref="1">
+        <MeshFace etype="Quad4" format="text" count="4">
+         1 2 5 4
+         2 3 6 5
+         4 5 8 7
+         5 6 9 8
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-4" gref="2">
+        <ParamVertex vref="3" gref="2" dim="2">118.158001420251 121.185489172325</ParamVertex>
+        <ParamVertex vref="12" gref="2" dim="2">90.0000000290708 122.752675763972</ParamVertex>
+        <ParamVertex vref="21" gref="2" dim="2">61.8419985797487 121.185489172325</ParamVertex>
+        <ParamVertex vref="6" gref="2" dim="2">123.172316832488 95.807141808043</ParamVertex>
+        <ParamVertex vref="15" gref="2" dim="2">89.9999999933445 99.4938870159108</ParamVertex>
+        <ParamVertex vref="24" gref="2" dim="2">56.8276831678486 95.8071418137095</ParamVertex>
+        <ParamVertex vref="9" gref="2" dim="2">121.144411771286 69.4254286839937</ParamVertex>
+        <ParamVertex vref="18" gref="2" dim="2">89.9999999581135 75.231711348668</ParamVertex>
+        <ParamVertex vref="27" gref="2" dim="2">58.8555882287142 69.4254286839936</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="4">
+         3 12 15 6
+         12 21 24 15
+         6 15 18 9
+         15 24 27 18
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/bottom_dom1" gref="3">
+        <ParamVertex vref="9" gref="3" dim="2">121.144411771397 53.9730597836465</ParamVertex>
+        <ParamVertex vref="18" gref="3" dim="2">89.9999999581135 48.1667771201432</ParamVertex>
+        <ParamVertex vref="8" gref="3" dim="2">131.99694249951 90.0000000847625</ParamVertex>
+        <ParamVertex vref="17" gref="3" dim="2">90.3271336160609 89.9150316962811</ParamVertex>
+        <ParamVertex vref="7" gref="3" dim="2">121.144411771397 126.026940216353</ParamVertex>
+        <ParamVertex vref="16" gref="3" dim="2">90.0000000418864 131.833222879857</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="2">
+         9 18 17 8
+         8 17 16 7
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/bottom_dom2" gref="3">
+        <ParamVertex vref="18" gref="3" dim="2">89.9999999581135 48.1667771201432</ParamVertex>
+        <ParamVertex vref="27" gref="3" dim="2">58.855588228603 53.9730597836466</ParamVertex>
+        <ParamVertex vref="17" gref="3" dim="2">90.3271336160609 89.9150316962811</ParamVertex>
+        <ParamVertex vref="26" gref="3" dim="2">48.0030575004904 89.9999999152375</ParamVertex>
+        <ParamVertex vref="16" gref="3" dim="2">90.0000000418864 131.833222879857</ParamVertex>
+        <ParamVertex vref="25" gref="3" dim="2">58.8558011945283 126.026714648121</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="2">
+         18 27 26 17
+         17 26 25 16
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-3" gref="4">
+        <ParamVertex vref="19" gref="4" dim="2">61.8419985797487 58.8145108276748</ParamVertex>
+        <ParamVertex vref="10" gref="4" dim="2">89.9999999709293 57.2473242360278</ParamVertex>
+        <ParamVertex vref="1" gref="4" dim="2">118.158001420251 58.8145108276748</ParamVertex>
+        <ParamVertex vref="22" gref="4" dim="2">56.8276969998954 84.1926250899115</ParamVertex>
+        <ParamVertex vref="13" gref="4" dim="2">90.0000074282968 80.5061137038676</ParamVertex>
+        <ParamVertex vref="4" gref="4" dim="2">123.172316832149 84.1928581862479</ParamVertex>
+        <ParamVertex vref="25" gref="4" dim="2">58.8555784792523 110.574101861989</ParamVertex>
+        <ParamVertex vref="16" gref="4" dim="2">90.0000000418864 104.768288651332</ParamVertex>
+        <ParamVertex vref="7" gref="4" dim="2">121.144411771286 110.574571316006</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="4">
+         19 10 13 22
+         10 1 4 13
+         22 13 16 25
+         13 4 7 16
+        </MeshFace>
+      </MeshSheet>
+	  
+      <MeshSheet name="my special faces" gref="5">
+        <MeshFaceReference etype="Quad4" format="text" count="4">1 2 3 4</MeshFaceReference>
+      </MeshSheet>
+	  
+      <MeshSheet name="root/dom-1" gref="5">
+        <ParamVertex vref="21" gref="5" dim="2">118.147592901024 121.180610972375</ParamVertex>
+        <ParamVertex vref="20" gref="5" dim="2">90.0000000226361 122.75267576429</ParamVertex>
+        <ParamVertex vref="19" gref="5" dim="2">61.8524070989758 121.180610972375</ParamVertex>
+        <ParamVertex vref="24" gref="5" dim="2">123.172316832152 95.8071418137096</ParamVertex>
+        <ParamVertex vref="23" gref="5" dim="2">90.0000432028976 99.4960288254606</ParamVertex>
+        <ParamVertex vref="22" gref="5" dim="2">56.8276969998948 95.8073749100886</ParamVertex>
+        <ParamVertex vref="27" gref="5" dim="2">121.142597058976 69.4260032029538</ParamVertex>
+        <ParamVertex vref="26" gref="5" dim="2">90.0000000701483 75.2317113484103</ParamVertex>
+        <ParamVertex vref="25" gref="5" dim="2">58.8572654651931 69.4264322087724</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="4">
+         21 20 23 24
+         20 19 22 23
+         24 23 26 27
+         23 22 25 26
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-5" gref="6">
+        <ParamVertex vref="1" gref="6" dim="2">118.156739591811 121.172550399628</ParamVertex>
+        <ParamVertex vref="2" gref="6" dim="2">123.344394345696 90.0000000242322</ParamVertex>
+        <ParamVertex vref="3" gref="6" dim="2">118.156739591812 58.8274496003718</ParamVertex>
+        <ParamVertex vref="10" gref="6" dim="2">89.9999999709293 122.75267576464</ParamVertex>
+        <ParamVertex vref="11" gref="6" dim="2">90 90</ParamVertex>
+        <ParamVertex vref="12" gref="6" dim="2">90.0000000290708 57.2473242353604</ParamVertex>
+        <ParamVertex vref="19" gref="6" dim="2">61.8432604081886 121.172550399628</ParamVertex>
+        <ParamVertex vref="20" gref="6" dim="2">56.6556056543044 89.9999999757678</ParamVertex>
+        <ParamVertex vref="21" gref="6" dim="2">61.8432604081885 58.8274496003717</ParamVertex>
+        <MeshFace etype="Quad4" format="text" count="4">
+         10 11 2 1
+         11 12 3 2
+         19 20 11 10
+         20 21 12 11
+        </MeshFace>
+      </MeshSheet>
+      <MeshString name="root/con-1" gref="7">
+        <ParamVertex vref="1" gref="7" dim="1">0.363436908451394</ParamVertex>
+        <ParamVertex vref="2" gref="7" dim="1">0.499999999898125</ParamVertex>
+        <ParamVertex vref="3" gref="7" dim="1">0.636563091548604</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">1 2 2 3</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-8" gref="8">
+        <ParamVertex vref="9" gref="8" dim="1">0.411879858543274</ParamVertex>
+        <ParamVertex vref="6" gref="8" dim="1">0.524429534729475</ParamVertex>
+        <ParamVertex vref="3" gref="8" dim="1">0.636954793861912</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="2">9 6 6 3</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-6" gref="9">
+        <ParamVertex vref="7" gref="9" dim="1">0.318737092487415</ParamVertex>
+        <ParamVertex vref="8" gref="9" dim="1">0.499999999631257</ParamVertex>
+        <ParamVertex vref="9" gref="9" dim="1">0.681262907512583</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="2">7 8 8 9</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-7" gref="10">
+        <ParamVertex vref="1" gref="10" dim="1">0.363045206137518</ParamVertex>
+        <ParamVertex vref="4" gref="10" dim="1">0.47557046524644</ParamVertex>
+        <ParamVertex vref="7" gref="10" dim="1">0.588120141456725</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="2">1 4 4 7</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-3" gref="11">
+        <ParamVertex vref="3" gref="11" dim="1">0.363442393343842</ParamVertex>
+        <ParamVertex vref="12" gref="11" dim="1">0.499999999869098</ParamVertex>
+        <ParamVertex vref="21" gref="11" dim="1">0.636557606656162</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">3 12 12 21</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-9" gref="12">
+        <ParamVertex vref="21" gref="12" dim="1">0.363045206138084</ParamVertex>
+        <ParamVertex vref="24" gref="12" dim="1">0.475570465246619</ParamVertex>
+        <ParamVertex vref="27" gref="12" dim="1">0.588120141456514</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">21 24 24 27</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-13" gref="13">
+        <ParamVertex vref="18" gref="13" dim="1">0.500000000220256</ParamVertex>
+        <ParamVertex vref="27" gref="13" dim="1">0.681127410544861</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="1">18 27</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-12" gref="14">
+        <ParamVertex vref="9" gref="14" dim="1">0.318872589455148</ParamVertex>
+        <ParamVertex vref="18" gref="14" dim="1">0.500000000220256</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="1">9 18</MeshEdge>
+      </MeshString>
+	  
+	  <MeshString name="my special edges" gref="15">
+		<!-- my special edges -->
+		<MeshEdgeReference etype="Edge2" count="2">17 18</MeshEdgeReference>
+	  </MeshString>
+	  
+      <MeshString name="root/bottom_con" gref="15">
+        <ParamVertex vref="18" gref="15" dim="1">0</ParamVertex>
+        <ParamVertex vref="17" gref="15" dim="1">0.625156631213186</ParamVertex>
+        <ParamVertex vref="16" gref="15" dim="1">1</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">18 17 17 16</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-15" gref="16">
+        <ParamVertex vref="16" gref="16" dim="1">0.500000000220247</ParamVertex>
+        <ParamVertex vref="7" gref="16" dim="1">0.681127410544851</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="1">16 7</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-5" gref="17">
+        <ParamVertex vref="27" gref="17" dim="1">0.318737092487418</ParamVertex>
+        <ParamVertex vref="26" gref="17" dim="1">0.499999999631258</ParamVertex>
+        <ParamVertex vref="25" gref="17" dim="1">0.681262907512584</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">27 26 26 25</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-14" gref="18">
+        <ParamVertex vref="25" gref="18" dim="1">0.318872589455139</ParamVertex>
+        <ParamVertex vref="16" gref="18" dim="1">0.500000000220247</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="1">25 16</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-4" gref="19">
+        <ParamVertex vref="19" gref="19" dim="1">0.363442393343838</ParamVertex>
+        <ParamVertex vref="10" gref="19" dim="1">0.499999999869094</ParamVertex>
+        <ParamVertex vref="1" gref="19" dim="1">0.636557606656158</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">19 10 10 1</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-10" gref="20">
+        <ParamVertex vref="25" gref="20" dim="1">0.411881826803638</ParamVertex>
+        <ParamVertex vref="22" gref="20" dim="1">0.524430517965581</ParamVertex>
+        <ParamVertex vref="19" gref="20" dim="1">0.636954793861918</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">25 22 22 19</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-2" gref="21">
+        <ParamVertex vref="21" gref="21" dim="1">0.363436908451394</ParamVertex>
+        <ParamVertex vref="20" gref="21" dim="1">0.499999999898126</ParamVertex>
+        <ParamVertex vref="19" gref="21" dim="1">0.636563091548606</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="2">21 20 20 19</MeshEdge>
+      </MeshString>
+    </MeshModelReference>
+  </MeshFile>
+</MeshLink>

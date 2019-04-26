@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{32ACE185-2CC6-433D-BB61-030431E2811F}">
+	<Platforms>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Harness_f_Debug|x64" TargetName="$(ProjectName)d">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="$(SolutionDir)\meshlink\h" PreprocessorDefinitions="HAVE_XERCES;HAVE_GEODE" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)\mlparser_xerces\dist;$(SolutionDir)\meshlink\dist;$(SolutionDir)\..\external\xerces\win64\lib;$(SolutionDir)..\external\gelite\win64\lib;$(SolutionDir)\mlkernel_geode\dist;$(UniversalCRTSdkDir)Lib\10.0.17763.0\ucrt\x64" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="nmb.lib geom.lib vmath.lib xerces-c_3D.lib meshlinkd.lib mlparser_xercesd.lib mlkernel_geoded.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="xcopy /R /Q /K /Y $(TargetDir)$(TargetFileName) $(ProjectDir)\dist\"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Harness_f_Release|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="$(SolutionDir)\meshlink\h" PreprocessorDefinitions="HAVE_XERCES;HAVE_GEODE" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)\mlparser_xerces\dist;$(SolutionDir)\meshlink\dist;$(SolutionDir)\..\external\xerces\win64\lib;$(SolutionDir)..\external\gelite\win64\lib;$(SolutionDir)\mlkernel_geode\dist;$(UniversalCRTSdkDir)Lib\10.0.17763.0\ucrt\x64" SubSystem="subSystemConsole" AdditionalDependencies="nmb.lib geom.lib vmath.lib xerces-c_3.lib meshlink.lib mlparser_xerces.lib mlkernel_geode.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="xcopy /R /Q /K /Y $(TargetDir)$(TargetFileName) $(ProjectDir)\dist\"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="..\..\src\mlkernel_geode\GeomKernel_Geode_f.f90"/>
+		<File RelativePath=".\harness_f.f90"/>
+		<File RelativePath="..\..\src\meshlink\h\MeshAssociativity_f.f90"/>
+		<File RelativePath="..\..\src\mlparser_xerces\MeshLinkParser_xerces_f.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>
