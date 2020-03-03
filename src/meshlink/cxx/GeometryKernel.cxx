@@ -132,6 +132,22 @@ GeometryKernel::entityType(const char* name)
     return 0;
 }
 
+/// Set the model size of the geometry
+// Used to define tolerances within the geometry kernel
+void 
+GeometryKernel::setModelSize(MLREAL size)
+{
+    modelsize_ = size;
+}
+
+/// Return the geometry model size
+MLREAL 
+GeometryKernel::getModelSize() const
+{
+    return modelsize_;
+}
+
+
 
 KernelData::KernelData(GeometryKernel *kernel) :
     kernel_(kernel),

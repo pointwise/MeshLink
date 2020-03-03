@@ -144,8 +144,34 @@
 		  ML_STATUS ML_readGeomFile
           ML_OBJECT, VALUE :: geomKernelObj
           ML_STRING, INTENT(IN) :: geomFilename(*)
-        ENDFUNCTION ML_readGeomFile
+    ENDFUNCTION ML_readGeomFile
+
         
+        !
+        !/* Set geometry model size */
+        !int ML_setGeomModelSize(
+        !GeometryKernelObj *geomKernelObj,
+        !MLREAL modelSize));
+        FUNCTION ML_setGeomModelSize(geomKernelObj, modelSize) bind(C, name="ML_setGeomModelSize")
+          use, intrinsic :: iso_c_binding
+          implicit none
+		  ML_STATUS ML_setGeomModelSize
+          MLREAL_F, VALUE :: modelSize
+        ENDFUNCTION ML_setGeomModelSize
+
+        !
+        !/* Get geometry model size */
+        !int ML_getGeomModelSize(
+        !GeometryKernelObj *geomKernelObj,
+        !MLREAL *modelSize));
+        FUNCTION ML_getGeomModelSize(geomKernelObj, modelSize) bind(C, name="ML_getGeomModelSize")
+          use, intrinsic :: iso_c_binding
+          implicit none
+		  ML_STATUS ML_getGeomModelSize
+          ML_OBJECT, VALUE :: geomKernelObj
+          MLREAL_F, INTENT(OUT) :: modelSize(*)
+        ENDFUNCTION ML_getGeomModelSize
+    
         
         !int ML_getFileAttIDs(MeshAssociativityObj meshAssocObj,
         !MeshLinkFileConstObj fileObj,

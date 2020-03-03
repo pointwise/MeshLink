@@ -58,6 +58,19 @@ int ML_getGeometryFileObj(MeshAssociativityObj meshAssocObj,
 ML_EXTERN ML_STORAGE_CLASS
 int ML_getFilename( MeshLinkFileConstObj fileObj, char *filenameBuf, MLINT filenameBufLen );
 
+
+/* Define geometry model size */
+ML_EXTERN ML_STORAGE_CLASS
+int ML_setGeomModelSize(
+    GeometryKernelObj geomKernelObj,
+    MLREAL modelSize);
+
+/* Get geometry model size */
+ML_EXTERN ML_STORAGE_CLASS
+int ML_getGeomModelSize(
+    GeometryKernelObj geomKernelObj,
+    MLREAL *modelSize);
+
 /* Read geometry file */
 ML_EXTERN ML_STORAGE_CLASS
     int ML_readGeomFile(

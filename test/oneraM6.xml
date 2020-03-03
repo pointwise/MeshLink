@@ -3,8 +3,12 @@
   <!-- Sun Mar 10 20:43:14 2019 -->
   <Attribute attid="1" name="mesh generator">Pointwise V18.3A1</Attribute>
   <Attribute attid="2" name="geometry format">NMB</Attribute>
-  <Attribute attid="3" name="mesh format">NASA/FUN3D</Attribute>
-  <GeometryFile filename="oneraM6.nmb" aref="2">
+  <Attribute attid="3" name="model size">500.0</Attribute>
+  <Attribute attid="4" name="mesh format">NASA/FUN3D</Attribute>
+  
+  <AttributeGroup attid="5" name="geom file atts">2 3</AttributeGroup>
+  
+  <GeometryFile filename="oneraM6.nmb" aref="5">
     <GeometryReference gid="1" ref="TrimSurf-55"/>
     <GeometryReference gid="2" ref="TrimSurf-131"/>
     <GeometryReference gid="4" ref="TrimSurf-85"/>
@@ -48,7 +52,7 @@
   <GeometryGroup gid="31">28 29 30</GeometryGroup>
   <!-- grefs for: root/wing_tip_center_con -->
   <GeometryGroup gid="37">34 35 36</GeometryGroup>
-  <MeshFile filename="S:/nwyman_marvin/projects/MeshLink/Library/test/oneraM6" aref="3">
+  <MeshFile filename="S:/nwyman_marvin/projects/MeshLink/Library/test/oneraM6" aref="4">
     <!-- UNSTRUCTURED EXPORT -->
     <MeshModelReference ref="volume">
       <!-- UNSTRUCTURED -->

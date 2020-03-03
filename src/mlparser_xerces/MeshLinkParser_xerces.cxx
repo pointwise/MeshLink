@@ -2174,6 +2174,7 @@ MeshLinkParserXerces::parseMeshLinkFile(
     }
 
     delete parser;
+    delete errHandler;
 
     try {
         XMLPlatformUtils::Terminate();

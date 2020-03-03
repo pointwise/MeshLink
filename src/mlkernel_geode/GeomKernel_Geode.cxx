@@ -262,7 +262,15 @@ GeometryKernelGeode::evalXYZ(MLVector2D UV, const std::string &entityName, MLVec
     }
     else {
         // 2D surface
-        GE::Surface *surface = GE::Surface::Downcast(entity);
+        GE::Surface *surface = NULL;
+        GE::CurvedFace *cface = GE::CurvedFace::Downcast(entity);
+        if (cface) {
+            // get the surface supporting the curved face
+            surface = cface->Inquire_Surface();
+        }
+        else {
+            surface = GE::Surface::Downcast(entity);
+        }
         if (surface) {
             error = surface->Evaluate(uv,P);
         }
@@ -594,6 +602,20 @@ GeometryKernelGeode::~GeometryKernelGeode()
     BSPTreeMap_.clear();
 }
 
+/// Set the model size of the geometry
+// Used to define tolerances within the geometry kernel
+void
+GeometryKernelGeode::setModelSize(MLREAL size)
+{
+    GE::Tolerance::SetModelSize(size);
+}
+
+/// Return the geometry model size
+MLREAL
+GeometryKernelGeode::getModelSize() const
+{
+    return GE::Tolerance::GetModelSize();
+}
 
 // Read the geometry data file
 bool
@@ -631,8 +653,7 @@ GeometryKernelGeode::read(const char* filename)
                 usable_entities += faces;
             }
         }
-        else if (entities[i]->Is_InClassID(GE::Geometry::Static_ClassID()) &&
-            !entities[i]->Is_InClassID(GE::Plane::Static_ClassID())) {
+        else if (entities[i]->Is_InClassID(GE::Geometry::Static_ClassID())) {
             usable_entities += entities[i];
         }
     }

@@ -186,6 +186,32 @@ int ML_getFilename( MeshLinkFileConstObj fileObj, char *filenameBuf, MLINT filen
 }
 
 
+/* Define geometry model size */
+int ML_setGeomModelSize(
+    GeometryKernelObj geomKernelObj,
+    MLREAL modelSize)
+{
+    GeometryKernel *geomKernel = (GeometryKernel *)geomKernelObj;
+    if (geomKernel) {
+        geomKernel->setModelSize(modelSize);
+        return 0;
+    }
+    return 1;
+}
+
+/* Get geometry model size */
+int ML_getGeomModelSize(
+    GeometryKernelObj geomKernelObj,
+    MLREAL *modelSize)
+{
+    GeometryKernel *geomKernel = (GeometryKernel *)geomKernelObj;
+    if (geomKernel) {
+        *modelSize = geomKernel->getModelSize();
+        return 0;
+    }
+    return 1;
+}
+
 int ML_readGeomFile(
     GeometryKernelObj geomKernelObj,
     const char *geomFilename)

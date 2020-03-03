@@ -3,17 +3,19 @@
   <!-- Mon Feb 11 16:23:46 2019 -->
   <Attribute attid="1" name="mesh generator">Pointwise V18.3A1</Attribute>
   <Attribute attid="2" name="geometry format">NMB</Attribute>
-  <Attribute attid="3" name="mesh format">PLOT3D</Attribute>
-  <Attribute attid="4" name="block name">sphere</Attribute>
-  <AttributeGroup attid="5" name="mesh group1">3 4</AttributeGroup>
+  <Attribute attid="3" name="model size">100.0</Attribute>
+  <Attribute attid="4" name="mesh format">PLOT3D</Attribute>
+  <Attribute attid="5" name="block name">sphere</Attribute>
+  <AttributeGroup attid="6" name="geom group1">2 3</AttributeGroup>
+  <AttributeGroup attid="7" name="mesh group1">4 5</AttributeGroup>
   
-  <Attribute attid="6" name="refine_multiple I">4</Attribute>
-  <Attribute attid="7" name="refine_multiple J">5</Attribute>
-  <Attribute attid="8" name="refine_multiple K">6</Attribute>
+  <Attribute attid="8" name="refine_multiple I">4</Attribute>
+  <Attribute attid="9" name="refine_multiple J">5</Attribute>
+  <Attribute attid="10" name="refine_multiple K">6</Attribute>
 
-  <AttributeGroup attid="9" name="mesh group2">5 6 7 8</AttributeGroup>
+  <AttributeGroup attid="11" name="mesh group2">7 8 9 10</AttributeGroup>
   
-  <GeometryFile filename="sphere_ml.nmb" aref="2">
+  <GeometryFile filename="sphere_ml.nmb" aref="6">
     <GeometryReference gid="1" ref="surface-6"/>
     <GeometryReference gid="2" ref="surface-3"/>
     <GeometryReference gid="3" ref="surface-1"/>
@@ -36,7 +38,7 @@
     <GeometryReference gid="20" ref="con-10_1"/>
     <GeometryReference gid="21" ref="con-2_1"/>
   </GeometryFile>
-  <MeshFile filename="sphere.x" aref="9">
+  <MeshFile filename="sphere.x" aref="11">
     <!-- STRUCTURED EXPORT -->
     <MeshModelReference ref="/Base/sphere">
       <!-- STRUCTURED -->

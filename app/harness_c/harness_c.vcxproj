@@ -74,7 +74,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\gelite\include;$(SolutionDir)\meshlink\h;$(SolutionDir)\mlparser_xerces;$(SolutionDir)\mlkernel_geode</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PreprocessorDefinitions>HAVE_GEODE;HAVE_XERCES;IS64BIT;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_GEODE;HAVE_XERCES;IS64BIT;_CRT_SECURE_NO_WARNINGS;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
@@ -119,7 +119,7 @@ xcopy /R /Q /K /Y $(SolutionDir)\..\external\xerces\win64\lib\*.dll $(ProjectDir
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\external\gelite\include;$(SolutionDir)\meshlink\h;$(SolutionDir)\mlparser_xerces;$(SolutionDir)\mlkernel_geode</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HAVE_GEODE;HAVE_XERCES;IS64BIT;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_GEODE;HAVE_XERCES;IS64BIT;_CRT_SECURE_NO_WARNINGS;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

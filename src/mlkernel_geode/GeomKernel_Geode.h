@@ -137,6 +137,14 @@ public:
 
     bool entityExists(const char* name) const;
 
+    /// Set the model size of the geometry
+    // Used to define tolerances within the geometry kernel
+    void setModelSize(MLREAL size);
+
+    /// Return the geometry model size
+    MLREAL getModelSize() const;
+
+
 
 private:
     /// Construct a point projection data object for use by the geometry kernel

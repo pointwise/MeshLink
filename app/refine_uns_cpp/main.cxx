@@ -102,6 +102,7 @@ int main(int argc, char** argv)
     for (iFile = 0; iFile < numGeomFiles; ++iFile) {
         const GeometryFile &geomFile = geomFiles[iFile];
         const char * geom_fname = geomFile.getFilename();
+        MLREAL modelSize = 1000.0;
 
         printf("\nGeometryFile Attributes\n");
         std::vector<MLINT> attIDs = geomFile.getAttributeIDs(meshAssoc);
@@ -111,7 +112,23 @@ int main(int argc, char** argv)
             const char *attName, *attValue;
             if (meshAssoc.getAttribute(attIDs[iAtt], &attName, &attValue)) {
                 printf("  %" MLINT_FORMAT " %s = %s\n", iAtt, attName, attValue);
+
+                /* Get ModelSize attribute */
+                if (strcmp("model size", attName) == 0) {
+                    MLREAL value;
+                    if (1 == sscanf(attValue, "%lf", &value)) {
+                        modelSize = value;
+                    }
+                }
             }
+        }
+
+        /* Define ModelSize prior to reading geometry */
+        /* Ensures proper tolerances when building the database */
+        geomKernel.setModelSize(modelSize);
+        if (geomKernel.getModelSize() != modelSize) {
+            printf("Error defining model size\n  %lf\n", modelSize);
+            return (-1);
         }
 
         if (!geomKernel.read(geom_fname)) {

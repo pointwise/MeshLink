@@ -3,22 +3,25 @@
   <!-- Mon Feb 11 16:23:46 2019 -->
   <Attribute attid="1" name="mesh generator">Pointwise V18.3A1</Attribute>
   <Attribute attid="2" name="geometry format">NMB</Attribute>
+  <Attribute attid="3" name="model size">100.0</Attribute>
+
 
   <!--  sphere mesh file attributes -->
-  <Attribute attid="3" name="mesh format">PLOT3D</Attribute>
-  <Attribute attid="4" name="mesh filetype">ASCII</Attribute>
+  <Attribute attid="4" name="mesh format">PLOT3D</Attribute>
+  <Attribute attid="5" name="mesh filetype">ASCII</Attribute>
   
   <!--  sphere block refinement attributes -->
-  <Attribute attid="5" name="refine_block">TRUE</Attribute>
-  <Attribute attid="6" name="refine_multiple_I">4</Attribute>
-  <Attribute attid="7" name="refine_multiple_J">5</Attribute>
-  <Attribute attid="8" name="refine_multiple_K">6</Attribute>
+  <Attribute attid="6" name="refine_block">TRUE</Attribute>
+  <Attribute attid="7" name="refine_multiple_I">4</Attribute>
+  <Attribute attid="8" name="refine_multiple_J">5</Attribute>
+  <Attribute attid="9" name="refine_multiple_K">6</Attribute>
 
-  <AttributeGroup attid="9" name="sphere block file atts">3 4</AttributeGroup>
+  <AttributeGroup attid="10" name="sphere geom file atts">2 3</AttributeGroup>
+  <AttributeGroup attid="11" name="sphere block file atts">4 5</AttributeGroup>
   
-  <AttributeGroup attid="10" name="sphere block refine atts">5 6 7 8</AttributeGroup>
+  <AttributeGroup attid="12" name="sphere block refine atts">6 7 8 9</AttributeGroup>
   
-  <GeometryFile filename="sphere_ml.nmb" aref="2">
+  <GeometryFile filename="sphere_ml.nmb" aref="10">
     <GeometryReference gid="1" ref="surface-6"/>
     <GeometryReference gid="2" ref="surface-3"/>
     <GeometryReference gid="3" ref="surface-1"/>
@@ -43,9 +46,9 @@
   </GeometryFile>
   <GeometryGroup gid="22">21 15</GeometryGroup>
   
-  <MeshFile filename="sphere.x" aref="9">
+  <MeshFile filename="sphere.x" aref="11">
     <!-- STRUCTURED EXPORT -->
-    <MeshModelReference ref="/Base/sphere" aref="10">
+    <MeshModelReference ref="/Base/sphere" aref="12">
       <!-- STRUCTURED -->
 	  
 	  <!-- my special points defined at the MeshModel topology level -->

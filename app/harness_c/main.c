@@ -462,6 +462,7 @@ sphere_ml_tests(MeshAssociativityObj meshAssoc)
     /* Load Project Geode Kernel and set as active kernel */
     GeometryKernelObj geomKernel = NULL;
     MeshModelObj meshModel;
+    MLREAL modelSize = 1000.0;
 
     /* Name of mesh model */
     const char *target_block_name = "/Base/sphere";
@@ -517,9 +518,33 @@ sphere_ml_tests(MeshAssociativityObj meshAssoc)
                 }
                 else {
                     printf("  %" MLINT_FORMAT " %s = %s\n", iAtt+1, attName, attValue);
+
+                    /* Get ModelSize attribute */
+                    if (strcmp("model size", attName) == 0) {
+                        MLREAL value;
+                        if (1 == sscanf(attValue, "%lf", &value)) {
+                            modelSize = value;
+                        }
+                    }
+
                 }
             }
 
+            /* Define ModelSize prior to reading geometry */
+            /* Ensures proper tolerances when building the database */
+            if (0 != ML_setGeomModelSize(geomKernel, modelSize)) {
+                printf("Error defining model size\n  %lf\n", modelSize);
+                return (1);
+            }
+            {
+                MLREAL value;
+                if (0 != ML_getGeomModelSize(geomKernel, &value) ||
+                    value != modelSize) {
+                    printf("Error defining model size\n  %lf\n", modelSize);
+                    return (1);
+                }
+            }
+            
             if (0 != ML_readGeomFile(geomKernel, geom_fname)) {
                 /* error */
                 continue;

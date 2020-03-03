@@ -19,10 +19,14 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <cmath>
 
 // Test the mesh-geometry associativity in sphere_ml.xml
 static int sphere_ml_tests(MeshAssociativity &meshAssoc);
+
+// Test the mesh-geometry associativity in hemi_cyl.xml
+static int hemi_cyl_tests(MeshAssociativity &meshAssoc);
 
 // Closest point projection onto geometry of constrained meshTopo entity
 static int projectToMeshTopoGeometry(
@@ -61,7 +65,7 @@ int main(int argc, char** argv)
     int ret = 0;
     if (argc != 2) {
         printf("usage: <program name> <xml file name>\n");
-        exit(1);
+        ::exit(1);
     }
 
     // Name of geometry-mesh associativity file
@@ -95,6 +99,13 @@ int main(int argc, char** argv)
         // Test the mesh-geometry associativity in sphere_ml.xml
         if (0 != sphere_ml_tests(meshAssoc)) {
             printf("Error testing sphere_ml.xml geometry-mesh associativity\n");
+            return (-1);
+        }
+    }
+    else if (meshlink_fname.compare("hemi_cyl.xml") == 0) {
+        // Test the mesh-geometry associativity in hemi_cyl.xml
+        if (0 != hemi_cyl_tests(meshAssoc)) {
+            printf("Error testing hemi_cyl.xml geometry-mesh associativity\n");
             return (-1);
         }
     }
@@ -536,6 +547,168 @@ int test_mesh_face(
 
 
 //===============================================================================
+// Test the mesh-geometry associativity in hemi_cyl.xml
+int
+hemi_cyl_tests(MeshAssociativity &meshAssoc)
+{
+    int ret = 0;
+#if defined(HAVE_GEODE)
+
+    printf("\nhemi_cyl.xml Tests\n");
+
+    // Name of mesh model
+    const char *target_block_name = "/Base/blk-1";
+    MeshModel* meshModel = meshAssoc.getMeshModelByName(target_block_name);
+    if (meshModel) {
+
+        // Load Project Geode Kernel and set as active kernel
+        GeometryKernelGeode geomKernel;
+        meshAssoc.addGeometryKernel(&geomKernel);
+        meshAssoc.setActiveGeometryKernelByName(geomKernel.getName());
+
+        // Read geometry files
+        MLINT iFile;
+        MLINT numGeomFiles = meshAssoc.getNumGeometryFiles();
+        const std::vector<GeometryFile> &geomFiles = meshAssoc.getGeometryFiles();
+
+        for (iFile = 0; iFile < numGeomFiles; ++iFile) {
+            const GeometryFile &geomFile = geomFiles[iFile];
+            const char * geom_fname = geomFile.getFilename();
+            MLREAL modelSize = 1000.0;
+
+            printf("\nGeometryFile Attributes\n");
+            std::vector<MLINT> attIDs = geomFile.getAttributeIDs(meshAssoc);
+            MLINT numAtts = attIDs.size();
+            MLINT iAtt;
+            for (iAtt = 0; iAtt < numAtts; ++iAtt) {
+                const char *attName, *attValue;
+                if (meshAssoc.getAttribute(attIDs[iAtt], &attName, &attValue)) {
+                    printf("  %" MLINT_FORMAT " %s = %s\n", iAtt, attName, attValue);
+
+                    /* Get ModelSize attribute */
+                    if (strcmp("model size", attName) == 0) {
+                        MLREAL value;
+                        if (1 == sscanf(attValue, "%lf", &value)) {
+                            modelSize = value;
+                        }
+                    }
+                }
+            }
+
+            /* Define ModelSize prior to reading geometry */
+            /* Ensures proper tolerances when building the database */
+            geomKernel.setModelSize(modelSize);
+            if (geomKernel.getModelSize() != modelSize) {
+                printf("Error defining model size\n  %lf\n", modelSize);
+                return (-1);
+            }
+
+            if (!geomKernel.read(geom_fname)) {
+                printf("Error reading geometry file\n  %s\n", geom_fname);
+                return (-1);
+            }
+        }
+
+        MLREAL tol = 1e-5;
+        GeometryKernel *geom_kernel = meshAssoc.getActiveGeometryKernel();
+        if (!geom_kernel) {
+            printf("ERROR: no active geometry kernel\n");
+            ret = 1;
+        }
+        else {
+
+            /* Test a point which we know to be defined in the "dom-6" MeshSheet level,
+             * but not at the MeshString level
+             */
+            printf(" MeshPoint defined in MeshSheet name = \"root/dom-6\"\n");
+            /* Test data for MeshPoint defined in MeshSheet name="root/dom-6" */
+            MLVector3D dom6_pt = { 1.28269, -1.76547, 0.0 };
+            MLINT dom6_pt_ind = 322;
+            MLINT dom6_pt_gref = 1;
+            MLREAL dom6_pt_UV[2] = { 1.28268969952326, -1.76547095480407 };
+            const char *dom6_pt_entity_name = "plane-1";
+            const MLREAL dom6_pt_radius = 1.0e9;
+
+            /* Find the point at the lowest topological level (MeshString, MeshSheet, or MeshModel) */
+            MeshPoint *meshPoint = meshModel->findLowestTopoPointByInd(dom6_pt_ind);
+            if (meshPoint) {
+                ParamVertex *const paramVert = meshPoint->getParamVert();
+                if (paramVert) {
+                    // have parametric data
+                    MLINT gref;
+                    gref = paramVert->getGref();
+                    MLVector2D UV;
+                    paramVert->getUV(&(UV[0]), &(UV[1]));
+                    if (gref != dom6_pt_gref ||
+                        UV[0] != dom6_pt_UV[0] ||
+                        UV[1] != dom6_pt_UV[1]
+                        ) {
+                        printf("Error: incorrect point parametric data\n");
+                        ml_assert(0 == 1);
+                        ret = 1;
+                    }
+
+                    GeometryGroup *geomGroup = meshAssoc.getGeometryGroupByID(gref);
+                    if (NULL == geomGroup) {
+                        printf("Error: incorrect point parametric data\n");
+                        ml_assert(0 == 1);
+                        ret = 1;
+                    }
+                    else {
+                        const std::vector<std::string> entityNames = geomGroup->getEntityNames();
+                        if (entityNames.size() != 1 ||
+                            entityNames[0].compare(dom6_pt_entity_name) != 0) {
+                            printf("Error: incorrect point parametric data\n");
+                            ml_assert(0 == 1);
+                            ret = 1;
+                        }
+
+                        if (0 != evaluateParamPoint(meshAssoc, UV, entityNames[0].c_str(),
+                            dom6_pt, dom6_pt_radius)) {
+                            printf("Error: bad point parametric evaluation\n");
+                            ml_assert(0 == 1);
+                            ret = 1;
+                        }
+                        else {
+                            printf("  parametric evaluation OK\n");
+                        }
+                    }
+                }
+                else {
+                    printf("Error: incorrect point parametric data\n");
+                    ml_assert(0 == 1);
+                    ret = 1;
+                }
+
+                if (0 != projectToMeshTopoGeometry(meshAssoc, meshPoint, dom6_pt, dom6_pt)) {
+                    printf("Error: bad point projection\n");
+                    ml_assert(0 == 1);
+                    ret = 1;
+                }
+                else {
+                    printf("  closest point projection OK\n");
+                }
+            }
+            else {
+                printf("Error: missing constrained point\n");
+                ml_assert(NULL != meshPoint);
+                ret = 1;
+            }
+
+        }
+    }
+    else {
+        printf("missing Mesh Model\n");
+        ml_assert(NULL != meshModel);
+        ret = 1;
+    }
+#endif
+    return ret;
+}
+
+
+
+//===============================================================================
 // Test the mesh-geometry associativity in sphere_ml.xml
 int
 sphere_ml_tests(MeshAssociativity &meshAssoc)
@@ -735,7 +908,7 @@ int evaluateParamPoint(
         MLREAL minRadOfCurvature, maxRadOfCurvature;
         if (!geom_kernel->evalRadiusOfCurvature(UV, entityName, 
             &minRadOfCurvature, &maxRadOfCurvature) ||
-            abs(minRadOfCurvature - expectedRadiusOfCurvature) > tol) {
+            std::abs(minRadOfCurvature - expectedRadiusOfCurvature) > tol) {
             printf("Error: bad radius of curvature evaluation\n");
             ml_assert(0 == 1);
             return 1;
