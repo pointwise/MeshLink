@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 #include "MeshAssociativity.h"
 #include "MeshTopo.h"
 
@@ -82,7 +93,7 @@ MeshModel::~MeshModel()
 }
 
 
-bool 
+bool
 MeshModel::addMeshString(MeshString* meshString, bool mapID)
 {
     if (!meshString) { return false; }
@@ -127,7 +138,7 @@ MeshModel::getMeshStringByName(const std::string &name) const
 }
 
 /// \brief Find a MeshString by reference
-MeshString * 
+MeshString *
 MeshModel::getMeshStringByRef(const std::string &ref) const
 {
     MeshTopoRefToNameMap::const_iterator iter = meshStringRefToNameMap_.find(ref);
@@ -138,7 +149,7 @@ MeshModel::getMeshStringByRef(const std::string &ref) const
 }
 
 
-std::vector<MeshString *> 
+std::vector<MeshString *>
 MeshModel::getMeshStrings() const
 {
     std::vector<MeshString *> strings;
@@ -149,6 +160,13 @@ MeshModel::getMeshStrings() const
         strings[i] = iter->second;
     }
     return strings;
+}
+
+
+size_t
+MeshModel::getMeshStringCount() const
+{
+    return meshStringNameMap_.size();
 }
 
 bool
@@ -196,7 +214,7 @@ MeshModel::getMeshSheetByName(const std::string &name) const
 }
 
 /// \brief Find a MeshSheet by reference
-MeshSheet * 
+MeshSheet *
 MeshModel::getMeshSheetByRef(const std::string &ref) const
 {
     MeshTopoRefToNameMap::const_iterator iter = meshSheetRefToNameMap_.find(ref);
@@ -207,7 +225,7 @@ MeshModel::getMeshSheetByRef(const std::string &ref) const
 }
 
 
-std::vector<MeshSheet *> 
+std::vector<MeshSheet *>
 MeshModel::getMeshSheets() const
 {
     std::vector<MeshSheet *> sheets;
@@ -220,8 +238,15 @@ MeshModel::getMeshSheets() const
     return sheets;
 }
 
+size_t
+MeshModel::getMeshSheetCount() const
+{
+    return meshSheetNameMap_.size();
+}
+
+
 /// \brief Find a MeshEdge by name
-MeshEdge * 
+MeshEdge *
 MeshModel::getMeshEdgeByName(const std::string &name) const
 {
     MeshEdgeNameMap::const_iterator iter = meshEdgeNameMap_.find(name);
@@ -232,7 +257,7 @@ MeshModel::getMeshEdgeByName(const std::string &name) const
 }
 
 /// \brief Find a MeshEdge by reference
-MeshEdge * 
+MeshEdge *
 MeshModel::getMeshEdgeByRef(const std::string &ref) const
 {
     MeshTopoRefToNameMap::const_iterator iter = meshEdgeRefToNameMap_.find(ref);
@@ -245,7 +270,7 @@ MeshModel::getMeshEdgeByRef(const std::string &ref) const
 
 
 /// \brief Find a MeshFace in the MeshModel using name
-MeshFace * 
+MeshFace *
 MeshModel::getMeshFaceByName(const std::string &name) const
 {
     MeshFaceNameMap::const_iterator iter = meshFaceNameMap_.find(name);
@@ -256,7 +281,7 @@ MeshModel::getMeshFaceByName(const std::string &name) const
 }
 
 /// \brief Find a MeshFace in the MeshModel using reference
-MeshFace * 
+MeshFace *
 MeshModel::getMeshFaceByRef(const std::string &ref) const
 {
     MeshTopoRefToNameMap::const_iterator iter = meshFaceRefToNameMap_.find(ref);
@@ -269,8 +294,8 @@ MeshModel::getMeshFaceByRef(const std::string &ref) const
 
 /// \brief Return the number of edges in the MeshModel
 //
-///  Return will be the count of all MeshEdges from all MeshStrings 
-MLINT 
+///  Return will be the count of all MeshEdges from all MeshStrings
+MLINT
 MeshModel::getNumEdges() const
 {
     return (MLINT)meshEdgeNameMap_.size();
@@ -278,8 +303,8 @@ MeshModel::getNumEdges() const
 
 /// \brief Return the number of faces in the MeshModel
 //
-///  Return will be the count of all MeshFaces from all MeshSheets 
-MLINT 
+///  Return will be the count of all MeshFaces from all MeshSheets
+MLINT
 MeshModel::getNumFaces() const
 {
     return (MLINT)meshFaceNameMap_.size();
@@ -289,7 +314,7 @@ MeshModel::getNumFaces() const
 
 // Add an edge to the associativity data
 bool
-MeshModel::addPoint(MLINT i1, 
+MeshModel::addPoint(MLINT i1,
     MLINT mid,
     MLINT aref,
     MLINT gref,
@@ -354,7 +379,8 @@ MeshModel::getMeshPointByID(MLINT id) const
     return getMeshPointByName(it->second);
 }
 
-MeshPoint * 
+
+MeshPoint *
 MeshModel::getMeshPointByName(const std::string &name) const
 {
     MeshPointNameMap::const_iterator iter = meshPointNameMap_.find(name);
@@ -364,7 +390,8 @@ MeshModel::getMeshPointByName(const std::string &name) const
     return iter->second;
 }
 
-MeshPoint * 
+
+MeshPoint *
 MeshModel::getMeshPointByRef(const std::string &ref) const
 {
     MeshTopoRefToNameMap::const_iterator iter = meshPointRefToNameMap_.find(ref);
@@ -375,11 +402,21 @@ MeshModel::getMeshPointByRef(const std::string &ref) const
 }
 
 
+StringArray
+MeshModel::getMeshPointRefs() const
+{
+    StringArray refs;
+    MeshTopoRefToNameMap::const_iterator iter = meshPointRefToNameMap_.begin();
+    for (; iter != meshPointRefToNameMap_.end(); ++iter) {
+        refs.push_back(iter->first);
+    }
+    return refs;
+}
 
 
 // Add an edge to the associativity data
 bool
-MeshModel::addEdge(MLINT i1, MLINT i2, 
+MeshModel::addEdge(MLINT i1, MLINT i2,
     MLINT mid,
     MLINT aref,
     MLINT gref,
@@ -433,7 +470,7 @@ MeshModel::addEdge(
     return true;
 }
 
-std::vector<const MeshEdge *> 
+std::vector<const MeshEdge *>
 MeshModel::getMeshEdges() const
 {
     std::vector<const MeshEdge *> edges;
@@ -447,7 +484,7 @@ MeshModel::getMeshEdges() const
 }
 
 
-void 
+void
 MeshModel::addEdgePoint(MLINT i1,
     MLINT mid,
     MLINT aref,
@@ -480,11 +517,6 @@ MeshModel::addFaceEdgePoint(MLINT i1,
     MeshPoint *point = new MeshPoint(i1, mid, aref, gref, name, pv1);
     faceEdgePointMap_[point->getHash()] = point;
 }
-
-std::map<pwiFnvHash::FNVHash, MeshPoint*> pointMap_; // not the owner
-MeshPointNameMap        meshPointNameMap_;  // owner
-MeshTopoIDToNameMap     meshPointIDToNameMap_;
-MeshTopoRefToNameMap    meshPointRefToNameMap_;
 
 
 // Delete a point from the associativity data
@@ -603,7 +635,7 @@ MeshModel::findLowestTopoPointByInd(MLINT i1) const
 {
     MeshPoint *point = NULL;
 
-    // Look in MeshEdge list (MeshString) 
+    // Look in MeshEdge list (MeshString)
     point = findEdgePointByInd(i1);
     if (NULL != point) return point;
 
@@ -632,7 +664,7 @@ MeshModel::findHighestTopoPointByInd(MLINT i1) const
     point = findFaceEdgePointByInd(i1);
     if (NULL != point) return point;
 
-    // Look in MeshEdge list (MeshString) 
+    // Look in MeshEdge list (MeshString)
     point = findEdgePointByInd(i1);
     if (NULL != point) return point;
 
@@ -647,7 +679,7 @@ MeshModel::findPointByInd(MLINT i1) const
     pwiFnvHash::FNVHash hash = MeshPoint::computeHash(i1);
     std::map<pwiFnvHash::FNVHash, MeshPoint*>::const_iterator iter;
 
-    // Look in MeshPoint list 
+    // Look in MeshPoint list
     iter = pointMap_.find(hash);
     if (iter != pointMap_.end()) {
         return iter->second;
@@ -698,7 +730,7 @@ MeshModel::findFaceEdgePointByInd(MLINT i1) const
 
 // Add a face edge to the associativity data
 void
-MeshModel::addFaceEdge(MLINT i1, MLINT i2, 
+MeshModel::addFaceEdge(MLINT i1, MLINT i2,
     MLINT mid,
     MLINT aref,
     MLINT gref,
@@ -804,7 +836,7 @@ MeshModel::deleteEdgeByInds(MLINT i1, MLINT i2)
 }
 
 
-void 
+void
 MeshModel::deleteEdgeByRef(MLINT iref)
 {
     std::stringstream ss;
@@ -860,7 +892,7 @@ MeshModel::deleteEdgeByRef(const std::string &ref)
 
 // Add a face to the associativity data
 bool
-MeshModel::addFace(MLINT i1, MLINT i2, MLINT i3, 
+MeshModel::addFace(MLINT i1, MLINT i2, MLINT i3,
     MLINT mid,
     MLINT aref,
     MLINT gref,
@@ -871,7 +903,7 @@ MeshModel::addFace(MLINT i1, MLINT i2, MLINT i3,
         // face already exists
         return true;
     }
-    MeshFace *face = new MeshFace(i1, i2, i3, mid, aref, 
+    MeshFace *face = new MeshFace(i1, i2, i3, mid, aref,
         gref, name, pv1, pv2, pv3);
 
     MeshTopo *existing = getMeshFaceByName(face->name_);
@@ -933,7 +965,7 @@ MeshModel::addFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
         return true;
     }
 
-    MeshFace *face = new MeshFace(i1, i2, i3, i4, mid, aref, 
+    MeshFace *face = new MeshFace(i1, i2, i3, i4, mid, aref,
         gref, name, pv1, pv2, pv3, pv4);
     MeshTopo *existing = getMeshFaceByName(face->name_);
     if (existing) {
@@ -1080,3 +1112,20 @@ MeshModel::deleteFaceByRef(const std::string &ref)
         delete face;
     }
 }
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

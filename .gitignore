@@ -50,3 +50,5 @@ Temporary Items
 **/x86/*
 **/.vs/*
 **/app/export_meshlink_test/**
+**/xerces-c_3D_static.lib
+**/xerces-c_3_static.lib

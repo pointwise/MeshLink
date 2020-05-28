@@ -90,7 +90,7 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
             newPt.r_,
             projectedPoint, projectionDist)) {
             printf("bad edge point projection\n");
-            ml_assert(0 == 1);
+            ML_assert(0 == 1);
             return false;
         }
         else {
@@ -119,8 +119,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
         // orient it to match the face orientation
         SurfEdge *fe2 = NULL;
         fe2 = findEdge(parentFace1.nodes_[1], parentFace1.nodes_[2], true);
-        ml_assert(NULL != fe2);
-        ml_assert(fe2->faces_[0] == parentEdge.faces_[0]);
+        ML_assert(NULL != fe2);
+        ML_assert(fe2->faces_[0] == parentEdge.faces_[0]);
 
         // new edge splitting face 1 
         face1SplitEdge.nodes_[0] = newPtInd;
@@ -162,8 +162,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
         SurfFace parentFace2 = faces_[parentEdge.faces_[1]];
         parentFace2.clockFace( parentEdge.nodes_[1], parentEdge.nodes_[0] );
         fe3 = findEdge(parentFace2.nodes_[2], parentFace2.nodes_[0], true);
-        ml_assert(NULL != fe3);
-        ml_assert(fe3->faces_[0] == parentEdge.faces_[1]);
+        ML_assert(NULL != fe3);
+        ML_assert(fe3->faces_[0] == parentEdge.faces_[1]);
 
 
         // new edge splitting face 2
@@ -548,37 +548,37 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
 
 
 #if defined(CHECK_TOPOLOGY)
-    ml_assert(NULL == findEdge(parentEdge.nodes_[0], parentEdge.nodes_[1], false));
+    ML_assert(NULL == findEdge(parentEdge.nodes_[0], parentEdge.nodes_[1], false));
 
     //checkEdges();
     //checkFaces();
 
     MLINT i;
     for (i = 0; i < 2; ++i) {
-        ml_assert((MLINT)points_.size() > childEdge1.nodes_[i]);
-        ml_assert((MLINT)points_.size() > childEdge2.nodes_[i]);
+        ML_assert((MLINT)points_.size() > childEdge1.nodes_[i]);
+        ML_assert((MLINT)points_.size() > childEdge2.nodes_[i]);
     }
 
     for (i = 0; i < 3; ++i) {
-        ml_assert(faces_[childEdge1.faces_[0]].nodes_[i] < (MLINT)points_.size());
-        ml_assert(faces_[childEdge2.faces_[0]].nodes_[i] < (MLINT)points_.size());
+        ML_assert(faces_[childEdge1.faces_[0]].nodes_[i] < (MLINT)points_.size());
+        ML_assert(faces_[childEdge2.faces_[0]].nodes_[i] < (MLINT)points_.size());
     }
 
-    ml_assert(faces_[childEdge1.faces_[0]].nodes_[0] == childEdge1.nodes_[0]);
-    ml_assert(faces_[childEdge1.faces_[0]].nodes_[1] == childEdge1.nodes_[1]);
+    ML_assert(faces_[childEdge1.faces_[0]].nodes_[0] == childEdge1.nodes_[0]);
+    ML_assert(faces_[childEdge1.faces_[0]].nodes_[1] == childEdge1.nodes_[1]);
     if (parentEdge.faces_[1] >= 0) {
         for (i = 0; i < 3; ++i) {
-            ml_assert(faces_[childEdge1.faces_[1]].nodes_[i] < (MLINT)points_.size());
-            ml_assert(faces_[childEdge2.faces_[1]].nodes_[i] < (MLINT)points_.size());
+            ML_assert(faces_[childEdge1.faces_[1]].nodes_[i] < (MLINT)points_.size());
+            ML_assert(faces_[childEdge2.faces_[1]].nodes_[i] < (MLINT)points_.size());
         }
     }
 
-    ml_assert(faces_[childEdge2.faces_[0]].nodes_[0] == childEdge2.nodes_[0]);
-    ml_assert(faces_[childEdge2.faces_[0]].nodes_[1] == childEdge2.nodes_[1]);
+    ML_assert(faces_[childEdge2.faces_[0]].nodes_[0] == childEdge2.nodes_[0]);
+    ML_assert(faces_[childEdge2.faces_[0]].nodes_[1] == childEdge2.nodes_[1]);
 
     if (parentEdge.faces_[1] >= 0) {
-        ml_assert(faces_[childEdge2.faces_[1]].nodes_[0] == childEdge2.nodes_[1]);
-        ml_assert(faces_[childEdge2.faces_[1]].nodes_[1] == childEdge2.nodes_[0]);
+        ML_assert(faces_[childEdge2.faces_[1]].nodes_[0] == childEdge2.nodes_[1]);
+        ML_assert(faces_[childEdge2.faces_[1]].nodes_[1] == childEdge2.nodes_[0]);
     }
 #endif
     return status;

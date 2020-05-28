@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 #include "MeshAssociativity.h"
 #include "MeshTopo.h"
 
@@ -6,15 +17,15 @@
 
 
 /****************************************************************************
-*
-* pwiFnvHash class
-*
-* A simple hashing routine used to uniquely identify mesh topology entities.
-* Fowler-Noll-Vo Hash Function
-* Designed to be fast with decent dispersion.
-* https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-*
-***************************************************************************/
+ *
+ * pwiFnvHash class
+ *
+ * A simple hashing routine used to uniquely identify mesh topology entities.
+ * Fowler-Noll-Vo Hash Function
+ * Designed to be fast with decent dispersion.
+ * https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ *
+ ***************************************************************************/
 const pwiFnvHash::FNVHash pwiFnvHash::fnv_num_octets_ = sizeof(void*);
 #if defined(IS64BIT)
 const pwiFnvHash::FNVHash pwiFnvHash::fnv_init_ = FNV1_64_INIT;
@@ -41,9 +52,9 @@ pwiFnvHash::hash(MLINT data, FNVHash hash) {
     return hash;
 }
 
-/********************************************************************************
-  MeshTopo Base Class
-*********************************************************************************/
+/****************************************************************************
+ * MeshTopo Base Class
+ ***************************************************************************/
 
 MLUINT MeshTopo::nameCounter_ = 0;
 
@@ -57,7 +68,7 @@ MeshTopo::MeshTopo(
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name) :
+    const std::string &name) :
     mid_(mid),
     aref_(aref),
     gref_(gref),
@@ -69,11 +80,11 @@ MeshTopo::MeshTopo(
 };
 
 MeshTopo::MeshTopo(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name) :
+    const std::string &name) :
     ref_(ref),
     mid_(mid),
     aref_(aref),
@@ -154,7 +165,7 @@ MeshTopo::getParamVertByID(MLINT id) const
     if (pviter2 != paramVertVrefMap_.end()) {
         return pviter2->second;
     }
-    ml_assert(0 == "missing ParamVertex");
+    ML_assert(0 == "missing ParamVertex");
     return NULL;
 }
 
@@ -265,9 +276,9 @@ MeshTopo::getAttributeIDs(const MeshAssociativity &meshAssoc) const
 }
 
 
-/********************************************************************************
-  Mesh Point Class
-*********************************************************************************/
+/***************************************************************************
+ * Mesh Point Class
+ ***************************************************************************/
 MLUINT MeshPoint::nameCounter_ = 0;
 
 const std::string &
@@ -286,7 +297,7 @@ MeshPoint::MeshPoint(MLINT i1,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1
 ) :
     MeshTopo(mid, aref, gref, name),
@@ -303,11 +314,11 @@ MeshPoint::MeshPoint(MLINT i1,
 }
 
 MeshPoint::MeshPoint(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1
 ) :
     MeshTopo(ref, mid, aref, gref, name),
@@ -343,9 +354,9 @@ MeshPoint::getHash() const {
 }
 
 
-/********************************************************************************
-  Mesh Edge Class
-*********************************************************************************/
+/****************************************************************************
+ * Mesh Edge Class
+ ***************************************************************************/
 MLUINT MeshEdge::nameCounter_ = 0;
 
 const std::string &
@@ -364,7 +375,7 @@ MeshEdge::MeshEdge(MLINT i1, MLINT i2,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2) :
     MeshTopo(mid, aref, gref, name),
     i1_(i1),
@@ -426,11 +437,11 @@ MeshEdge::operator=(const MeshEdge &other)
 }
 
 MeshEdge::MeshEdge(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2) :
     MeshTopo(ref, mid, aref, gref, name),
     i1_(MESH_TOPO_INDEX_UNUSED),
@@ -461,9 +472,12 @@ MeshEdge::~MeshEdge()
     }
 }
 
-void MeshEdge::getInds(MLINT **inds) const {
-    (*inds)[0] = i1_;
-    (*inds)[1] = i2_;
+void MeshEdge::getInds(MLINT *inds, MLINT *numInds) const {
+    inds[0] = i1_;
+    inds[1] = i2_;
+    *numInds = 0;
+    if (i1_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
+    if (i2_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
 }
 
 pwiFnvHash::FNVHash 
@@ -487,9 +501,9 @@ MeshEdge::computeHash(MLINT i1, MLINT i2) {
 
 
 
-/********************************************************************************
-  Mesh Face Class
-*********************************************************************************/
+/****************************************************************************
+ * Mesh Face Class
+ ***************************************************************************/
 MLUINT MeshFace::nameCounter_ = 0;
 
 const std::string &
@@ -505,11 +519,11 @@ MeshFace::getNameCounter() {
 };
 
 MeshFace::MeshFace(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2,
     ParamVertex *pv3) :
     MeshTopo(ref, mid, aref, gref, name),
@@ -541,7 +555,7 @@ MeshFace::MeshFace(MLINT i1, MLINT i2, MLINT i3,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2,
     ParamVertex *pv3) :
     MeshTopo(mid, aref, gref, name),
@@ -573,7 +587,7 @@ MeshFace::MeshFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2,
     ParamVertex *pv3, ParamVertex *pv4) :
     MeshTopo(mid, aref, gref, name),
@@ -605,11 +619,11 @@ MeshFace::MeshFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
 }
 
 MeshFace::MeshFace(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2,
     ParamVertex *pv3, ParamVertex *pv4) :
     MeshTopo(ref, mid, aref, gref, name),
@@ -650,11 +664,16 @@ MeshFace::~MeshFace()
 }
 
 void 
-MeshFace::getInds(MLINT **inds) const {
-    (*inds)[0] = i1_;
-    (*inds)[1] = i2_;
-    (*inds)[2] = i3_;
-    (*inds)[3] = i4_;
+MeshFace::getInds(MLINT *inds, MLINT *numInds) const {
+    inds[0] = i1_;
+    inds[1] = i2_;
+    inds[2] = i3_;
+    inds[3] = i4_;
+    *numInds = 0;
+    if (i1_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
+    if (i2_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
+    if (i3_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
+    if (i4_ != MESH_TOPO_INDEX_UNUSED) ++(*numInds);
 }
 
 pwiFnvHash::FNVHash 
@@ -681,3 +700,20 @@ MeshFace::computeHash(MLINT i1, MLINT i2, MLINT i3, MLINT i4) {
     hash = pwiFnvHash::hash(i4, hash);
     return hash;
 }
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

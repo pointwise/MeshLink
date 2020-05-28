@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 #include "MeshAssociativity.h"
 #include "MeshTopo.h"
 
@@ -5,9 +16,9 @@
 #include <sstream>
 
 
-/********************************************************************************
-  Mesh Sheet Class
-*********************************************************************************/
+/****************************************************************************
+ * Mesh Sheet Class
+ ***************************************************************************/
 MLUINT MeshSheet::nameCounter_ = 0;
 
 const std::string &
@@ -29,7 +40,7 @@ MeshSheet::MeshSheet(
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name) :
+    const std::string &name) :
     MeshTopo(mid, aref, gref, name)
 {
     // name arg is allowed to be empty, setName ensures a unique name
@@ -37,11 +48,11 @@ MeshSheet::MeshSheet(
 };
 
 MeshSheet::MeshSheet(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name) :
+    const std::string &name) :
     MeshTopo(ref, mid, aref, gref, name)
 {
     // name arg is allowed to be empty, setName ensures a unique name
@@ -129,7 +140,7 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2, ParamVertex *pv3, bool mapID)
 {
     if (NULL != findFaceByInds(i1, i2, i3)) {
@@ -153,11 +164,11 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3,
 }
 bool
 MeshSheet::addFace(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2, ParamVertex *pv3, bool mapID)
 {
     MeshFace *face = new MeshFace(ref, mid, aref,
@@ -186,7 +197,7 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2, ParamVertex *pv3, ParamVertex *pv4,
     bool mapID)
 {
@@ -211,11 +222,11 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
 }
 bool
 MeshSheet::addFace(
-    std::string &ref,
+    const std::string &ref,
     MLINT mid,
     MLINT aref,
     MLINT gref,
-    std::string &name,
+    const std::string &name,
     ParamVertex *pv1, ParamVertex *pv2, ParamVertex *pv3, ParamVertex *pv4,
     bool mapID)
 {
@@ -344,3 +355,19 @@ MeshSheet::getMeshFaces() const
     return faces;
 }
 
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

@@ -11,15 +11,15 @@
 
 #include "MeshAssociativity.h"
 
-#include "MeshLinkParser_xerces.h"
-#include "MeshLinkParser_xerces_c.h"
+#include "MeshLinkWriter_xerces.h"
+#include "MeshLinkWriter_xerces_c.h"
 
 int
-ML_createMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
+ML_createMeshLinkWriterXercesObj(MeshLinkWriterObj *writerObj)
 {
-    if (parseObj) {
-        *parseObj = (MeshLinkParserObj) new MeshLinkParserXerces;
-        if (*parseObj) {
+    if (writerObj) {
+        *writerObj = (MeshLinkWriterObj) new MeshLinkWriterXerces;
+        if (*writerObj) {
             return 0;
         }
     }
@@ -27,15 +27,14 @@ ML_createMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
 }
 
 void
-ML_freeMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
+ML_freeMeshLinkWriterXercesObj(MeshLinkWriterObj *writerObj)
 {
-    MeshLinkParserXerces *parser = (MeshLinkParserXerces *)*parseObj;
-    if (parser) {
-        delete parser;
-        *parseObj = NULL;
+    MeshLinkWriterXerces *writer = (MeshLinkWriterXerces *)*writerObj;
+    if (writer) {
+        delete writer;
+        *writerObj = NULL;
     }
 }
-
 
 /****************************************************************************
  *

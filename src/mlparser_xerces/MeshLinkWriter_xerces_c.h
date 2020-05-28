@@ -9,33 +9,23 @@
  *
  ***************************************************************************/
 
-#include "MeshAssociativity.h"
+#ifndef MESH_LINK_WRITER_XERCES_C_API
+#define MESH_LINK_WRITER_XERCES_C_API
 
-#include "MeshLinkParser_xerces.h"
-#include "MeshLinkParser_xerces_c.h"
+#include "Types.h"
 
-int
-ML_createMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
-{
-    if (parseObj) {
-        *parseObj = (MeshLinkParserObj) new MeshLinkParserXerces;
-        if (*parseObj) {
-            return 0;
-        }
-    }
-    return 1;
-}
 
-void
-ML_freeMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
-{
-    MeshLinkParserXerces *parser = (MeshLinkParserXerces *)*parseObj;
-    if (parser) {
-        delete parser;
-        *parseObj = NULL;
-    }
-}
+/* Allocate a new MeshLinkWriterXercesObj */
+ML_EXTERN ML_STORAGE_CLASS
+int  ML_createMeshLinkWriterXercesObj(MeshLinkWriterObj *writerObj);
 
+/* Free MeshLinkWriterXercesObj memory */
+ML_EXTERN ML_STORAGE_CLASS
+void   ML_freeMeshLinkWriterXercesObj(MeshLinkWriterObj *writerObj);
+
+
+
+#endif
 
 /****************************************************************************
  *

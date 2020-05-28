@@ -14,9 +14,8 @@
 #include "Types.h"
 #include "GeomKernel_Geode.h"
 #include "MeshAssociativity.h"
-#if defined(HAVE_XERCES)
 #include "MeshLinkParser_xerces.h"
-#endif
+#include "MeshLinkWriter_xerces.h"
 
 // Refine_Uns Project Headers
 #include "surf_mesh.h"
@@ -31,13 +30,18 @@
 int main(int argc, char** argv)
 {
     int ret = 0;
-    if (argc != 2) {
-        printf("usage: <program name> <xml file name>\n");
+    if (argc < 2) {
+        printf("usage: <program name> <xml file name> <compress yes/no>\n");
         exit(1);
     }
 
     // Name of geometry-mesh associativity file
     std::string meshlink_fname(argv[1]);
+    // Use base64 encoding on face data
+    bool compress = false;
+    if (argc == 3 && std::string("yes") == std::string(argv[2])) {
+        compress = true;
+    }
     std::string schema_fname;  // empty schema filename causes schemaLocation in meshlink file to be used
     std::string vrml_fname     = "oneraM6_wingsurf.wrl";
     std::string vrml_out_fname = "oneraM6_wingsurf_refined.wrl";
@@ -57,26 +61,23 @@ int main(int argc, char** argv)
         0.005,          // min allowed edge length
         20.0,           // max allowed tri aspect ratio
         5.0);           // min allowed tri included angle
-    
 
-#if defined(HAVE_XERCES)
-    // Read Geometry-Mesh associativity
-    {
-        // Xerces MeshLink XML parser
-        MeshLinkParserXerces parser;
 
-        // Validate first
-        parser.validate(meshlink_fname, schema_fname);
-
-        if (!parser.parseMeshLinkFile(meshlink_fname, &meshAssoc)) {
-            printf("Error parsing geometry-mesh associativity\n");
-            return (-1);
-        }
-    }
-#else
+#if !defined(HAVE_XERCES)
     printf("Error parsing geometry-mesh associativity\n");
     return (-1);
 #endif
+    // Read Geometry-Mesh associativity
+    // Xerces MeshLink XML parser
+    MeshLinkParserXerces parser;
+
+    // Validate first
+    parser.validate(meshlink_fname, schema_fname);
+
+    if (!parser.parseMeshLinkFile(meshlink_fname, &meshAssoc)) {
+        printf("Error parsing geometry-mesh associativity\n");
+        return (-1);
+    }
 
     // Read VRML file into SurfMesh and build Face and Edge Arrays
     if (!surfMesh.readVrml(vrml_fname) || !surfMesh.createEdges()) {
@@ -173,7 +174,7 @@ int main(int argc, char** argv)
         }
     }
 
-    // In an effort to minimize impact on mesh quality, 
+    // In an effort to minimize impact on mesh quality,
     // blend quality to neighbors of those in the queue
     addNeighborsToQueue(surfMesh, meshAssoc,
         *meshModel, geom_kernel, qualityThreshold, queueForNextGen);
@@ -213,7 +214,7 @@ int main(int argc, char** argv)
                     numSplitsTotal++;
 
                     // add new edges to the next-gen queue
-                    ml_assert(i == *(newEdgeIndsToCheck.begin()));  // original edge should be first
+                    ML_assert(i == *(newEdgeIndsToCheck.begin()));  // original edge should be first
 
                     for (newEdgeIndsIter = newEdgeIndsToCheck.begin();
                         newEdgeIndsIter != newEdgeIndsToCheck.end(); ++newEdgeIndsIter) {
@@ -250,6 +251,18 @@ int main(int argc, char** argv)
         return (-1);
     }
 
+    // Write out the mesh associativity as a XML, roundtrip-capable
+    // file using xerces MeshLink XML writer
+    std::string xmlns;
+    std::string xmlns_xsi;
+    std::string schemaLocation;
+    parser.getMeshLinkAttributes(xmlns, xmlns_xsi, schemaLocation);
+    MeshLinkWriterXerces writer;
+    writer.setMeshLinkAttributes(xmlns, xmlns_xsi, schemaLocation);
+    std::string t = std::string("refined_") + meshlink_fname;
+    printf("Writing out refined data to new MeshLink XML file: %s\n",
+        t.c_str());
+    writer.writeMeshLinkFile(t, &meshAssoc, compress);
+
     return ret;
 }
-

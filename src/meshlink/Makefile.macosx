@@ -91,8 +91,9 @@ CP = cp -f
 DEFINE = -D IS64BIT  
 ifeq ($(BUILD),Debug)
 	COPTS = -g 
-	CXXOPTS = -g 
+	CXXOPTS = -std=c++11 -g 
 else
+	CXXOPTS = -std=c++11
 endif
 
 ########################################################################

@@ -118,11 +118,11 @@ SurfFace::clockFace(MLINT ind1, MLINT ind2)
         if (nodes_[i] == ind1) {
             j = i+1;
             if (j == numNodes_) j = 0;
-            ml_assert(nodes_[j] == ind2);
+            ML_assert(nodes_[j] == ind2);
             break;
         }
     }
-    ml_assert(i < numNodes_);
+    ML_assert(i < numNodes_);
     // clock nodes until we have the positions desired
     while (nodes_[0] != ind1) {
         j = nodes_[0];
@@ -131,8 +131,8 @@ SurfFace::clockFace(MLINT ind1, MLINT ind2)
         }
         nodes_[i] = j;
     }
-    ml_assert(nodes_[0] == ind1);
-    ml_assert(nodes_[1] == ind2);
+    ML_assert(nodes_[0] == ind1);
+    ML_assert(nodes_[1] == ind2);
 }
 
 // Reverse the nodes in an edge
@@ -162,16 +162,16 @@ SurfMesh::findEdge(MLINT ind1, MLINT ind2, bool matchOrientation)
     if (iter != edgeMap_.end()) {
         MLINT edgeInd = iter->second;
         if (edgeInd < 0 || edgeInd >= (MLINT)edges_.size()) {
-            ml_assert(false);
+            ML_assert(false);
         }
         SurfEdge *edge = &(edges_[edgeInd]);
         if (matchOrientation) {
             if (edge->nodes_[0] != ind1) {
                 edge->flipEdge();
             }
-            ml_assert(edge->nodes_[0] == ind1 && edge->nodes_[1] == ind2);
+            ML_assert(edge->nodes_[0] == ind1 && edge->nodes_[1] == ind2);
         }
-        ml_assert(
+        ML_assert(
             (edge->nodes_[0] == ind1 && edge->nodes_[1] == ind2) ||
             (edge->nodes_[0] == ind2 && edge->nodes_[1] == ind1));
         return edge;
@@ -205,14 +205,14 @@ SurfMesh::checkFaces()
     
     for (iter = faces_.begin(); iter != faces_.end(); ++iter) {
         const SurfFace & face = *iter;
-        ml_assert(face.numNodes_ == 3);
-        ml_assert(face.nodes_[0] >= 0 && face.nodes_[0] < numPoints);
-        ml_assert(face.nodes_[1] >= 0 && face.nodes_[1] < numPoints);
-        ml_assert(face.nodes_[2] >= 0 && face.nodes_[2] < numPoints);
+        ML_assert(face.numNodes_ == 3);
+        ML_assert(face.nodes_[0] >= 0 && face.nodes_[0] < numPoints);
+        ML_assert(face.nodes_[1] >= 0 && face.nodes_[1] < numPoints);
+        ML_assert(face.nodes_[2] >= 0 && face.nodes_[2] < numPoints);
 
-        ml_assert(NULL != findEdge(face.nodes_[0], face.nodes_[1], false));
-        ml_assert(NULL != findEdge(face.nodes_[1], face.nodes_[2], false));
-        ml_assert(NULL != findEdge(face.nodes_[2], face.nodes_[0], false));
+        ML_assert(NULL != findEdge(face.nodes_[0], face.nodes_[1], false));
+        ML_assert(NULL != findEdge(face.nodes_[1], face.nodes_[2], false));
+        ML_assert(NULL != findEdge(face.nodes_[2], face.nodes_[0], false));
     }
     return true;
 }
@@ -224,12 +224,12 @@ SurfMesh::checkEdges() const
     EdgeArray::const_iterator iter;
     for (iter = edges_.begin(); iter != edges_.end(); ++iter) {
         const SurfEdge & edge = *iter;
-        ml_assert(edge.nodes_[0] >= 0 && edge.nodes_[0] < numPoints);
-        ml_assert(edge.nodes_[1] >= 0 && edge.nodes_[1] < numPoints);
+        ML_assert(edge.nodes_[0] >= 0 && edge.nodes_[0] < numPoints);
+        ML_assert(edge.nodes_[1] >= 0 && edge.nodes_[1] < numPoints);
 
-        ml_assert(faceHasEdge(faces_[edge.faces_[0]], *iter));
+        ML_assert(faceHasEdge(faces_[edge.faces_[0]], *iter));
         if (edge.faces_[1] >= 0) {
-            ml_assert(faceHasEdge(faces_[edge.faces_[1]], *iter));
+            ML_assert(faceHasEdge(faces_[edge.faces_[1]], *iter));
         }
     }
     return true;
@@ -267,7 +267,7 @@ SurfMesh::updateEdge(SurfEdge &target, const SurfEdge &source) {
     }
     else {
         // edge not in database
-        ml_assert(false);
+        ML_assert(false);
     }
 }
 
@@ -418,7 +418,7 @@ SurfMesh::findEdgeArrayIndex(SurfEdge *edge, MLINT &edgeIndex)
     // pointer subtraction, only works because we're using 
     // a simple vector for EdgeArray
     edgeIndex = (MLINT)( edge - &(edges_[0]) );
-    ml_assert( edgeIndex >= 0 && edgeIndex < (MLINT)(edges_.size()) );
+    ML_assert( edgeIndex >= 0 && edgeIndex < (MLINT)(edges_.size()) );
     if (edgeIndex >= 0 && edgeIndex < (MLINT)(edges_.size())) {
         return true;
     }

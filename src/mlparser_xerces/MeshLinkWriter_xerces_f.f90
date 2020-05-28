@@ -9,33 +9,41 @@
  *
  ***************************************************************************/
 
-#include "MeshAssociativity.h"
+!  MeshLinkWriter_xerces_f.f90
+!
+!
 
-#include "MeshLinkParser_xerces.h"
-#include "MeshLinkParser_xerces_c.h"
+!****************************************************************************
+!
+!  MODULE: mlwriter_xerces
+!
+!  PURPOSE:  Interface to MeshLinkWriterXerces C functions.
+!
+!****************************************************************************
 
-int
-ML_createMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
-{
-    if (parseObj) {
-        *parseObj = (MeshLinkParserObj) new MeshLinkParserXerces;
-        if (*parseObj) {
-            return 0;
-        }
-    }
-    return 1;
-}
 
-void
-ML_freeMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
-{
-    MeshLinkParserXerces *parser = (MeshLinkParserXerces *)*parseObj;
-    if (parser) {
-        delete parser;
-        *parseObj = NULL;
-    }
-}
+    module mlwriter_xerces
+      use iso_c_binding
+      interface
 
+! Allocate a new MeshLinkWriterXercesObj
+        INTEGER(C_INT) FUNCTION ML_createMeshLinkWriterXercesObj(writerObj) bind(C, name="ML_createMeshLinkWriterXercesObj")
+          use, intrinsic :: iso_c_binding
+          implicit none
+          TYPE(C_PTR), INTENT(OUT) :: writerObj
+        ENDFUNCTION ML_createMeshLinkWriterXercesObj
+
+
+! Free MeshLinkWriterXercesObj memory
+        subroutine ML_freeMeshLinkWriterXercesObj(writerObj) bind(C, name="ML_freeMeshLinkWriterXercesObj")
+          use, intrinsic :: iso_c_binding
+          implicit none
+          TYPE(C_PTR), INTENT(OUT) :: writerObj
+        END subroutine ML_freeMeshLinkWriterXercesObj
+
+
+      end interface
+    end module
 
 /****************************************************************************
  *

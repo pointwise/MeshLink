@@ -1,4 +1,15 @@
-﻿#ifndef MESH_STRING_CLASS
+﻿/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
+#ifndef MESH_STRING_CLASS
 #define MESH_STRING_CLASS
 
 #include "Types.h"
@@ -9,63 +20,98 @@
 #include <string>
 
 /****************************************************************************
-* MeshString class
-***************************************************************************/
+ * MeshString class
+ ***************************************************************************/
 /**
-* \class MeshString
-*
-* \brief 1D (curve) mesh topology
-*
-* Provides access to MeshLink schema %MeshString data
-*
-*/
+ * \class MeshString
+ *
+ * \brief 1D (curve) mesh topology
+ *
+ * Provides access to MeshLink schema %MeshString data
+ *
+ */
 class ML_STORAGE_CLASS MeshString : public MeshTopo {
 public:
     friend class MeshAssociativity;
     friend class MeshModel;
 
-    /// Constructor
+    /// \brief Constructor with no application-defined reference data
+    ///
+    /// \param mid unique ID of the mesh string
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh string
     MeshString(
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name);
+        const std::string &name);
 
-    /// Construct with reference to String entity in mesh data
+    /// \brief Constructor with application-defined reference data
+    ///
+    /// \param ref application-defined reference data for the mesh string
+    /// \param mid unique ID of the mesh string
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh string
     MeshString(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name);
+        const std::string &name);
 
     /// \brief Add a MeshEdge to the MeshString using indices
+    ///
+    /// \param i1,i2 the point indices of the string edge
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
+    /// \param pv1,pv2 (optional) the ParamVertex objects associated with the points
+    /// \param mapID whether to map the unique ID to the entity name
     virtual bool addEdge(MLINT i1, MLINT i2, 
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2, bool mapID);
 
     /// \brief Add a MeshEdge to the MeshString using reference
+    ///
+    /// \param ref the application-defined reference of the mesh entity
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
+    /// \param pv1,pv2 (optional) the ParamVertex objects associated with the points
+    /// \param mapID whether to map the unique ID to the entity name
     virtual bool addEdge(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2, bool mapID);
 
     /// \brief Find a MeshEdge in the MeshString associativity data
+    ///
+    /// \param i1,i2 the point indices of the desired string edge
     virtual MeshEdge *findEdgeByInds(MLINT i1, MLINT i2) const;
 
     /// \brief Delete a MeshEdge from the MeshString associativity data
+    ///
+    /// \param i1,i2 the point indices of the string edge to delete
     virtual void deleteEdgeByInds(MLINT i1, MLINT i2);
 
     /// \brief Find a MeshEdge by name
+    ///
+    /// \param name the name of the desired string edge
     virtual MeshEdge * getMeshEdgeByName(const std::string &name) const;
 
     /// \brief Find a MeshEdge by reference
+    //
+    /// \param ref the application-defined reference string of the desired string edge
     virtual MeshEdge * getMeshEdgeByRef(const std::string &ref) const;
 
     /// \brief Return the number of MeshEdges in the MeshString
@@ -74,29 +120,54 @@ public:
     /// \brief Return array of MeshEdges in the MeshString
     virtual std::vector<const MeshEdge *> getMeshEdges() const;
 
+    /// Default constructor
     MeshString();
+    /// Destructor
     ~MeshString();
 
-    // get unique name base and counter
+    /// Return the base name used for generating unique names for strings
     virtual const std::string &getBaseName() const;
+    /// Return the current value used for generating unique names for strings
     virtual MLUINT &getNameCounter();
 
 private:
-    // unique name counter
+    /// The unique name counter for strings
     static MLUINT nameCounter_;
 
-    // Map point index hash to point
+    /// Map point index hash to point
     std::map<pwiFnvHash::FNVHash, MeshPoint*> pointMap_;  // not the owner
+    /// Map point name to point
     MeshPointNameMap        meshPointNameMap_;  // owner
+    /// Map point ID to point name
     MeshTopoIDToNameMap     meshPointIDToNameMap_;
 
-    // Map edge indices hash to edge
+    /// Map edge indices hash to edge
     std::map<pwiFnvHash::FNVHash, MeshEdge*> edgeMap_; // not the owner
+    /// Map edge name to edge
     MeshEdgeNameMap         meshEdgeNameMap_;  // owner
+    /// Map edge unique ID to edge name
     MeshTopoIDToNameMap     meshEdgeIDToNameMap_;
+    /// Map edge application-defined reference string th edge name
     MeshTopoRefToNameMap    meshEdgeRefToNameMap_;
 };
+
 typedef std::map<std::string, MeshString *> MeshStringNameMap;
 
-
 #endif
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

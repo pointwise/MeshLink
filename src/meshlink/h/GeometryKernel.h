@@ -1,4 +1,15 @@
-﻿#ifndef GEOMETRY_KERNEL_CLASS
+﻿/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
+#ifndef GEOMETRY_KERNEL_CLASS
 #define GEOMETRY_KERNEL_CLASS
 
 #include "Types.h"
@@ -10,32 +21,36 @@ class GeometryKernel;
 class GeometryGroup;
 
 
-
-
 /****************************************************************************
-* KernelData class
-***************************************************************************/
+ * KernelData class
+ ***************************************************************************/
 /**
-* \class KernelData
-*
-* \brief Opaque container for geometry kernel specific data
-*
-* Provides a neutral interface for transfering information to/from
-* wrapped geometry kernels.
-*
-*/
+ * \class KernelData
+ *
+ * \brief Opaque container for geometry kernel specific data
+ *
+ * Provides a neutral interface for transfering information to/from
+ * wrapped geometry kernels.
+ *
+ */
 class ML_STORAGE_CLASS KernelData {
 public:
+    /// \brief Constructor with GeometryKernel
     KernelData(GeometryKernel *kernel);
+    /// \brief Destructor
     ~KernelData();
 
+    /// \brief Return the encapsulated opaque pointer
     KernelDataObj getData() { return data_; }
 
 protected:
+    /// The associated GeometryKernel
     GeometryKernel *kernel_;
+    /// The opaque data pointer
     KernelDataObj data_;
 
 private:
+    /// \brief Hidden default constructor
     KernelData();
 };
 
@@ -43,155 +58,249 @@ private:
 * ProjectionData class
 ***************************************************************************/
 /**
-* \class ProjectionData
-*
-* \brief Opaque container for geometry kernel point projection specific data
-*
-* Provides a neutral interface for transfering information to/from
-* wrapped geometry kernels.
-*
-*/
+ * \class ProjectionData
+ *
+ * \brief Opaque container for geometry kernel point projection specific data
+ *
+ * Provides a neutral interface for transfering information to/from
+ * wrapped geometry kernels.
+ *
+ */
 class ML_STORAGE_CLASS ProjectionData : public KernelData {
 public:
+    /// \brief Constructor with GeometryKernel
     ProjectionData(GeometryKernel *kernel);
+    /// \brief Destructor
     ~ProjectionData();
 };
 
 
 /****************************************************************************
-* GeometryKernel class
-***************************************************************************/
+ * GeometryKernel class
+ ***************************************************************************/
 /**
-* \class GeometryKernel
-*
-* \brief Base class for geometry kernel interface
-*
-* Provides a neutral interface for interaction with geometry stored in
-* wrapped geometry kernels.
-*
-*/
+ * \class GeometryKernel
+ *
+ * \brief Base class for geometry kernel interface
+ *
+ * Provides a neutral interface for interaction with geometry stored in
+ * wrapped geometry kernels. The geometry kernel is application-defined,
+ * and performs all geometric operations as provided by this interface.
+ *
+ */
 class ML_STORAGE_CLASS GeometryKernel {
 public:
     friend class ProjectionData;
 
-    /// Read the geometry data file
+    /// \brief Read the geometry data file.
+    ///
+    /// Defined by kernel implementation.
+    ///
+    /// \param filename the name (path) of the geometry file
     virtual bool read(const char* filename);
 
     /**
-    * \brief Project a Cartesian point onto the Geometry group
-    *
-    * Closest point projection of \b point onto the geometric
-    * entities in the GeometryGroup. 
-    * Data is returned in the ProjectionData object.
-    */
+     * \brief Project a Cartesian point onto the Geometry group
+     *
+     * Defined by kernel implementation.
+     *
+     * Closest point projection of \b point onto the geometric
+     * entities in the GeometryGroup. 
+     * Data is returned in the ProjectionData object.
+     *
+     * \param group the GeometryGroup to project upon
+     * \param point the point to project
+     * \param[out] projectionData the projection result data
+     *
+     * \return true if the projection was successful
+     */
     virtual bool projectPoint(const GeometryGroup *group, 
         const MLVector3D point, 
         ProjectionData &projectionData);
 
-    /// Return the projection hit Cartesian coordinates
+    /// \brief Return the projection hit Cartesian coordinates
+    ///
+    /// \param[in] projectionData the projection data from which to extract
+    /// \param[out] point the projection coordinate result
     virtual bool getProjectionXYZ(ProjectionData &projectionData, MLVector3D point);
 
-    /// Return the projection hit entity parametric coordinates
+    /// \brief Return the projection hit entity parametric coordinates
+    ///
+    /// \param[in] projectionData the projection data from which to extract
+    /// \param[out] UV the projection parametric coordinate result
     virtual bool getProjectionUV(ProjectionData &projectionData, MLVector2D UV);
 
-    /// Return the projection hit entity name
+    /// \brief Return the projection hit entity name
+    ///
+    /// \param[in] projectionData the projection data from which to extract
+    /// \param[out] name the geometric entity name
     virtual bool getProjectionEntityName(ProjectionData &projectionData, std::string &name);
 
-    /// Evaluate the Cartesian coordinates at the entity parametric coordinates
+    /// \brief Evaluate the Cartesian coordinates at the entity parametric coordinates
+    ///
+    /// Defined by kernel implementation.
+    ///
+    /// \param[in] UV the parametric coordinate location to evaluate
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] xyz the evaluated location in model space
     virtual bool evalXYZ(MLVector2D UV, const std::string &entityName, MLVector3D xyz);
 
     /// \brief Evaluate the radius of curvature at the entity parametric coordinates
     ///
+    /// Defined by kernel implementation.
+    ///
     /// For a curve entity, min and max are equal.
+    ///
+    /// \param[in] UV the parametric coordinate location to evaluate
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] minRadiusOfCurvature,maxRadiusOfCurvature the minimum and maximum radius of curvature at the given coordinate
     virtual bool evalRadiusOfCurvature(MLVector2D UV, const std::string &entityName, 
         MLREAL *minRadiusOfCurvature, MLREAL *maxRadiusOfCurvature );
 
     /// \brief Evaluate the curvature on a curve entity at the parametric coordinates
     ///
-    /// 
+    /// Defined by kernel implementation.
+    ///
+    /// \param[in] UV the parametric coordinate (U) location to evaluate
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] XYZ the evaluated location in model space
+    /// \param[out] Tangent the evaluated tangent vector
+    /// \param[out] PrincipalNormal the evaluated principal normal vector
+    /// \param[out] Binormal the binormal vector (Tangent X PrincipalNormal)
+    /// \param[out] Curvature evaluated curvature in radians per unit length. This is ALWAYS
+    ///     non-negative and in the direction of the principal normal vector. Radius of
+    ///     curvature is computed as 1 / Curvature.
+    /// \param[out] Linear true if curve is linear and has no unique normal vector
     virtual bool evalCurvatureOnCurve(
         MLVector2D UV,
         const std::string &entityName,
-        MLVector3D             XYZ,   // Evaluated location on curve
-        MLVector3D         Tangent,   // tangent to curve
-        MLVector3D PrincipalNormal,   // principal normal (pointing towards the center of curvature)
-        MLVector3D        Binormal,   // binormal (tangent x principal normal)
-        // curvature in radians per unit length 
-        // ALWAYS non-negative and in the direction of the principal normal 
-        // Radius of curvature = 1 / Curvature
+        MLVector3D             XYZ,
+        MLVector3D         Tangent,
+        MLVector3D PrincipalNormal,
+        MLVector3D        Binormal,
         MLREAL  *Curvature,
-        bool        *Linear           // If true, the curve is linear and has no unique normal
+        bool        *Linear
+    );
+
+    /// \brief Evaluate the parametric derivatives on a curve entity at the parametric coordinates
+    ///
+    /// Defined by kernel implementation.
+    ///
+    /// \param[in] UV the parametric coordinate (U) location to evaluate
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] XYZ the evaluated location in model space
+    /// \param[out] dXYZdU first derivative
+    /// \param[out] d2XYZdU2 second derivative
+    virtual bool evalDerivativesOnCurve(
+        MLVector2D UV,
+        const std::string &entityName,
+        MLVector3D        XYZ,
+        MLVector3D        dXYZdU,
+        MLVector3D        d2XYZdU2
     );
 
     /// \brief Evaluate the curvature on a surface entity at the parametric coordinates
     ///
-    /// 
+    /// Defined by kernel implementation.
+    ///
+    /// \param[in] UV the parametric coordinate (UV) location to evaluate
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] XYZ the evaluated location in model space
+    /// \param[out] dXYZdU,dXYZdV first partial derivatives
+    /// \param[out] d2XYZdU2,d2XYZdUdV,d2XYZdV2 second partial derivatives
+    /// \param[out] surfaceNormal normalized surface normal vector (unit vector)
+    /// \param[out] principalV Unit vector tangent to surface where curvature = min;
+    ///     surfaceNormal cross principalV yields the direction where curvature = max;
+    ///     if the surface is locally planar (min and max are 0.0) or if the 
+    ///     surface is locally spherical (min and max are equal), 
+    ///     this will be an arbitrary vector tangent to the surface
+    /// \param[out] minCurvature,maxCurvature minimum and maximum curvature, in radians
+    ///     per unit length; defined so that positive values indicate the surface bends 
+    ///     in the direction of surfaceNormal, and negative values indicate 
+    ///     the surface bends away from surfaceNormal
+    /// \param[out] avg average curvature; average or mean curvature is defined
+    ///     as : avg = (min + max) / 2
+    /// \param[out] gauss Guassian curvature; Gaussian curvature is defined as :
+    ///     gauss = min * max
+    /// \param[out] orientation orientation of the surface in the model
     virtual bool evalCurvatureOnSurface(
         MLVector2D UV,
         const std::string &entityName,
-        MLVector3D        XYZ,           // Evaluated location on surface
-        MLVector3D        dXYZdU,        // First partial derivative
-        MLVector3D        dXYZdV,        // First partial derivative
-        MLVector3D        d2XYZdU2,      // Second partial derivative
-        MLVector3D        d2XYZdUdV,     // Second partial derivative
-        MLVector3D        d2XYZdV2,      // Second partial derivative
-        MLVector3D        surfaceNormal, // Surface normal - unit vector
-        // Unit vector tangent to surface where curvature = min 
-        // surfaceNormal cross principalV yields the direction where curvature = max 
-        // if the surface is locally planar (min and max are 0.0) or if the 
-        // surface is locally spherical (min and max are equal), 
-        // this will be an arbitrary vector tangent to the surface
+        MLVector3D        XYZ,
+        MLVector3D        dXYZdU,
+        MLVector3D        dXYZdV,
+        MLVector3D        d2XYZdU2,
+        MLVector3D        d2XYZdUdV,
+        MLVector3D        d2XYZdV2,
+        MLVector3D        surfaceNormal,
         MLVector3D        principalV,
-        // Minimum and maximum curvature, in radians per unit length
-        // Defined so that positive values indicate the surface bends 
-        // in the direction of surfaceNormal, and negative values indicate 
-        // the surface bends away from surfaceNormal
-        MLREAL          *minCurvature,
-        MLREAL          *maxCurvature,
-
-        // The average or mean curvature is defined as :
-        //    avg = (min + max) / 2
-        // The Gaussian curvature is defined as :
-        //    gauss = min * max
-        MLREAL          *avg,           // Average curvature
-        MLREAL          *gauss          //  Gaussian curvature
+        MLREAL            *minCurvature,
+        MLREAL            *maxCurvature,
+        MLREAL            *avg,
+        MLREAL            *gauss,
+        MLORIENT          *orientation
     );
 
-    /// Determine entity type (0 = unknown, 1 = curve, 2 = surface)
-    virtual MLINT entityType(const char* name);
+    /// \brief Determine entity type 
+    ///
+    /// \param[in] name the name of the entity
+    virtual MLTYPE entityType(const char* name);
 
-    /// Determine if an entity exists in the geometry kernel database
+    /// \brief Determine if an entity exists in the geometry kernel database
+    ///
+    /// \param[in] name the name of the entity
     virtual bool entityExists(const char* name);
 
-
-    /// Return the name of the geometry kernel
+    /// \brief Return the name of the geometry kernel
     virtual const char * getName() const;
 
-    /// Set the model size of the geometry
-    // Used to define tolerances within the geometry kernel
+    /// \brief Set the model size of the geometry
+    ///
+    /// Used to define tolerances within the geometry kernel
+    ///
+    /// \param[in] size the model size to set
     virtual void setModelSize(MLREAL size);
 
-    /// Return the geometry model size
+    /// \brief Return the geometry model size
     virtual MLREAL getModelSize() const;
 
+    /// Default constructor sets model size to 1000.0
     GeometryKernel()
     {
         modelsize_ = 1000.0;
     }
 
+    /// Destructor
     ~GeometryKernel()
     {
     }
 
 private:
+    /// model size
     MLREAL  modelsize_;
 
-    /// Construct a point projection data object for use by the geometry kernel
+    /// \brief Construct a point projection data object for use by the geometry kernel
     virtual ProjectionDataObj getProjectionDataObject();
 
-    /// Delete (and free) a kernel point projection data object
+    /// \brief Delete (and free) a kernel point projection data object
     virtual void deleteProjectionDataObject(ProjectionDataObj projectionData);
 };
 
-
 #endif
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

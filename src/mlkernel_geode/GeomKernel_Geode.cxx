@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 //#include "MeshAssociativity.h"
 
 #include "GeometryGroup.h"
@@ -162,7 +173,7 @@ GeometryKernelGeode::getBSPTree(const GeometryGroup *group)
             }
         }
     }
-    ml_assert(numAdded == entity_names.size());
+    ML_assert(numAdded == entity_names.size());
 
     // Build the BSP tree
     if (status) {
@@ -288,18 +299,18 @@ GeometryKernelGeode::evalXYZ(MLVector2D UV, const std::string &entityName, MLVec
     return true;
 }
 
-/// Determine entity type (0 = unknown, 1 = curve, 2 = surface)
-MLINT 
+/// Determine entity type 
+MLTYPE 
 GeometryKernelGeode::entityType(const char* entityName)
 {
-    MLINT type = 0;
+    MLTYPE type = ML_TYPE_UNKNOWN;
     GE::Entity *entity = getEntity(entityName);
     if (NULL == entity) {
         return type;
     }
     if (isCurveEntity(entity)) {
         // a curve
-        type = 1;
+        type = ML_TYPE_CURVE;
     }
     else {
         // potentially a surface
@@ -313,7 +324,7 @@ GeometryKernelGeode::entityType(const char* entityName)
             surface = GE::Surface::Downcast(entity);
         }
         if (surface) {
-            type = 2;
+            type = ML_TYPE_SURFACE;
         }
     }
 
@@ -471,6 +482,49 @@ GeometryKernelGeode::evalCurvatureOnCurve(
     return true;
 }
 
+bool
+GeometryKernelGeode::evalDerivativesOnCurve(
+    MLVector2D UV,                // Parametric location
+    const std::string &entityName,
+    MLVector3D        XYZ,        // Evaluated location on curve
+    MLVector3D        dXYZdU,     // First derivative
+    MLVector3D        d2XYZdU2    // Second derivative
+)
+{
+    GE::Vector2D uv(UV[0], UV[1]);
+
+    GE::Entity *entity = getEntity(entityName);
+    if (NULL == entity) {
+        return false;
+    }
+    GE::Error error;
+
+    bool isCurve = isCurveEntity(entity);
+    if (isCurve) {
+        // 1D curve
+        GE::Curve *curve = GE::Curve::Downcast(entity);
+        if (curve) {
+            GE::Vector3D        ge_XYZ;           // Evaluated location on curve
+            GE::Vector3D        ge_dXYZdU;        // First derivative
+            GE::Vector3D        ge_d2XYZdU2;      // Second derivative
+
+            error = curve->Evaluate_2ndDerivative(uv.U(), ge_XYZ,
+                ge_dXYZdU, ge_d2XYZdU2);
+            if (error == GE::Error::No_errors) {
+                for (int n = 0; n < 3; ++n) {
+                    XYZ[n] = ge_XYZ[n];
+                    dXYZdU[n] = ge_dXYZdU[n];
+                    d2XYZdU2[n] = ge_d2XYZdU2[n];
+                }
+                return true;
+            }
+        }
+    }
+    else {
+        return false;
+    }
+    return true;
+}
 
 bool
 GeometryKernelGeode::evalCurvatureOnSurface(
@@ -502,7 +556,8 @@ GeometryKernelGeode::evalCurvatureOnSurface(
     // The Gaussian curvature is defined as :
     //    gauss = min * max
     MLREAL          *avg,           // Average curvature
-    MLREAL          *gauss         //  Gaussian curvature
+    MLREAL          *gauss,         //  Gaussian curvature
+    MLORIENT        *orientation    // Orientation of surface in model
 
 )
 {
@@ -576,6 +631,15 @@ GeometryKernelGeode::evalCurvatureOnSurface(
             *gauss = ge_gauss;
             *minCurvature = ge_minCurvature;
             *maxCurvature = ge_maxCurvature;
+            *orientation = ML_ORIENT_SAME;
+
+            if (cface) {
+                GE::Orientation orient;
+                cface->Inquire_Surface(&orient);
+                if (orient != GE::Orientation_same) {
+                    *orientation = ML_ORIENT_OPPOSITE;
+                }
+            }
 
             return true;
         }
@@ -670,3 +734,20 @@ GeometryKernelGeode::read(const char* filename)
 
 
 
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

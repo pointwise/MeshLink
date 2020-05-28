@@ -80,11 +80,18 @@
 
 /* #undef XERCES_NO_MATCHING_DELETE_OPERATOR */
 
+#if defined(USE_XERCES_STATIC_LIBRARY)
+#define XERCES_STATIC_LIBRARY 1
+#define XERCES_PLATFORM_EXPORT
+#define XERCES_PLATFORM_IMPORT
+#define XERCES_TEMPLATE_EXTERN extern
+#else  /* Dynamic library build */
 #define XERCES_DLL_EXPORT 1
 /* #undef XERCES_STATIC_LIBRARY */
 #define XERCES_PLATFORM_EXPORT __declspec(dllexport)
 #define XERCES_PLATFORM_IMPORT __declspec(dllimport)
 #define XERCES_TEMPLATE_EXTERN 
+#endif
 #ifdef XERCES_DLL_EXPORT
 #  define DLL_EXPORT
 #endif

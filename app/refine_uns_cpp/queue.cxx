@@ -67,12 +67,12 @@ void addNeighborsToQueue(
                         }
                         oppPtInd = parentFace.nodes_[n];
                     }
-                    ml_assert(oppPtInd != surfEdge.nodes_[0] &&
+                    ML_assert(oppPtInd != surfEdge.nodes_[0] &&
                         oppPtInd != surfEdge.nodes_[1]);
 
                     // find edge running from node[0] to oppPtInd
                     neighborSurfEdge = surfMesh.findEdge(surfEdge.nodes_[0], oppPtInd, false);
-                    ml_assert(NULL != neighborSurfEdge);
+                    ML_assert(NULL != neighborSurfEdge);
 
                     surfMesh.findEdgeArrayIndex(neighborSurfEdge, neighborEdgeInd);
 
@@ -94,7 +94,7 @@ void addNeighborsToQueue(
 
                     // find edge running from node[1] to oppPtInd
                     neighborSurfEdge = surfMesh.findEdge(surfEdge.nodes_[1], oppPtInd, false);
-                    ml_assert(NULL != neighborSurfEdge);
+                    ML_assert(NULL != neighborSurfEdge);
 
                     surfMesh.findEdgeArrayIndex(neighborSurfEdge, neighborEdgeInd);
 

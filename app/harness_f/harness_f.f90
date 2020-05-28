@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 !***********************************************************************
 !  MeshLink Library Test Harness (FORTRAN)
 !
@@ -185,7 +196,9 @@
     MLVector3D(evaluationPoint)
     MLVector3D(bottom_con_pt)
     MLREAL_F dist
-    
+	MLREAL_F modelSize
+   
+    modelSize = 1000.0
     sizeAttIDs = 24
     MAX_STRING_SIZE = 64 
     
@@ -260,10 +273,34 @@
                     call STRING_C_TO_F(attName)
                     call STRING_C_TO_F(attValue)
                     write(*,'(I2,2X,A,A,A)')  iAtt, trim(attName), ' = ', trim(attValue)
+
+                    ! Get ModelSize attribute
+                    if (trim(attName) .eq. 'model size') then
+					   read( attValue , * ) modelSize  
+					end if
+
                 end if
             end do
+
+			status = ML_setGeomModelSize(geomKernel, modelSize)
+            if (status .ne. 0) then
+                !     error
+                write(*,'(A,F10.2)') 'ML_setGeomModelSize:error ', modelSize
+                sphere_test = 1;
+                return
+            end if
+			!
+			status = ML_getGeomModelSize(geomKernel, modelSize)
+            if (status .ne. 0) then
+                !     error
+                write(*,'(A)') 'ML_getGeomModelSize:error '
+                sphere_test = 1;
+                return
+            end if
             !
             !
+			write(*,*)
+            write(*,'(A,F10.2)') 'Geometry Kernel ModelSize = ', modelSize
             status = ML_readGeomFile(geomKernel, geom_fname)
             if (status .ne. 0) then
                 !     error
@@ -307,3 +344,20 @@
     sphere_test = 0
     return
     endfunction sphere_test
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

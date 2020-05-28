@@ -1,28 +1,36 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
 
 #include "MeshAssociativity.h"
 
-
 #include "MeshLinkParser_xerces.h"
+#include "MeshLinkWriter_xerces.h"
 
 #include <iostream>
-#include <sstream>
 #include <istream>
 #include <iterator>
 #include <sstream>
 
-#define SSTR( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
-
-#include <xercesc/util/PlatformUtils.hpp>
+// DOM Parser
 #include <xercesc/dom/DOM.hpp>
-#include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/framework/LocalFileInputSource.hpp>
+#include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xercesc/sax/HandlerBase.hpp>
+#include <xercesc/util/Base64.hpp>
+#include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XercesDefs.hpp>
 #include <xercesc/util/XMLString.hpp>
+#include <xercesc/util/XMLUni.hpp>
 
 using namespace xercesc;
-
-
 
 // Replaces xerces XMLString::transcode() method to take care of
 // releasing the transcoded result automatically
@@ -30,26 +38,29 @@ template <typename T, typename U>
 class XMLCopier {
 public:
     XMLCopier(const T *input) :
-        input_(input),
-        val_(0)
-    {}
+        input_(input)
+    {
+        val_ = XMLString::transcode(input_);
+    }
 
-    ~XMLCopier() {
+    ~XMLCopier()
+    {
         XMLString::release(&val_);
     }
 
-    operator U *() {
-        if (nullptr == val_) {
-            val_ = XMLString::transcode(input_);
-        }
+    operator U *()
+    {
         return val_;
     }
 
-    bool empty() {
-        if (nullptr != val_) {
-            return XMLString::stringLen(val_) > 0;
-        }
-        return false;
+    const U *convert() const
+    {
+        return val_;
+    }
+
+    bool empty()
+    {
+        return !(XMLString::stringLen(val_) > 0);
     }
 
 private:
@@ -58,16 +69,36 @@ private:
 };
 
 
-// Returns true if Element node is a Text Node
+// Very temporary - use in function calls only
+#define X(str) (XMLCopier<char, XMLCh>(str)).convert()
+#define Char(str) XMLCopier<XMLCh, char>(str).convert()
+
+// Returns true if Element node is a Text Node or CDATASection Node
 static bool
 parseNode(DOMElement *node, std::vector<std::string> &atts, std::string &value)
 {
     bool result = false;
     // Attributes vector contains names, to be replaced with parsed values
+    int count; // used if data is base64
+    bool base64 = false;
+    bool quads = false;
     for (size_t i = 0; i < atts.size(); ++i) {
         XMLCopier<char, XMLCh> name(atts.at(i).c_str());
         XMLCopier<XMLCh, char> attr(node->getAttribute(name));
         if (!attr.empty()) {
+            if (std::string("count") == atts.at(i)) {
+                count = std::stoul((char*)attr);
+            }
+            if (std::string("format") == atts.at(i)) {
+                if (std::string("base64") == std::string((char*)attr)) {
+                    base64 = true;
+                }
+            }
+            if (std::string("etype") == atts.at(i)) {
+                if (std::string("Quad4") == std::string((char*)attr)) {
+                    quads = true;
+                }
+            }
             atts[i] = attr;
         }
         else {
@@ -80,7 +111,34 @@ parseNode(DOMElement *node, std::vector<std::string> &atts, std::string &value)
     while (nullptr != child) {
         if (DOMNode::TEXT_NODE == child->getNodeType()) {
             XMLCopier<XMLCh, char> contents(child->getNodeValue());
-            value  = contents;
+            if (base64) {
+                XMLSize_t length;
+                XMLByte *data = Base64::decode((const XMLByte*)((char*)contents),
+                    &length);
+                int faceIndxSize = count * (quads ? 4 : 3);
+                int *faceIndices = new int[faceIndxSize];
+                memcpy(faceIndices, data, faceIndxSize * sizeof(int));
+                for (int i = 0; i < faceIndxSize; ++i) {
+                    if (0 < i) {
+                        value += " ";
+                    }
+                    value += std::to_string(faceIndices[i]);
+                }
+            }
+            else {
+                value = contents;
+            }
+            result = true;
+            break;
+        }
+        else if (DOMNode::CDATA_SECTION_NODE == child->getNodeType()) {
+            // Get the data
+            DOMCDATASection *cdata = dynamic_cast<DOMCDATASection*>(child);
+
+            // Base64 decode
+            XMLSize_t length;
+            XMLByte *data = Base64::decodeToXMLByte(cdata->getData(), &length);
+            value.assign((char*)data, length);
             result = true;
             break;
         }
@@ -161,13 +219,10 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
     if (!meshAssociativity_) { return false; }
     bool status = true;
     meshAssociativity_->clearAttributes();
-    XMLCopier<char, XMLCh> attName("Attribute");
-    XMLCopier<char, XMLCh> attGroupName("AttributeGroup");
-    XMLCopier<char, XMLCh> formatName("#text");
     DOMNode *attr;
 
     DOMNodeList *attNodes;
-    if (nullptr == (attNodes = root->getElementsByTagName(attName))) {
+    if (nullptr == (attNodes = root->getElementsByTagName(X("Attribute")))) {
         return true;
     }
 
@@ -188,7 +243,7 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
                 std::cout << "Attribute node not an element" << std::endl;
                 continue;
             }
-            
+
             // required atts
             attr = attMap->getNamedItem(attidName);
             if (nullptr == attr) {
@@ -196,9 +251,11 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
                 continue;
             }
             attid = XMLString::parseInt(attr->getNodeValue());
-            const MeshLinkAttribute *existing = meshAssociativity_->getAttributeByID(attid);
+            const MeshLinkAttribute *existing =
+                meshAssociativity_->getAttributeByID(attid);
             if (existing) {
-                std::cout << "Attribute reuses existing attid attribute \"" << attid << "\"" << std::endl;
+                std::cout << "Attribute reuses existing attid attribute \"" <<
+                    attid << "\"" << std::endl;
                 continue;
             }
 
@@ -225,7 +282,8 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
                 continue;
             }
             else {
-                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, false, *meshAssociativity_);
+                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, false,
+                    *meshAssociativity_);
                 if (mlAtt.isValid()) {
                     meshAssociativity_->addAttribute(mlAtt);
                 }
@@ -235,7 +293,7 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
 
 
     // AttributeGroup elements
-    if (nullptr == (attNodes = root->getElementsByTagName(attGroupName))) {
+    if (nullptr == (attNodes = root->getElementsByTagName(X("AttributeGroup")))) {
         return true;
     }
 
@@ -260,13 +318,16 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
             // required atts
             attr = attMap->getNamedItem(attidName);
             if (nullptr == attr) {
-                std::cout << "AttributeGroup missing attid attribute" << std::endl;
+                std::cout << "AttributeGroup missing attid attribute" <<
+                    std::endl;
                 continue;
             }
             attid = XMLString::parseInt(attr->getNodeValue());
-            const MeshLinkAttribute *existing = meshAssociativity_->getAttributeByID(attid);
+            const MeshLinkAttribute *existing =
+                meshAssociativity_->getAttributeByID(attid);
             if (existing) {
-                std::cout << "AttributeGroup reuses existing attid attribute \"" << attid << "\"" << std::endl;
+                std::cout << "AttributeGroup reuses existing attid attribute \"" <<
+                    attid << "\"" << std::endl;
                 continue;
             }
 
@@ -294,7 +355,8 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
                 continue;
             }
             else {
-                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, true, *meshAssociativity_);
+                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, true,
+                    *meshAssociativity_);
                 if (mlAtt.isValid()) {
                     meshAssociativity_->addAttribute(mlAtt);
                 }
@@ -304,6 +366,7 @@ MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
 
     return status;
 }
+
 
 // Valiadate MeshLink file against the schema
 bool
@@ -332,11 +395,13 @@ MeshLinkParserXerces::validate(const std::string &fileName,
     parser->setErrorHandler(errHandler);
 
     if (!schemaName.empty()) {
-        // Use explicitly defined schema file, not the schemaLocation specified in meshlink file
+        // Use explicitly defined schema file, not the schemaLocation
+        // specified in meshlink file
         try {
             XMLCopier<char, XMLCh> sc(schemaName.c_str());
             parser->useCachedGrammarInParse(true);
-            Grammar *schema = parser->loadGrammar(sc, Grammar::SchemaGrammarType, true);
+            Grammar *schema = parser->loadGrammar(sc, Grammar::SchemaGrammarType,
+                true);
             if (nullptr == schema) {
                 std::cout << "Schema not loaded. Check for file." << std::endl;
                 errHandler->outputCounts();
@@ -415,18 +480,13 @@ MeshLinkParserXerces::validate(const std::string &fileName,
 bool
 parseGeomRefDOM(DOMNode *geometryReferenceDOM, GeometryGroup &group)
 {
-    XMLCopier<char, XMLCh> gidName("gid");
-    XMLCopier<char, XMLCh> refName("ref");
-    XMLCopier<char, XMLCh> arefName("aref");
-    XMLCopier<char, XMLCh> nameName("name");
-
     DOMNamedNodeMap *attMap = geometryReferenceDOM->getAttributes();
     if (nullptr == attMap) {
         std::cout << "GeometryReference node not an element" << std::endl;
         return false;
     }
     // geometry id - 'gid' attribute
-    DOMNode *gidAttr = attMap->getNamedItem(gidName);
+    DOMNode *gidAttr = attMap->getNamedItem(X("gid"));
     if (nullptr == gidAttr) {
         std::cout << "GeometryReference missing gid attribute" << std::endl;
         return false;
@@ -435,7 +495,7 @@ parseGeomRefDOM(DOMNode *geometryReferenceDOM, GeometryGroup &group)
     group.setID(XMLString::parseInt(gid));
 
     // entity name - only one per DOMNode - 'ref' attribute
-    DOMNode *refAttr = attMap->getNamedItem(refName);
+    DOMNode *refAttr = attMap->getNamedItem(X("ref"));
     if (nullptr == refAttr) {
         std::cout << "GeometryReference missing ref attribute" << std::endl;
         return false;
@@ -447,14 +507,14 @@ parseGeomRefDOM(DOMNode *geometryReferenceDOM, GeometryGroup &group)
     group.setName((char *)ref);
 
     // optional 'name' attribute
-    DOMNode *nameAttr = attMap->getNamedItem(nameName);
+    DOMNode *nameAttr = attMap->getNamedItem(X("name"));
     if (nullptr != nameAttr) {
         XMLCopier<XMLCh, char> xmlStr(nameAttr->getNodeValue());
         group.setName((char *)xmlStr);
     }
-    
+
     // optional aref attribute
-    DOMNode *arefAttr = attMap->getNamedItem(arefName);
+    DOMNode *arefAttr = attMap->getNamedItem(X("aref"));
     if (nullptr != arefAttr) {
         const XMLCh *valStr = arefAttr->getNodeValue();
         group.setAref( XMLString::parseInt(valStr) );
@@ -467,21 +527,17 @@ parseGeomRefDOM(DOMNode *geometryReferenceDOM, GeometryGroup &group)
 
 // Parse GeometryGroup node
 bool
-parseGeomGroupDOM(DOMNode *geometryGroupDOM, 
+parseGeomGroupDOM(DOMNode *geometryGroupDOM,
     MeshAssociativity *meshAssociativity,
     GeometryGroup &group)
 {
-    XMLCopier<char, XMLCh> gidName("gid");
-    XMLCopier<char, XMLCh> arefName("aref");
-    XMLCopier<char, XMLCh> nameName("name");
-
     DOMNamedNodeMap *attMap = geometryGroupDOM->getAttributes();
     if (nullptr == attMap) {
         std::cout << "GeometryGroup node not an element" << std::endl;
         return false;
     }
-    // geometry group id - 'gid' attribute
-    DOMNode *gidAttr = attMap->getNamedItem(gidName);
+    // Geometry group id - 'gid' attribute
+    DOMNode *gidAttr = attMap->getNamedItem(X("gid"));
     if (nullptr == gidAttr) {
         std::cout << "GeometryGroup missing gid attribute" << std::endl;
         return false;
@@ -501,31 +557,43 @@ parseGeomGroupDOM(DOMNode *geometryGroupDOM,
         child = child->getNextSibling();
     }
     if (grefstr.empty()) {
-        std::cout << "GeometryGroup with gid=\"" << gid << "\" missing content" << std::endl;
+        std::cout << "GeometryGroup with gid=\"" << gid <<
+            "\" missing content" << std::endl;
         return false;
     }
 
-    // construct a stream from the string
+    // Construct a stream from the string
     std::stringstream strstr(grefstr);
 
-    // use stream iterators to copy the stream to the vector as whitespace separated strings
+    // Use stream iterators to copy the stream to the vector as
+    // whitespace separated strings
     std::istream_iterator<std::string> it(strstr);
     std::istream_iterator<std::string> end;
     std::vector<std::string> grefs(it, end);
 
+    // Always need a name - default to "geom_group_<gid>"
+    std::ostringstream s;  s << gid;
+    std::string name = std::string("geom_group_") + s.str();
+    group.setName( name.c_str() );
+    group.setID(gid);
+
     size_t i;
     for (i = 0; i < grefs.size(); ++i) {
         std::string &gref = grefs[i];
-        int grefID = -1;
+        int grefID = MESH_TOPO_INVALID_REF;
         try {
             grefID = std::stoi(gref);
         }
         catch (...) {
-            std::cout << "GeometryGroup invalid content \"" << gref << "\"" << std::endl;
+            std::cout << "GeometryGroup invalid content \"" << gref << "\"" <<
+                std::endl;
             return false;
         }
+        // Add to group
+        group.addGID(grefID);
         GeometryGroup *refgroup = meshAssociativity->getGeometryGroupByID(grefID);
         if (refgroup) {
+            refgroup->setGroupID(gid);
             const std::vector<std::string> &ents = refgroup->getEntityNames();
             std::vector<std::string>::const_iterator iter;
             for (iter = ents.cbegin(); iter != ents.cend(); ++iter) {
@@ -533,26 +601,21 @@ parseGeomGroupDOM(DOMNode *geometryGroupDOM,
             }
         }
         else {
-            std::cout << "GeometryGroup unknown gid in content \"" << grefID << "\"" << std::endl;
+            std::cout << "GeometryGroup unknown gid in content \"" << grefID <<
+                "\"" << std::endl;
             return false;
         }
     }
 
-    // always need a name - default to "geom_group_<gid>"
-    std::ostringstream s;  s << gid;
-    std::string name = std::string("geom_group_") + s.str();
-    group.setName( name.c_str() );
-    group.setID(gid);
-
     // optional 'name' attribute
-    DOMNode *nameAttr = attMap->getNamedItem(nameName);
+    DOMNode *nameAttr = attMap->getNamedItem(X("name"));
     if (nullptr != nameAttr) {
         XMLCopier<XMLCh, char> xmlStr(nameAttr->getNodeValue());
         group.setName((char *)xmlStr);
     }
 
     // optional aref attribute
-    DOMNode *arefAttr = attMap->getNamedItem(arefName);
+    DOMNode *arefAttr = attMap->getNamedItem(X("aref"));
     if (nullptr != arefAttr) {
         const XMLCh *valStr = arefAttr->getNodeValue();
         group.setAref(XMLString::parseInt(valStr));
@@ -562,111 +625,101 @@ parseGeomGroupDOM(DOMNode *geometryGroupDOM,
 }
 
 
-// Parse GeometryFile element and child GeometryReference and GeometryGroup elements 
+// Parse GeometryFile element and child GeometryReference and
+// GeometryGroup elements
 bool
 MeshLinkParserXerces::parseGeometryRefs(DOMElement *root)
 {
-    if (!meshAssociativity_) { return false; }
+    if (!meshAssociativity_) {
+        return false;
+    }
     bool result = true;
-    XMLCh *geoFileName = XMLString::transcode("GeometryFile");
-    XMLCh *geoRefName = XMLString::transcode("GeometryReference");
-    XMLCh *geoGroupName = XMLString::transcode("GeometryGroup");
 
     // Loop through GeometryFile nodes parsing GeometryReference elements
-    DOMNodeList *gfNode = root->getElementsByTagName(geoFileName);
+    DOMNodeList *gfNode = root->getElementsByTagName(X("GeometryFile"));
     for (XMLSize_t i = 0; i < gfNode->getLength() && result; ++i) {
         DOMElement *elem = dynamic_cast<DOMElement *>(gfNode->item(i));
         if ( nullptr != elem ) {
 
-            XMLCopier<char, XMLCh> filenameName("filename");
-            XMLCopier<char, XMLCh> arefName("aref");
-
             std::string filename, aref;
 
-            if (elem->hasAttribute(filenameName)) {
-                XMLCopier<XMLCh, char>  xmlStr(elem->getAttribute(filenameName));
+            if (elem->hasAttribute(X("filename"))) {
+                XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("filename")));
                 filename = (char *) xmlStr;
             }
             else {
-                std::cout << "GeometryFile node: no filename attribute." << std::endl;
+                std::cout << "GeometryFile node: no filename attribute." <<
+                    std::endl;
                 return false;
             }
-            if (elem->hasAttribute(arefName)) {
-                XMLCopier<XMLCh, char>  xmlStr(elem->getAttribute(arefName));
+            if (elem->hasAttribute(X("aref"))) {
+                XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("aref")));
                 aref = (char *)xmlStr;
             }
 
             GeometryFile geomFile(filename, aref);
-            meshAssociativity_->addGeometryFile(geomFile);
 
-        }
+            DOMNodeList *geomRefs = elem->getElementsByTagName(X("GeometryReference"));
 
-        DOMNodeList *geomRefs = root->getElementsByTagName(geoRefName);
-
-        for (XMLSize_t i = 0; i < geomRefs->getLength() && result; ++i) {
-            DOMNode *geomRef = geomRefs->item(i);
-            GeometryGroup geom_group;
-            if ((result = parseGeomRefDOM(geomRef, geom_group))) {
-                meshAssociativity_->addGeometryGroup(geom_group);
+            for (XMLSize_t i = 0; i < geomRefs->getLength() && result; ++i) {
+                DOMNode *geomRef = geomRefs->item(i);
+                GeometryGroup geom_group;
+                if ((result = parseGeomRefDOM(geomRef, geom_group))) {
+                    meshAssociativity_->addGeometryGroup(geom_group);
+                    geomFile.addGeometryGroupID(geom_group.getID());
+                }
             }
+            // Since we add via value instead of pointer, we better
+            // add it after we've made all our changes/additions
+            meshAssociativity_->addGeometryFile(geomFile);
         }
     }
 
-    // Loop through GeometryFile nodes parsing GeometryGroup elements
     // GeometryGroup content is list of attids which must match
     // those defined by GeometryReference elements above.
-    for (XMLSize_t i = 0; i < gfNode->getLength() && result; ++i) {
+    DOMNodeList *geomGroups = root->getElementsByTagName(X("GeometryGroup"));
 
-        DOMNodeList *geomGroups = root->getElementsByTagName(geoGroupName);
-
-        for (XMLSize_t i = 0; i < geomGroups->getLength() && result; ++i) {
-            DOMNode *geomGroup = geomGroups->item(i);
-            GeometryGroup geom_group;
-            if ((result = parseGeomGroupDOM(geomGroup, meshAssociativity_, geom_group))) {
-                meshAssociativity_->addGeometryGroup(geom_group);
-            }
+    for (XMLSize_t i = 0; i < geomGroups->getLength() && result; ++i) {
+        DOMNode *geomGroup = geomGroups->item(i);
+        GeometryGroup geom_group;
+        if ((result = parseGeomGroupDOM(geomGroup, meshAssociativity_,
+                geom_group))) {
+            meshAssociativity_->addGeometryGroup(geom_group);
         }
     }
 
-    XMLString::release(&geoFileName);
-    XMLString::release(&geoRefName);
-    XMLString::release(&geoGroupName);
     return result;
 }
 
 
-// Parse single MeshFile element and children 
+// Parse single MeshFile element and children
 bool
 MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
 {
     if (!meshAssociativity_) { return false; }
-    // Attributes
-    XMLCopier<char, XMLCh> filenameName("filename");
-    XMLCopier<char, XMLCh> arefName("aref");
 
     std::string filename, aref;
 
-    if (meshFile->hasAttribute(filenameName)) {
-        XMLCopier<XMLCh, char>  xmlStr(meshFile->getAttribute(filenameName));
+    if (meshFile->hasAttribute(X("filename"))) {
+        XMLCopier<XMLCh, char> xmlStr(meshFile->getAttribute(X("filename")));
         filename = (char *)xmlStr;
     }
     else {
         std::cout << "MeshFile node: no filename attribute." << std::endl;
         return false;
     }
-    if (meshFile->hasAttribute(arefName)) {
-        XMLCopier<XMLCh, char>  xmlStr(meshFile->getAttribute(arefName));
+    if (meshFile->hasAttribute(X("aref"))) {
+        XMLCopier<XMLCh, char> xmlStr(meshFile->getAttribute(X("aref")));
         aref = (char *)xmlStr;
     }
 
     MeshFile mFile(filename, aref);
-    meshAssociativity_->addMeshFile(mFile);
 
     // Model References
-    XMLCopier<char, XMLCh> modelRefTag("MeshModelReference");
     DOMNodeList *nodes;
-    if (nullptr == (nodes = meshFile->getElementsByTagName(modelRefTag)) ||
-        0 == nodes->getLength()) {
+    if (nullptr ==
+            (nodes = meshFile->getElementsByTagName(X("MeshModelReference"))) ||
+            0 == nodes->getLength()) {
         std::cout << "MeshFile node: no model references." << std::endl;
         return false;
     }
@@ -677,9 +730,10 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
         DOMNode *node = nodes->item(i);
         if (DOMNode::ELEMENT_NODE == node->getNodeType()) {
             modelRef = dynamic_cast<DOMElement*>(node);
-            result = parseMeshRefModel(modelRef);
+            result = parseMeshRefModel(mFile, modelRef);
         }
     }
+    meshAssociativity_->addMeshFile(mFile);
 
     if (!result) {
         std::cout << "MeshFile node: problem parsing mesh reference." <<
@@ -700,7 +754,7 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
             DOMNode *node = nodes->item(i);                             \
             if (DOMNode::ELEMENT_NODE == node->getNodeType()) {         \
                 meshObj = dynamic_cast<DOMElement*>(node);              \
-                result = parse##MeshObj(meshModel, meshObj);      \
+                result = parse##MeshObj(meshModel, meshObj);            \
             }                                                           \
             if (!result) {                                              \
                 std::cout << "MeshModelReference node: problem "        \
@@ -710,7 +764,7 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
         }                                                               \
     }
 
-#define ParseMeshContainerNoRecurse(MeshModel, MeshObj)                          \
+#define ParseMeshContainerNoRecurse(MeshModel, MeshObj)                 \
     {                                                                   \
         XMLCopier<char, XMLCh> objTag(#MeshObj);                        \
         DOMNodeList *nodes = MeshModel->getElementsByTagName(objTag);   \
@@ -718,8 +772,8 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
             DOMElement *meshObj;                                        \
             DOMNode *node = nodes->item(i);                             \
             DOMNode *parentNode = node->getParentNode();                \
-            if (parentNode && DOMNode::ELEMENT_NODE == parentNode->getNodeType()) {         \
-                DOMElement *parentElem = dynamic_cast<DOMElement*>(parentNode);   \
+            if (parentNode && DOMNode::ELEMENT_NODE == parentNode->getNodeType()) { \
+                DOMElement *parentElem = dynamic_cast<DOMElement*>(parentNode); \
                 if (parentElem != MeshModel) continue;                  \
             }                                                           \
             if (DOMNode::ELEMENT_NODE == node->getNodeType()) {         \
@@ -736,35 +790,30 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
 
 
 bool
-MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
+MeshLinkParserXerces::parseMeshRefModel(MeshFile &meshFile,
+    xercesc_3_2::DOMElement *modelRef)
 {
     if (!meshAssociativity_) { return false; }
 
-    // MeshModelReference attributes
-    XMLCopier<char, XMLCh> refName("ref"); // required
-    XMLCopier<char, XMLCh> midName("mid");
-    XMLCopier<char, XMLCh> arefName("aref");
-    XMLCopier<char, XMLCh> grefName("gref");
-    XMLCopier<char, XMLCh> nameName("name");
-
     bool mapID = false;
-    int mid = -1;
+    int mid = MESH_TOPO_INVALID_REF;
     std::string name;
-    int aref = -1;
-    int gref = -1;
+    int aref = MESH_TOPO_INVALID_REF;
+    int gref = MESH_TOPO_INVALID_REF;
     std::string ref;
-    if (modelRef->hasAttribute(refName)) {
-        XMLCopier<XMLCh, char>  xmlStr(modelRef->getAttribute(refName));
+    // Required
+    if (modelRef->hasAttribute(X("ref"))) {
+        XMLCopier<XMLCh, char> xmlStr(modelRef->getAttribute(X("ref")));
         ref = std::string(xmlStr);
     }
     else {
-        // bad model store
+        // Bad model store
         std::cout << "MeshModelReference: missing ref attribute." << std::endl;
         return false;
     }
 
-    if (modelRef->hasAttribute(midName)) {
-        mid = XMLString::parseInt(modelRef->getAttribute(midName));
+    if (modelRef->hasAttribute(X("mid"))) {
+        mid = XMLString::parseInt(modelRef->getAttribute(X("mid")));
 
         MeshModel *existingModel = meshAssociativity_->getMeshModelByID(mid);
         if (existingModel) {
@@ -775,17 +824,17 @@ MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
         }
         mapID = true;
     }
-    if (modelRef->hasAttribute(arefName)) {
-        aref = XMLString::parseInt(modelRef->getAttribute(arefName));
+    if (modelRef->hasAttribute(X("aref"))) {
+        aref = XMLString::parseInt(modelRef->getAttribute(X("aref")));
     }
-    if (modelRef->hasAttribute(grefName)) {
-        gref = XMLString::parseInt(modelRef->getAttribute(grefName));
+    if (modelRef->hasAttribute(X("gref"))) {
+        gref = XMLString::parseInt(modelRef->getAttribute(X("gref")));
     }
-    if (modelRef->hasAttribute(nameName)) {
-        XMLCopier<XMLCh, char>  xmlStr(modelRef->getAttribute(nameName));
+    if (modelRef->hasAttribute(X("name"))) {
+        XMLCopier<XMLCh, char> xmlStr(modelRef->getAttribute(X("name")));
         name = std::string(xmlStr);
 
-        MeshModel *existingModel = 
+        MeshModel *existingModel =
             meshAssociativity_->getMeshModelByName(name.c_str());
         if (existingModel) {
             // Can't have multiple name values
@@ -795,7 +844,7 @@ MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
         }
     }
 
-    MeshModel* meshModel = new MeshModel(ref, mid,aref,gref,name);
+    MeshModel* meshModel = new MeshModel(ref, mid, aref, gref, name);
 
     bool result = meshAssociativity_->addMeshModel(meshModel, mapID);
 
@@ -806,6 +855,9 @@ MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
         return false;
     }
     else {
+        // Add to MeshFile
+        meshFile.addModelRef(ref);
+
         // Parse MeshSheets
         ParseMeshContainer(modelRef, MeshSheet);
         ParseMeshContainer(modelRef, MeshSheetReference);
@@ -817,10 +869,10 @@ MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
         // Parse MeshPoints
 
         // Param vertices (do prior to MeshPointRef)
-        XMLCopier<char, XMLCh> vertexName("ParamVertex");
         DOMNodeList *verts;
-        if (nullptr != (verts = modelRef->getElementsByTagName(vertexName)) &&
-            0 != verts->getLength()) {
+        if (nullptr !=
+                (verts = modelRef->getElementsByTagName(X("ParamVertex"))) &&
+                0 != verts->getLength()) {
 
             for (XMLSize_t i = 0; i < verts->getLength() && result; ++i) {
                 DOMNode *node;
@@ -852,12 +904,10 @@ MeshLinkParserXerces::parseMeshRefModel(xercesc_3_2::DOMElement *modelRef)
 
 
         if (result) {
-            XMLCopier<char, XMLCh> modelRefNameAtt("name");
-            DOMAttr *attNode = modelRef->getAttributeNode(modelRefNameAtt);
+            DOMAttr *attNode = modelRef->getAttributeNode(X("name"));
             if (attNode) {
-                const XMLCh *val = attNode->getValue();
-                char* meshName = XMLString::transcode(attNode->getValue());
-                printf("MeshModel %s geometry associations:\n", meshName);
+                XMLCopier<XMLCh, char> val(attNode->getValue());
+                printf("MeshModel %s geometry associations:\n", (char *)val);
             }
             printf("%8" MLINT_FORMAT " mesh edges\n", meshModel->getNumEdges());
             printf("%8" MLINT_FORMAT " mesh faces\n", meshModel->getNumFaces());
@@ -873,62 +923,29 @@ MeshLinkParserXerces::~MeshLinkParserXerces()
     //clearMeshObjs();
 }
 
-//void
-//MeshLinkParserXerces::clearMeshObjs()
-//{
-//    MeshObjs::iterator moIter;
-//    for (moIter = meshObjs_.begin(); moIter != meshObjs_.end(); ++moIter) {
-//        delete moIter->second;
-//    }
-//    meshObjs_.clear();
-//}
-//
-//MeshObjPtr 
-//MeshLinkParserXerces::findMeshObj(MLINT id)
-//{
-//    MeshObjs::iterator it = meshObjs_.find(id);
-//    if (it == meshObjs_.end()) {
-//        return NULL;
-//    }
-//    else {
-//        return it->second;
-//    }
-//}
-//
-//void            
-//MeshLinkParserXerces::addMeshObj(MeshObjPtr meshObj)
-//{
-//    meshObjs_[meshObj->mid_] = meshObj;
-//}
-
 
 bool
 MeshLinkParserXerces::parseMeshObject(MeshModel *model,
     MeshTopo* meshTopo,
     xercesc_3_2::DOMElement *xmlObj,
-    const char *objName, 
+    const char *objName,
     ParseMeshObjMap &parseMeshObjMap, bool &mapID)
 {
-    // Attributes
-    XMLCopier<char, XMLCh> midName("mid");
-    XMLCopier<char, XMLCh> nameName("name");
-    XMLCopier<char, XMLCh> refName("ref");
-    XMLCopier<char, XMLCh> grefName("gref");
-    XMLCopier<char, XMLCh> arefName("aref");
-
     if (NULL == meshTopo) { return false; }
     MeshString *meshString = dynamic_cast<MeshString *> (meshTopo);
     MeshSheet *meshSheet = dynamic_cast<MeshSheet *> (meshTopo);
 
     mapID = false;
-    if (xmlObj->hasAttribute(midName)) {
-        meshTopo->setID( XMLString::parseInt(xmlObj->getAttribute(midName)) );
+    if (xmlObj->hasAttribute(X("mid"))) {
+        meshTopo->setID( XMLString::parseInt(xmlObj->getAttribute(X("mid"))) );
 
         if (meshString) {
-            MeshString *existingString = model->getMeshStringByID(meshString->getID());
+            MeshString *existingString =
+                model->getMeshStringByID(meshString->getID());
             if (existingString) {
                 // Can't have multiple mid values
-                std::cout << "MeshString: mid identifier already in use." << std::endl;
+                std::cout << "MeshString: mid identifier already in use." <<
+                    std::endl;
                 return false;
             }
             mapID = true;
@@ -937,21 +954,23 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
             MeshSheet *existingSheet = model->getMeshSheetByID(meshSheet->getID());
             if (existingSheet) {
                 // Can't have multiple mid values
-                std::cout << "MeshSheet: mid identifier already in use." << std::endl;
+                std::cout << "MeshSheet: mid identifier already in use." <<
+                    std::endl;
                 return false;
             }
             mapID = true;
         }
     }
-    if (xmlObj->hasAttribute(nameName)) {
-        XMLCopier<XMLCh, char>  name(xmlObj->getAttribute(nameName));
+    if (xmlObj->hasAttribute(X("name"))) {
+        XMLCopier<XMLCh, char> name(xmlObj->getAttribute(X("name")));
         meshTopo->setName( name );
 
         if (meshString) {
             MeshString *existingString = model->getMeshStringByName(meshString->getName());
             if (existingString) {
                 // Can't have multiple name values
-                std::cout << "MeshString: name identifier already in use." << std::endl;
+                std::cout << "MeshString: name identifier already in use." <<
+                    std::endl;
                 return false;
             }
         }
@@ -959,7 +978,8 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
             MeshSheet *existingSheet = model->getMeshSheetByName(meshSheet->getName());
             if (existingSheet) {
                 // Can't have multiple name values
-                std::cout << "MeshSheet: name identifier already in use." << std::endl;
+                std::cout << "MeshSheet: name identifier already in use." <<
+                    std::endl;
                 return false;
             }
         }
@@ -972,23 +992,25 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
             meshSheet->setName(meshSheet->getNextName().c_str());
         }
     }
-    if (xmlObj->hasAttribute(grefName)) {
-        meshTopo->setGref( XMLString::parseInt(xmlObj->getAttribute(grefName)) );
+    if (xmlObj->hasAttribute(X("gref"))) {
+        meshTopo->setGref(XMLString::parseInt(xmlObj->getAttribute(X("gref"))));
     }
-    if (xmlObj->hasAttribute(arefName)) {
-        meshTopo->setAref( XMLString::parseInt(xmlObj->getAttribute(arefName)) );
+    if (xmlObj->hasAttribute(X("aref"))) {
+        meshTopo->setAref(XMLString::parseInt(xmlObj->getAttribute(X("aref"))));
     }
 
 
-    if (xmlObj->hasAttribute(refName)) {
-        XMLCopier<XMLCh, char>  ref(xmlObj->getAttribute(refName));
+    if (xmlObj->hasAttribute(X("ref"))) {
+        XMLCopier<XMLCh, char> ref(xmlObj->getAttribute(X("ref")));
         meshTopo->setRef(ref);
 
         if (meshString) {
-            MeshString *existingString = model->getMeshStringByRef(meshString->getRef());
+            MeshString *existingString =
+                model->getMeshStringByRef(meshString->getRef());
             if (existingString) {
                 // Can't have multiple narefme values
-                std::cout << "MeshStringReference: ref identifier already in use." << std::endl;
+                std::cout << "MeshStringReference: ref identifier already in use." <<
+                    std::endl;
                 return false;
             }
         }
@@ -996,7 +1018,8 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
             MeshSheet *existingSheet = model->getMeshSheetByRef(meshSheet->getRef());
             if (existingSheet) {
                 // Can't have multiple ref values
-                std::cout << "MeshSheetReference: ref identifier already in use." << std::endl;
+                std::cout << "MeshSheetReference: ref identifier already in use." <<
+                    std::endl;
                 return false;
             }
         }
@@ -1005,11 +1028,10 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
     bool result = true;
 
     // Param vertices
-    XMLCopier<char, XMLCh> vertexName("ParamVertex");
     DOMNodeList *verts;
-    if (nullptr != (verts = xmlObj->getElementsByTagName(vertexName)) &&
+    if (nullptr != (verts = xmlObj->getElementsByTagName(X("ParamVertex"))) &&
             0 != verts->getLength()) {
-        
+
         for (XMLSize_t i = 0; i < verts->getLength() && result; ++i) {
             DOMNode *node;
             if (nullptr == (node = verts->item(i))) {
@@ -1028,7 +1050,8 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
     // Child mesh objects
     ParseMeshObjMap::iterator meshObjIter;
     XMLSize_t totalItems = 0;
-    for (meshObjIter = parseMeshObjMap.begin(); meshObjIter != parseMeshObjMap.end(); ++meshObjIter) {
+    for (meshObjIter = parseMeshObjMap.begin();
+             meshObjIter != parseMeshObjMap.end(); ++meshObjIter) {
         const char *meshObjName = meshObjIter->first;
         pParseMeshObj parseMeshObj = meshObjIter->second;
         XMLCopier<char, XMLCh> childMeshObj(meshObjName);
@@ -1071,6 +1094,7 @@ MeshLinkParserXerces::parseMeshStringReference(MeshModel *model,
     // Handle as MeshString
     return parseMeshString(model, meshStringNode);
 }
+
 
 bool
 MeshLinkParserXerces::parseMeshString(MeshModel *model,
@@ -1132,7 +1156,7 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
 
     std::vector<std::string> attributeNames;
 
-    // optional attributes
+    // Optional attributes
     attributeNames.push_back("mid");
     attributeNames.push_back("format");
     attributeNames.push_back("count");
@@ -1143,9 +1167,9 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
     std::string value;
     if (parseNode(meshPointNode, attrs, value)) {
 
-        // optional mid attribute
+        // Optional mid attribute
         int iattr = 0;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         bool mapID = false;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
@@ -1153,7 +1177,7 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
             mapID = true;
         }
 
-        // optional format attribute
+        // Optional format attribute
         ++iattr;
         std::string format = "text";
         if (attrs[iattr] != "") {
@@ -1165,7 +1189,7 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
             return false;
         }
 
-        // optional count attribute
+        // Optional count attribute
         ++iattr;
         int count = 1;
         if (attrs[iattr] != "") {
@@ -1178,32 +1202,32 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
             }
         }
 
-        // optional aref attribute
+        // Optional aref attribute
         ++iattr;
-        int aref = -1;
+        int aref = MESH_TOPO_INVALID_REF;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> aref;
         }
 
-        // optional gref attribute
+        // Optional gref attribute
         ++iattr;
-        int gref = -1;
+        int gref = MESH_TOPO_INVALID_REF;
         if (parentMeshTopo) {
-            gref = (int)parentMeshTopo->getGref();  // default to parent's Gref
+            gref = (int)parentMeshTopo->getGref();  // Default to parent's Gref
         }
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> gref;
         }
 
-        // optional name attribute
+        // Optional name attribute
         ++iattr;
         std::string name = attrs[iattr];
 
         if (!name.empty() && count > 1) {
-            printf("MeshPointReference: error name att cannot be specified when count > 1\n   %s\n",
-                name.c_str());
+            printf("MeshPointReference: error name att cannot be specified "
+                "when count > 1\n   %s\n", name.c_str());
             return false;
         }
 
@@ -1230,24 +1254,23 @@ MeshLinkParserXerces::parseMeshPointReference(MeshModel *model,
                         ref.c_str());
                 }
 
-
                 if (meshSheet) {
-                    // add point to sheet
+                    // Add point to sheet
                 }
                 if (meshString) {
-                    // add point to string
+                    // Add point to string
                 }
 
 #if DEBUG
                 MeshPoint *point = model->getMeshPointByRef(ref);
-                pw_assert(point);
+                ML_assert(nullptr != point);
                 if (meshSheet) {
                     //point = meshSheet->getMeshPointByRef(ref);
-                    pw_assert(point);
+                    ML_assert(nullptr != point);
                 }
                 if (meshString) {
                     //point = meshString->getMeshPointByRef(ref);
-                    pw_assert(point);
+                    ML_assert(nullptr != point);
                 }
 #endif
             }
@@ -1280,7 +1303,7 @@ bool
 MeshLinkParserXerces::parseMeshSheet(MeshModel *model,
     xercesc_3_2::DOMElement *meshSheetNode)
 {
-    // map tag name -> parsing function pointer
+    // Map tag name -> parsing function pointer
     ParseMeshObjMap parseMap;
     parseMap["MeshFace"] = &MeshLinkParserXerces::parseMeshFace;
     parseMap["MeshFaceReference"] = &MeshLinkParserXerces::parseMeshFaceReference;
@@ -1327,7 +1350,7 @@ MeshLinkParserXerces::parseParamVertex(MeshTopo *meshTopo,
     std::string value;
     if (parseNode(vertNode, attrs, value)) {
         bool mapID = false;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         if (attrs[0] != "") {
             std::istringstream is(attrs[0]);
             int mid;
@@ -1368,7 +1391,7 @@ MeshLinkParserXerces::parseParamVertex(MeshTopo *meshTopo,
             }
         }
 
-        // element content is UV
+        // Element content is UV
         MLVector2D uv = {0.0, 0.0};
         if (1 == dim) {
             uv[0] = std::stod(value);
@@ -1383,7 +1406,7 @@ MeshLinkParserXerces::parseParamVertex(MeshTopo *meshTopo,
         }
 
         ParamVertex *pv = new ParamVertex(vref,gref,mid,uv[0],uv[1]);
-        meshTopo->addParamVertex( pv, mapID );
+        meshTopo->addParamVertex( pv, mapID);
 
     }
     else {
@@ -1396,7 +1419,7 @@ MeshLinkParserXerces::parseParamVertex(MeshTopo *meshTopo,
 
 bool
 MeshLinkParserXerces::parseMeshFace(MeshModel *model,
-    MeshTopo* parentMeshTopo, 
+    MeshTopo* parentMeshTopo,
     xercesc_3_2::DOMElement *faceArrayNode)
 {
     if (NULL == parentMeshTopo) { return false; }
@@ -1404,11 +1427,11 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
         dynamic_cast <MeshSheet*> (parentMeshTopo);
 
     std::vector<std::string> attributeNames;
-    // required attributes
+    // Required attributes
     attributeNames.push_back("etype");
     int numReqAttrs = (int)attributeNames.size();
 
-    // optional attributes
+    // Optional attributes
     attributeNames.push_back("mid");
     attributeNames.push_back("aref");
     attributeNames.push_back("gref");
@@ -1421,7 +1444,7 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
     if (parseNode(faceArrayNode, attrs, value)) {
         int n;
         int iattr = 0;
-        // first numReqAttrs are required
+        // First numReqAttrs are required
         for (n = 0; n < numReqAttrs; ++n) {
             if (attrs[n] == "") {
                 std::cout << "MeshFace: missing required attribute: " <<
@@ -1444,9 +1467,9 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
             return false;
         }
 
-        // optional mid attribute
+        // Optional mid attribute
         ++iattr;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         bool mapID = false;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
@@ -1454,15 +1477,15 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
             mapID = true;
         }
 
-        // optional aref attribute
+        // Optional aref attribute
         ++iattr;
-        int aref = -1;
+        int aref = MESH_TOPO_INVALID_REF;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> aref;
         }
 
-        // optional gref attribute
+        // Optional gref attribute
         ++iattr;
         int gref = (int)parentMeshTopo->getGref();  // default is parent's Gref
         if (attrs[iattr] != "") {
@@ -1470,23 +1493,23 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
             is >> gref;
         }
 
-        // optional name attribute
+        // Optional name attribute
         ++iattr;
         std::string name = attrs[iattr];
 
-        // optional format attribute
+        // Optional format attribute
         ++iattr;
         std::string format = "text";
         if (attrs[iattr] != "") {
             format = attrs[iattr];
         }
-        if ("text" != format) {
+        if ("text" != format && "base64" != format) {
             std::cout << "MeshFace: illegal format value: " <<
                 format << std::endl;
             return false;
         }
 
-        // optional count attribute
+        // Optional count attribute
         ++iattr;
         int count = 1;
         if (attrs[iattr] != "") {
@@ -1507,7 +1530,7 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
                 if (triFace) {
                     // 1 group of 3
                     is >> i1 >> i2 >> i3;
-                    // map parametric verts from parent
+                    // Map parametric verts from parent
                     pv1 = parentMeshTopo->getParamVertByVref(std::to_string(i1));
                     pv2 = parentMeshTopo->getParamVertByVref(std::to_string(i2));
                     pv3 = parentMeshTopo->getParamVertByVref(std::to_string(i3));
@@ -1519,20 +1542,19 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
                     model->addFaceEdgePoint(i2, mid, aref, gref, pv2);
                     model->addFaceEdgePoint(i3, mid, aref, gref, pv3);
 
-                    // record map from mesh face indices to geometry group ID
-                    bool result = model->addFace(i1, i2, i3, 
+                    // Record map from mesh face indices to geometry group ID
+                    bool result = model->addFace(i1, i2, i3,
                         mid, aref, gref, name, pv1, pv2, pv3, mapID);
                     if (!result) {
                         printf("MeshFace: error storing\n   %s\n",
                             (char*)faceArrayNode->getNodeName());
                     }
 
-
                     if (meshSheet) {
                         meshSheet->addFaceEdge(i1, i2, mid, aref, gref, pv1, pv2);
                         meshSheet->addFaceEdge(i2, i3, mid, aref, gref, pv2, pv3);
                         meshSheet->addFaceEdge(i3, i1, mid, aref, gref, pv3, pv1);
-                        bool result = meshSheet->addFace(i1, i2, i3, 
+                        bool result = meshSheet->addFace(i1, i2, i3,
                             mid, aref, gref, name, pv1, pv2, pv3, mapID);
                         if (!result) {
                             printf("MeshFace: error storing\n   %s\n",
@@ -1542,9 +1564,9 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
 
 #if DEBUG
                     MeshFace *face = model->findFaceByInds(i1, i2, i3);
-                    pw_assert(face);
+                    ML_assert(nullptr != face);
                     face = meshSheet->findFaceByInds(i1, i2, i3);
-                    pw_assert(face);
+                    ML_assert(nullptr != face);
 #endif
 
                 }
@@ -1552,7 +1574,7 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
                     // 1 group of 4
                     is >> i1 >> i2 >> i3 >> i4;
 
-                    // map parametric verts from parent
+                    // Map parametric verts from parent
                     pv1 = parentMeshTopo->getParamVertByVref(std::to_string(i1));
                     pv2 = parentMeshTopo->getParamVertByVref(std::to_string(i2));
                     pv3 = parentMeshTopo->getParamVertByVref(std::to_string(i3));
@@ -1569,9 +1591,8 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
                         model->addFaceEdgePoint(i3, mid, aref, gref, pv3);
                         model->addFaceEdgePoint(i4, mid, aref, gref, pv4);
 
-
                         // record map from mesh face indices to geometry group ID
-                        bool result = model->addFace(i1, i2, i3, i4, 
+                        bool result = model->addFace(i1, i2, i3, i4,
                             mid, aref, gref, name, pv1, pv2, pv3, pv4, mapID);
                         if (!result) {
                             printf("MeshFace: error storing\n   %s\n",
@@ -1584,7 +1605,7 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
                         meshSheet->addFaceEdge(i2, i3, mid, aref, gref, pv2, pv3);
                         meshSheet->addFaceEdge(i3, i4, mid, aref, gref, pv3, pv4);
                         meshSheet->addFaceEdge(i4, i1, mid, aref, gref, pv4, pv1);
-                        bool result = meshSheet->addFace(i1, i2, i3, i4, 
+                        bool result = meshSheet->addFace(i1, i2, i3, i4,
                             mid, aref, gref, name, pv1, pv2, pv3, pv4, mapID);
                         if (!result) {
                             printf("MeshFace: error storing\n   %s\n",
@@ -1594,9 +1615,9 @@ MeshLinkParserXerces::parseMeshFace(MeshModel *model,
 
 #if DEBUG
                     MeshFace *face = model->findFaceByInds(i1, i2, i3, i4);
-                    pw_assert(face);
+                    ML_assert(nullptr != face);
                     face = meshSheet->findFaceByInds(i1, i2, i3, i4);
-                    pw_assert(face);
+                    ML_assert(nullptr != face);
 #endif
 
                 }
@@ -1626,11 +1647,11 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
         dynamic_cast <MeshSheet*> (parentMeshTopo);
 
     std::vector<std::string> attributeNames;
-    // required attributes
+    // Required attributes
     attributeNames.push_back("etype");
     int numReqAttrs = (int)attributeNames.size();
 
-    // optional attributes
+    // Optional attributes
     attributeNames.push_back("mid");
     attributeNames.push_back("format");
     attributeNames.push_back("count");
@@ -1642,7 +1663,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
     bool triFace;
     if (parseNode(faceArrayNode, attrs, value)) {
         int n;
-        // first numReqAttrs are required
+        // First numReqAttrs are required
         for (n = 0; n < numReqAttrs; ++n) {
             if (attrs[n] == "") {
                 std::cout << "MeshFaceReference: missing required attribute: " <<
@@ -1651,7 +1672,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             }
         }
 
-        // required etype attribute
+        // Required etype attribute
         int iattr = 0;
         std::string etype = attrs[iattr];
         triFace = false;
@@ -1667,9 +1688,9 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             return false;
         }
 
-        // optional mid attribute
+        // Optional mid attribute
         ++iattr;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         bool mapID = false;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
@@ -1677,7 +1698,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             mapID = true;
         }
 
-        // optional format attribute
+        // Optional format attribute
         ++iattr;
         std::string format = "text";
         if (attrs[iattr] != "") {
@@ -1689,7 +1710,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             return false;
         }
 
-        // optional count attribute
+        // Optional count attribute
         ++iattr;
         int count = 1;
         if (attrs[iattr] != "") {
@@ -1702,15 +1723,15 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             }
         }
 
-        // optional aref attribute
+        // Optional aref attribute
         ++iattr;
-        int aref = -1;
+        int aref = MESH_TOPO_INVALID_REF;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> aref;
         }
 
-        // optional gref attribute
+        // Optional gref attribute
         ++iattr;
         int gref = (int)parentMeshTopo->getGref();  // default to parent's Gref
         if (attrs[iattr] != "") {
@@ -1718,13 +1739,13 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             is >> gref;
         }
 
-        // optional name attribute
+        // Optional name attribute
         ++iattr;
         std::string name = attrs[iattr];
 
         if (!name.empty() && count > 1) {
-            printf("MeshFaceReference: error name att cannot be specified when count > 1\n   %s\n",
-                name.c_str());
+            printf("MeshFaceReference: error name att cannot be specified when "
+                "count > 1\n   %s\n", name.c_str());
             return false;
         }
 
@@ -1739,14 +1760,13 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
             for (int icnt = 0; icnt < count; ++icnt) {
                 is >> ref;
 
-                // record map from mesh face indices to geometry group ID
+                // Record map from mesh face indices to geometry group ID
                 bool result = model->addFace(ref,
                     mid, aref, gref, name, pv1, pv2, pv3, mapID);
                 if (!result) {
                     printf("MeshFaceReference: error storing\n   %s\n",
                         ref.c_str());
                 }
-
 
                 if (meshSheet) {
                     //meshSheet->addFaceEdge(i1, i2, mid, aref, gref, pv1, pv2);
@@ -1762,9 +1782,9 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
 
 #if DEBUG
                 MeshFace *face = model->getMeshFaceByRef(ref);
-                pw_assert(face);
+                ML_assert(nullptr != face);
                 face = meshSheet->getMeshFaceByRef(ref);
-                pw_assert(face);
+                ML_assert(nullptr != face);
 #endif
             }
         }
@@ -1781,7 +1801,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
 
 bool
 MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
-    MeshTopo* parentMeshTopo, 
+    MeshTopo* parentMeshTopo,
     xercesc_3_2::DOMElement *edgeNode)
 {
     if (NULL == parentMeshTopo) { return false; }
@@ -1789,11 +1809,11 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
         dynamic_cast <MeshString*> (parentMeshTopo);
 
     std::vector<std::string> attributeNames;
-    // required attributes
+    // Required attributes
     attributeNames.push_back("etype");
     int numReqAttrs = (int)attributeNames.size();
 
-    // optional attributes
+    // Optional attributes
     attributeNames.push_back("mid");
     attributeNames.push_back("format");
     attributeNames.push_back("count");
@@ -1805,7 +1825,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
     if (parseNode(edgeNode, attrs, value)) {
         int n;
         int iattr = 0;
-        // first numReqAttrs are required
+        // First numReqAttrs are required
         for (n = 0; n < numReqAttrs; ++n) {
             if (attrs[n] == "") {
                 std::cout << "Mesh Edge: missing required attribute: " <<
@@ -1821,9 +1841,9 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
             return false;
         }
 
-        // optional mid attribute
+        // Optional mid attribute
         ++iattr;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         bool mapID = false;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
@@ -1831,7 +1851,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
             mapID = true;
         }
 
-        // optional format attribute
+        // Optional format attribute
         ++iattr;
         std::string format = "text";
         if (attrs[iattr] != "") {
@@ -1843,7 +1863,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
             return false;
         }
 
-        // optional count attribute
+        // Optional count attribute
         ++iattr;
         int count = 1;
         if (attrs[iattr] != "") {
@@ -1856,15 +1876,15 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
             }
         }
 
-        // optional aref attribute
+        // Optional aref attribute
         ++iattr;
-        int aref = -1;
+        int aref = MESH_TOPO_INVALID_REF;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> aref;
         }
 
-        // optional gref attribute
+        // Optional gref attribute
         ++iattr;
         int gref = (int)parentMeshTopo->getGref();  // default to parent's Gref
         if (attrs[iattr] != "") {
@@ -1872,7 +1892,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
             is >> gref;
         }
 
-        // optional name attribute
+        // Optional name attribute
         ++iattr;
         std::string name = attrs[iattr];
 
@@ -1883,7 +1903,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
                 // 1 group of 2
                 is >> i1 >> i2;
 
-                // map parametric verts from parent
+                // Map parametric verts from parent
                 ParamVertex *pv1,*pv2;
                 pv1 = parentMeshTopo->getParamVertByVref(std::to_string(i1));
                 pv2 = parentMeshTopo->getParamVertByVref(std::to_string(i2));
@@ -1891,9 +1911,8 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
                 model->addEdgePoint(i1, mid, aref, gref, pv1);
                 model->addEdgePoint(i2, mid, aref, gref, pv2);
 
-
-                bool result = model->addEdge(i1, i2, 
-                    mid, 
+                bool result = model->addEdge(i1, i2,
+                    mid,
                     aref,
                     gref,
                     name,
@@ -1904,7 +1923,7 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
                 }
 
                 if (meshString) {
-                    bool results = meshString->addEdge(i1, i2, 
+                    bool results = meshString->addEdge(i1, i2,
                         mid,
                         aref,
                         gref,
@@ -1917,9 +1936,9 @@ MeshLinkParserXerces::parseMeshEdge(MeshModel *model,
                 }
 #if DEBUG
                 MeshEdge *edge = model->findEdgeByInds(i1, i2);
-                pw_assert(edge);
+                ML_assert(nullptr != edge);
                 edge = meshString->findEdgeByInds(i1, i2);
-                pw_assert(edge);
+                ML_assert(nullptr != edge);
 #endif
 
             }
@@ -1943,11 +1962,11 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
         dynamic_cast <MeshString*> (parentMeshTopo);
 
     std::vector<std::string> attributeNames;
-    // required attributes
+    // Required attributes
     attributeNames.push_back("etype");
     int numReqAttrs = (int)attributeNames.size();
 
-    // optional attributes
+    // Optional attributes
     attributeNames.push_back("mid");
     attributeNames.push_back("format");
     attributeNames.push_back("count");
@@ -1959,7 +1978,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
     if (parseNode(edgeNode, attrs, value)) {
         int n;
         int iattr = 0;
-        // first numReqAttrs are required
+        // First numReqAttrs are required
         for (n = 0; n < numReqAttrs; ++n) {
             if (attrs[n] == "") {
                 std::cout << "MeshEdgeReference: missing required attribute: " <<
@@ -1968,7 +1987,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             }
         }
 
-        // required etype attribute
+        // Required etype attribute
         std::string etype = attrs[iattr];
         if ("Edge2" != etype) {
             std::cout << "MeshEdgeReference: illegal etype value: " <<
@@ -1976,9 +1995,9 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             return false;
         }
 
-        // optional mid attribute
+        // Optional mid attribute
         ++iattr;
-        int mid = -1;
+        int mid = MESH_TOPO_INVALID_REF;
         bool mapID = false;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
@@ -1986,7 +2005,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             mapID = true;
         }
 
-        // optional format attribute
+        // Optional format attribute
         ++iattr;
         std::string format = "text";
         if (attrs[iattr] != "") {
@@ -1998,7 +2017,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             return false;
         }
 
-        // optional count attribute
+        // Optional count attribute
         ++iattr;
         int count = 1;
         if (attrs[iattr] != "") {
@@ -2011,15 +2030,15 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             }
         }
 
-        // optional aref attribute
+        // Optional aref attribute
         ++iattr;
-        int aref = -1;
+        int aref = MESH_TOPO_INVALID_REF;
         if (attrs[iattr] != "") {
             std::istringstream is(attrs[iattr]);
             is >> aref;
         }
 
-        // optional gref attribute
+        // Optional gref attribute
         ++iattr;
         int gref = (int)parentMeshTopo->getGref();  // default to parent's Gref
         if (attrs[iattr] != "") {
@@ -2027,7 +2046,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
             is >> gref;
         }
 
-        // optional name attribute
+        // Optional name attribute
         ++iattr;
         std::string name = attrs[iattr];
 
@@ -2035,7 +2054,8 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
         ParamVertex *pv2 = NULL;
 
         if (!name.empty() && count > 1) {
-            printf("MeshEdgeReference: error name att cannot be specified when count > 1\n   %s\n",
+            printf("MeshEdgeReference: error name att cannot be specified when "
+                "count > 1\n   %s\n",
                 name.c_str());
             return false;
         }
@@ -2073,9 +2093,9 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
                 }
 #if DEBUG
                 MeshEdge *edge = model->getMeshEdgeByRef(ref);
-                pw_assert(edge);
+                ML_assert(nullptr != edge);
                 edge = meshString->getMeshEdgeByRef(ref);
-                pw_assert(edge);
+                ML_assert(nullptr != edge);
 #endif
             }
         }
@@ -2094,8 +2114,7 @@ MeshLinkParserXerces::parseMeshEdgeReference(MeshModel *model,
 bool
 MeshLinkParserXerces::parseMeshLinkFile(
     std::string fname,
-    MeshAssociativity *meshAssociativity
-)
+    MeshAssociativity *meshAssociativity)
 {
     if (!meshAssociativity) { return false; }
     meshAssociativity_ = meshAssociativity;
@@ -2140,23 +2159,30 @@ MeshLinkParserXerces::parseMeshLinkFile(
                 std::endl;
             XMLPlatformUtils::Terminate();
             result = false;
+            return result;
         }
 
         if (nullptr == (meshLinkRoot = doc->getDocumentElement())) {
             std::cout << "Mesh Link root element not found." << std::endl;
             XMLPlatformUtils::Terminate();
             result = false;
+            return result;
         }
 
         // Attribute and AttributeGroup elements
         parseAttributes(meshLinkRoot);
 
-        // GeometryFile, GeometryReference and GeometryGroup elements 
+        // GeometryFile, GeometryReference and GeometryGroup elements
         parseGeometryRefs(meshLinkRoot);
 
         // MeshFile elements
-        XMLCopier<char, XMLCh> meshFileTag("MeshFile");
-        DOMNodeList *meshFiles = meshLinkRoot->getElementsByTagName(meshFileTag);
+        DOMNodeList *meshFiles = meshLinkRoot->getElementsByTagName(X("MeshFile"));
+        if (nullptr == meshFiles) {
+            std::cout << "Mesh Link File element(s) not found." << std::endl;
+            XMLPlatformUtils::Terminate();
+            result = false;
+            return result;
+        }
 
         // Parse MeshFiles - multiple ModelReferences each containing
         // multiple MeshSheets, each containing multiple ParamVertices
@@ -2170,6 +2196,27 @@ MeshLinkParserXerces::parseMeshLinkFile(
                 meshFile = dynamic_cast<DOMElement*>(node);
                 result = parseMeshFile(meshFile);
             }
+        }
+
+        // Cached items for later use if/when writing out Xml file based
+        // on parsed/modified Meshassociativity.
+        XMLCopier<XMLCh, char> uri = doc->getDocumentURI();
+        DOMNode *node = doc->getFirstChild();
+        DOMNamedNodeMap *atts = node->getAttributes();
+        XMLSize_t size = atts->getLength();
+        if (size > 3) {
+            // Version
+            DOMNode *attNode = atts->getNamedItem(X("version"));
+            xmlVersion_ = Char(attNode->getNodeValue());
+            // Xml Namespace
+            attNode = atts->getNamedItem(X("xmlns"));
+            xmlns_ = Char(attNode->getNodeValue());
+            // Xml Namespace schema instance
+            attNode = atts->getNamedItem(X("xmlns:xsi"));
+            xmlns_xsi_ = Char(attNode->getNodeValue());
+            // Xml schema location
+            attNode = atts->getNamedItem(X("xsi:schemaLocation"));
+            schemaLocation_ = Char(attNode->getNodeValue());
         }
     }
 
@@ -2188,3 +2235,29 @@ MeshLinkParserXerces::parseMeshLinkFile(
     return result;
 }
 
+
+MeshLinkWriterXerces *
+MeshLinkParserXerces::getXMLWriter()
+{
+    if (!xmlns_.empty() && !xmlns_xsi_.empty() && !schemaLocation_.empty()) {
+        return new MeshLinkWriterXerces(xmlns_, xmlns_xsi_, schemaLocation_);
+    }
+    return nullptr;
+}
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

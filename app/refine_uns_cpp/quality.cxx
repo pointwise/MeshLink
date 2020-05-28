@@ -50,7 +50,7 @@ EdgeQual::computeQuality(
                 }
                 oppPtInd = face.nodes_[n];
             }
-            ml_assert(oppPtInd != surfEdge.nodes_[0] &&
+            ML_assert(oppPtInd != surfEdge.nodes_[0] &&
                 oppPtInd != surfEdge.nodes_[1]);
 
             // Triangle aspect ratio
@@ -131,7 +131,7 @@ int getEdgeRadOfCurvature(MeshAssociativity &meshAssoc,
     GeometryKernel *geomKernel = meshAssoc.getActiveGeometryKernel();
     if (!geomKernel) {
         printf("ERROR: no active geometry kernel\n");
-        ml_assert(0 == 1);
+        ML_assert(0 == 1);
     }
     ProjectionData projectionData(geomKernel);
 
@@ -338,7 +338,7 @@ int projectToMeshTopoGeometry(
     }
     else {
         printf("missing Geometry Group\n");
-        ml_assert(NULL != geom_group);
+        ML_assert(NULL != geom_group);
         return 1;
     }
     return 0;

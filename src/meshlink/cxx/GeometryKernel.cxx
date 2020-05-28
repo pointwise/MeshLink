@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 
 #include "GeometryGroup.h"
 #include "GeometryKernel.h"
@@ -87,6 +98,19 @@ GeometryKernel::evalCurvatureOnCurve(
     return false;
 }
 
+
+bool
+GeometryKernel::evalDerivativesOnCurve(
+    MLVector2D UV,
+    const std::string &entityName,
+    MLVector3D        XYZ,        // Evaluated location on curve
+    MLVector3D        dXYZdU,     // First derivative
+    MLVector3D        d2XYZdU2    // Second derivative
+)
+{
+    return false;
+}
+
 /// \brief Evaluate the curvature on a surface entity at the parametric coordinates
 ///
 /// 
@@ -119,14 +143,16 @@ GeometryKernel::evalCurvatureOnSurface(
     // The Gaussian curvature is defined as :
     //    gauss = min * max
     MLREAL          *avg,           // Average curvature
-    MLREAL          *gauss          //  Gaussian curvature
+    MLREAL          *gauss,         //  Gaussian curvature
+    MLORIENT        *orientation    // Orientation of surface in model
 )
 {
     return false;
 }
 
-/// Determine entity type (0 = unknown, 1 = curve, 2 = surface)
-MLINT 
+
+/// Determine entity type 
+MLTYPE
 GeometryKernel::entityType(const char* name)
 {
     return 0;
@@ -174,7 +200,7 @@ ProjectionData::~ProjectionData() {
             data_ = NULL;
         }
         else {
-            ml_assert(0 == "data but no kernel");
+            ML_assert(0 == "data but no kernel");
         }
     }
     data_ = NULL;
@@ -183,3 +209,20 @@ ProjectionData::~ProjectionData() {
 
 
 
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

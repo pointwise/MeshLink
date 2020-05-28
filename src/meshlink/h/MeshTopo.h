@@ -1,4 +1,15 @@
-﻿#ifndef MESH_TOPO_CLASS
+﻿/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
+#ifndef MESH_TOPO_CLASS
 #define MESH_TOPO_CLASS
 
 #include "Types.h"
@@ -12,15 +23,15 @@
 #define MESH_TOPO_INDEX_UNUSED -101
 
 /****************************************************************************
-*
-* pwiFnvHash class
-*
-* A simple hashing routine used to uniquely identify mesh topology entities.
-* Fowler-Noll-Vo Hash Function
-* Designed to be fast with decent dispersion.
-* https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-*
-***************************************************************************/
+ *
+ * pwiFnvHash class
+ *
+ * A simple hashing routine used to uniquely identify mesh topology entities.
+ * Fowler-Noll-Vo Hash Function
+ * Designed to be fast with decent dispersion.
+ * https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ *
+ ***************************************************************************/
 class pwiFnvHash {
 public:
     //! Hash type
@@ -45,25 +56,33 @@ private:
 
 
 /****************************************************************************
-* ParamVertex class
-***************************************************************************/
+ * ParamVertex class
+ ***************************************************************************/
 /**
-* \class ParamVertex
-*
-* \brief Parametric geometry data
-*
-* Provides access to MeshLink schema %ParamVertex data
-*
-*/
+ * \class ParamVertex
+ *
+ * \brief Parametric geometry data
+ *
+ * Provides access to MeshLink schema parametric vertex data
+ *
+ */
 class ParamVertex {
 public:
+    /// Default constructor
     ParamVertex() :
         gref_(MESH_TOPO_INVALID_REF),
         mid_(MESH_TOPO_INVALID_REF),
         u_(0.0),
         v_(0.0) {}
 
-    ParamVertex(std::string & vref, MLINT gref, MLINT mid, MLREAL u, MLREAL v) :
+    /// Constructor with parametric data
+    ///
+    /// \param vref the application-define vertex reference string (required non-empty)
+    /// \param gref the geometry reference ID (required non-zero)
+    /// \param mid the unique ID (optional)
+    /// \param u the parametric U value in the space of the referenced geometry
+    /// \param v the parametric V value in the space of the referenced geometry
+    ParamVertex(const std::string & vref, MLINT gref, MLINT mid, MLREAL u, MLREAL v) :
         vref_(vref),
         gref_(gref),
         mid_(mid),
@@ -77,49 +96,68 @@ public:
     /// \brief Return this entity's ID
     MLINT getID() const { return mid_; }
     /// \brief Return the associated geometry parametric coordinates
+    /// \param[out] u the parametric U value
+    /// \param[out] v the parametric V value
     void  getUV(MLREAL *u, MLREAL *v) const { *u = u_; *v = v_; }
 private:
+    /// The application-defined reference string
     std::string vref_;  // required attr
+    /// The geometry reference ID
     MLINT gref_;  // required attr
+    /// The unique ID
     MLINT mid_;   // optional attr
+    /// The parametric U value
     MLREAL u_;
+    /// The parametric V value
     MLREAL v_;
 };
+
 typedef std::map<std::string /*vref*/, ParamVertex *> ParamVertVrefMap;
 typedef std::map<MLINT /*mid*/, std::string /*vref*/> ParamVertIDToVrefMap;
 
 class MeshAssociativity;
 
 /****************************************************************************
-* MeshTopo class
-***************************************************************************/
+ * MeshTopo class
+ ***************************************************************************/
 /**
-* \class MeshTopo
-*
-* \brief Base class for mesh topology entities
-*
-* Common data for MeshString, MeshSheet, MeshModel topology and
-* MeshPoint, MeshEdge, MeshFace elements.
-*
-*/
+ * \class MeshTopo
+ *
+ * \brief Base class for mesh topology entities
+ *
+ * Common data for MeshString, MeshSheet, MeshModel topology and
+ * MeshPoint, MeshEdge, MeshFace elements.
+ *
+ */
 class ML_STORAGE_CLASS MeshTopo {
 public:
     friend class MeshAssociativity;
 
-    /// Constructor
+    /// \brief Construct without application-defined reference
+    ///
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
     MeshTopo(
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name );
+        const std::string &name );
 
-    /// Construct with reference to entity in mesh data
+    /// \brief Construct with application-defined reference to entity in mesh data
+    ///
+    /// \param ref the application-defined reference of the mesh entity
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
     MeshTopo(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name );
+        const std::string &name );
 
     /// \brief Return the ID of this MeshTopo
     virtual MLINT getID() const;
@@ -133,49 +171,75 @@ public:
     /// \brief Return the name of this MeshTopo
     ///
     /// N.B. return value subject to change
+    ///
+    /// \param[out] name the non-modifiable name of the entity
     virtual void getName(const char **name) const;
 
     /// \brief Return the name of this MeshTopo
     virtual const std::string & getName() const;
 
-    /// \brief Return the mesh data reference of this MeshTopo
+    /// \brief Return the application-defined mesh data reference of this MeshTopo
     virtual const std::string & getRef() const;
 
-    /// \brief Add a ParamVertex 
+    /// \brief Add a ParamVertex
+    ///
+    /// \param pv the vertex to add
+    /// \param mapID whether to map the unique ID to the entity name
     virtual void addParamVertex(ParamVertex *pv, bool mapID);
 
     /// \brief Find a ParamVertex by vertex reference
+    ///
+    /// \param vref the application-defined reference string of the desired ParamVertex
     virtual ParamVertex * getParamVertByVref(const std::string & vref) const;
 
     /// \brief Find a ParamVertex by ID
+    ///
+    /// \param id the unique ID of the desired ParamVertex
     virtual ParamVertex * getParamVertByID(MLINT id) const;
 
-    /// \brief Return the number of ParamVertices for this MeshTopo
+    /// \brief Return the number of ParamVertex objects for this MeshTopo
     virtual MLINT getNumParamVerts() const;
 
+    /// \brief Return the map of application-defined reference string to ParamVertex objects
+    /// for this MeshTopo
+    virtual const ParamVertVrefMap & getParamVertVrefMap() const {
+        return paramVertVrefMap_;
+    }
 
     /// \brief Set the ID of this MeshTopo
+    ///
+    /// \param id the unique ID of this mesh entity
     virtual void setID( MLINT id );
 
     /// \brief Set the GeometryGroup GID referenced by this MeshTopo
+    ///
+    /// \param gref the geometry reference ID for this mesh entity
     virtual void setGref( MLINT gref );
 
     /// \brief Set the MeshLinkAttribute AttID referenced by this MeshTopo
+    ///
+    /// \param aref the attribute reference ID (AttID) for this mesh entity
     virtual void setAref( MLINT aref );
 
     /// \brief Set the reference of this MeshTopo
+    //
+    /// \param ref the application-defined reference string for this mesh entity
     virtual void setRef(const char *ref);
 
     /// \brief Set the name of this MeshTopo
     ///
-    /// setName is special and should not be overrided
+    /// setName is special and should not be overridden, as
     /// it provides a mechanism for generating unique names
+    ///
+    /// \param name the name of the mesh entity, or empty if a unique name is to be generated
     void setName(const std::string &name);
 
     /// \brief Set the name of this MeshTopo
     ///
     /// setName is special and should not be overrided
     /// it provides a mechanism for generating unique names
+    //
+    /// \param name the name of the mesh entity, or null if a unique name is to be generated
     void setName(const char *name);
 
     /// \brief Whether the MeshTopo has an ID defined
@@ -190,32 +254,42 @@ public:
     /// \brief Return list of MeshLinkAttribute AttIDs referenced by the MeshTopo
     std::vector<MLINT> getAttributeIDs(const MeshAssociativity &meshAssoc) const;
 
-    // get a unique name for the entity
+    /// Generate and return a unique name for the entity
     std::string getNextName();
 
-    // get unique name base and counter
+    /// Returns the base name used for generating unique mesh entity names
     virtual const std::string &getBaseName() const;
+    /// Returns the current value of the counter used for generating unique mesh entity names
     virtual MLUINT &getNameCounter();
 
+    /// Default constructor
     MeshTopo();
+    /// Destructor
     ~MeshTopo();
 protected:
+    /// The application-defined reference string
     std::string ref_;
 
-    // MeshLink schema: MeshElementAttributes 
+    // MeshLink schema: MeshElementAttributes
+    /// The unique entity ID
     MLINT mid_;
+    /// The attribute reference ID (AttID)
     MLINT aref_;
+    /// The geometry reference ID
     MLINT gref_;
+    /// The name of the mesh entity
     std::string name_;
 
-    // ParamVerts associated with this entity
+    /// ParamVertex objects mapped to this entity by application-defined reference string
     ParamVertVrefMap paramVertVrefMap_;
+    /// ParamVertex objects mapped to this entity by unique entity ID
     ParamVertIDToVrefMap paramVertIDToVrefMap_;
 
 private:
-    // unique name counter
+    /// The unique name counter
     static MLUINT nameCounter_;
 };
+
 typedef std::map<MLINT, std::string> MeshTopoIDToNameMap;
 
 typedef std::map<std::string, std::string> MeshTopoRefToNameMap;
@@ -223,15 +297,15 @@ typedef std::map<std::string, std::string> MeshTopoRefToNameMap;
 
 
 /****************************************************************************
-* MeshPoint class
-***************************************************************************/
+ * MeshPoint class
+ ***************************************************************************/
 /**
-* \class MeshPoint
-*
-* \brief 0-D (point) mesh entity
-*
-* Provides access to MeshLink schema %MeshPoint data
-*/
+ * \class MeshPoint
+ *
+ * \brief 0-D (point) mesh entity
+ *
+ * Provides access to MeshLink schema %MeshPoint data
+ */
 
 class MeshPoint : public MeshTopo {
 public:
@@ -240,125 +314,190 @@ public:
     friend class MeshSheet;
     friend class MeshString;
 
-    /// Constructor
+    /// \brief Constructor without application-defined reference data
+    ///
+    /// \param i1 the index of the point
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
+    /// \param pv1 (optional) the ParamVertex to associate with this point
     MeshPoint(MLINT i1,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1
     );
 
     /// Construct with reference to Point entity in mesh data
+    ///
+    /// \param ref the application-defined reference of the mesh entity
+    /// \param mid unique ID of the mesh entity
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
+    /// \param pv1 (optional) the ParamVertex to associate with this point
     MeshPoint(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1
     );
 
     /// \brief Return ParamVertex associated with the MeshPoint
-    ParamVertex*const getParamVert() const {
+    ParamVertex * const getParamVert() const {
         return paramVert_;
     }
 
     /// \brief Return array of ParamVertices associated with the MeshPoint
+    ///
+    /// For MeshPoint, there ever only one ParamVertex associated
+    ///
+    /// \param[out] pvs the C-style array of associated ParamVertex
     MLINT getParamVerts(ParamVertex * const ** pvs) const {
         *pvs = &(paramVert_);
         return 1;
     }
 
+    /// \brief Destructor
     ~MeshPoint();
 
-    // get unique name base and counter
+    /// Return the base name used for generating unique names for points
     virtual const std::string &getBaseName() const;
+    /// Return the current value used for generating unique names for points
     virtual MLUINT &getNameCounter();
 
 private:
-    // unique name counter
+    /// The unique name counter for points
     static MLUINT nameCounter_;
 
+    /// Hidden default constructor
     MeshPoint():
         i1_(-1),
         paramVert_(NULL)
     {};
 
+    /// Compute a point hash value for the given index value
     static pwiFnvHash::FNVHash computeHash(MLINT i1);
 
+    /// Return the hash value for this point
     pwiFnvHash::FNVHash getHash() const;
 
+    /// The index of this point
     MLINT i1_;
+    /// The ParamVertex associated with this point
     ParamVertex * paramVert_;
 };
+
 typedef std::map<std::string, MeshPoint *> MeshPointNameMap;
 
 
 /****************************************************************************
-* MeshEdge class
-***************************************************************************/
+ * MeshEdge class
+ ***************************************************************************/
 /**
-* \class MeshEdge
-*
-* \brief 1-D (edge) mesh entity
-*
-* Provides access to MeshLink schema %MeshEdge data
-*/
+ * \class MeshEdge
+ *
+ * \brief 1-D (edge) mesh entity
+ *
+ * Provides access to MeshLink schema %MeshEdge data
+ */
 class MeshEdge : public MeshTopo {
 public:
     friend class MeshAssociativity;
     friend class MeshModel;
     friend class MeshSheet;
     friend class MeshString;
+
+    /// \brief Construct an edge with a start and end point index
+    ///
+    /// \param i1,i2 the indices of the points defining the edge
+    /// \param mid unique ID of the edge
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the edge
+    /// \param pv1,pv2 (optional) ParamVertex objects associated with the edge points
     MeshEdge(MLINT i1, MLINT i2,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2);
 
+    /// \brief Construct an edge with application-defined reference data
+    //
+    /// \param ref the application-defined reference of the mesh edge
+    /// \param mid unique ID of the mesh edge
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh entity
+    /// \param pv1,pv2 (optional) ParamVertex objects associated with the edge points
     MeshEdge(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2);
 
+    /// \brief Destructor
     ~MeshEdge();
 
+    /// \brief Copy constructor
     MeshEdge(const MeshEdge &other);
 
+    /// \brief Copy operator
     MeshEdge & operator=(const MeshEdge &other);
 
-    // get unique name base and counter
+    /// Return the base name used for generating unique names for edges
     virtual const std::string &getBaseName() const;
+    /// Return the current value used for generating unique names for edges
     virtual MLUINT &getNameCounter();
 
     /// \brief Return array of vertex indices associated with the MeshEdge
     ///
     /// N.B. Assumes inds is array of size 2.
-    void getInds(MLINT **inds) const;
+    ///
+    /// \param[in,out] inds the array of unique point indices for the edge
+    /// \param[out] numInds the number of points used in the edge
+    void getInds(MLINT *inds, MLINT *numInds) const;
 
     /// \brief Return pointer to array of ParamVertices associated with the MeshEdge
+    ///
+    /// \param[out] pvs the array of ParamVertex for this edge
+    /// \return number of ParamVertex in the array
     MLINT getParamVerts( ParamVertex * const ** pvs) const {
         *pvs = &(paramVerts_[0]);
-        return 2; 
+        return getNumParamVerts();
     }
 
     /// \brief Return vector of pointers to ParamVertices associated with the MeshEdge
     std::vector<ParamVertex*> getParamVerts() const {
         std::vector<ParamVertex*> pvs;
-        pvs.push_back(paramVerts_[0]);
-        pvs.push_back(paramVerts_[1]);
+        for (int i = 0; i < 2; ++i) {
+            if (NULL != paramVerts_[i]) pvs.push_back(paramVerts_[i]);
+        }
         return pvs;
     }
 
+    /// \brief Return number of ParamVertices associated with the MeshEdge
+    MLINT getNumParamVerts() const
+    {
+        MLINT count = 0;
+        for (int i = 0; i < 2; ++i) {
+            if (NULL != paramVerts_[i]) ++count;
+        }
+        return count;
+    }
+
 private:
-    // unique name counter
+    /// The unique name counter for edges
     static MLUINT nameCounter_;
 
+    /// Hidden default constructor
     MeshEdge():
         i1_(-1),
         i2_(-1)
@@ -366,12 +505,17 @@ private:
         paramVerts_[0] = paramVerts_[1] = NULL;
     };
 
+    /// Return the hash value for this edge
     pwiFnvHash::FNVHash getHash() const;
 
+    /// Return a hash value for the given point indices
     static pwiFnvHash::FNVHash computeHash(MLINT i1, MLINT i2);
 
+    /// The index of the starting point in the edge
     MLINT i1_;
+    /// The index of the ending point in the edge
     MLINT i2_;
+    /// The ParamVertex objects associated with the points in the edge
     ParamVertex * paramVerts_[2];
 };
 typedef std::map<std::string, MeshEdge *> MeshEdgeNameMap;
@@ -379,84 +523,135 @@ typedef std::map<std::string, MeshEdge *> MeshEdgeNameMap;
 
 
 /****************************************************************************
-* MeshFace class
-***************************************************************************/
+ * MeshFace class
+ ***************************************************************************/
 /**
-* \class MeshFace
-*
-* \brief 2-D (face) mesh entity
-*
-* Provides access to MeshLink schema %MeshFace data
-*/
+ * \class MeshFace
+ *
+ * \brief 2-D (face) mesh entity
+ *
+ * Provides access to MeshLink schema %MeshFace data
+ */
 class MeshFace : public MeshTopo {
 public:
     friend class MeshAssociativity;
     friend class MeshModel;
     friend class MeshSheet;
     friend class MeshString;
+
+    /// \brief Construct a triangular MeshFace with point indices
+    ///
+    /// \param i1,i2,i3 the indices of the points defining the triangular face
+    /// \param mid unique ID of the mesh face
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh face
+    /// \param pv1,pv2,pv3 (optional) the ParamVertex objects associated with the face points
     MeshFace(MLINT i1, MLINT i2, MLINT i3,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
-        ParamVertex *pv1, ParamVertex *pv2,
-        ParamVertex *pv3);
-    MeshFace(
-        std::string &ref,
-        MLINT mid,
-        MLINT aref,
-        MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2,
         ParamVertex *pv3);
 
+    /// \brief Construct a triangular MeshFace from application-defined reference data
+    //
+    /// \param ref the application-defined reference of the mesh face
+    /// \param mid unique ID of the mesh face
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh face
+    /// \param pv1,pv2,pv3 (optional) the ParamVertex objects associated with the face points
+    MeshFace(
+        const std::string &ref,
+        MLINT mid,
+        MLINT aref,
+        MLINT gref,
+        const std::string &name,
+        ParamVertex *pv1, ParamVertex *pv2,
+        ParamVertex *pv3);
+
+    /// \brief Construct a quadrilateral MeshFace with point indices
+    ///
+    /// \param i1,i2,i3,i4 the indices of the points defining the quadrilateral face
+    /// \param mid unique ID of the mesh face
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh face
+    /// \param pv1,pv2,pv3,pv4 (optional) the ParamVertex objects associated with the face points
     MeshFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2,
         ParamVertex *pv3, ParamVertex *pv4);
+
+    /// \brief Construct a quadrilateral MeshFace from application-defined reference data
+    ///
+    /// \param ref the application-defined reference of the mesh face
+    /// \param mid unique ID of the mesh face
+    /// \param aref the attribute reference ID (AttID) (optional)
+    /// \param gref the geometry reference ID
+    /// \param name the name of the mesh face
+    /// \param pv1,pv2,pv3,pv4 (optional) the ParamVertex objects associated with the face points
     MeshFace(
-        std::string &ref,
+        const std::string &ref,
         MLINT mid,
         MLINT aref,
         MLINT gref,
-        std::string &name,
+        const std::string &name,
         ParamVertex *pv1, ParamVertex *pv2,
         ParamVertex *pv3, ParamVertex *pv4);
 
+    /// \brief Destructor
     ~MeshFace();
 
-    // get unique name base and counter
+    /// Return the base name used for generating unique names for faces
     virtual const std::string &getBaseName() const;
+    /// Return the current value used for generating unique names for faces
     virtual MLUINT &getNameCounter();
 
     /// \brief Return array of vertex indices associated with the MeshFace
     ///
     /// N.B. Assumes inds is array of size 4.
-    void getInds(MLINT **inds) const;
+    ///
+    /// \param[in,out] inds the array of point indices
+    /// \param[out] numInds the number of valid point indices in the array
+    void getInds(MLINT *inds, MLINT *numInds) const;
 
     /// \brief Return array of ParamVertices associated with the MeshFace
+    /// \return the number of ParamVertex objects in the array
     MLINT getParamVerts(ParamVertex * const ** pvs) const {
         *pvs = &(paramVerts_[0]);
-        return 4;
+        return getNumParamVerts();
     }
 
-    /// \brief Return vector of ParamVertices associated with the MeshFace
+    /// \brief Return vector of pointers to ParamVertices associated with the MeshFace
     std::vector<ParamVertex*> getParamVerts() const {
         std::vector<ParamVertex*> pvs;
-        pvs.push_back(paramVerts_[0]);
-        pvs.push_back(paramVerts_[1]);
-        pvs.push_back(paramVerts_[2]);
-        pvs.push_back(paramVerts_[3]);
+        for (int i = 0; i < 4; ++i) {
+            if (NULL != paramVerts_[i]) pvs.push_back(paramVerts_[i]);
+        }
         return pvs;
     }
 
+    /// \brief Return number of ParamVertices associated with the MeshFace
+    MLINT getNumParamVerts() const
+    {
+        MLINT count = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (NULL != paramVerts_[i]) ++count;
+        }
+        return count;
+    }
+
 private:
-    // unique name counter
+    /// The unique name counter for faces
     static MLUINT nameCounter_;
 
+    /// Hidden default constructor
     MeshFace():
         i1_(-1),
         i2_(-1),
@@ -466,15 +661,42 @@ private:
         paramVerts_[0] = paramVerts_[1] = paramVerts_[2] = paramVerts_[3] = NULL;
     };
 
+    /// Return the hash value for this face
     pwiFnvHash::FNVHash getHash() const;
+
+    /// Return a hash value for the given point indices
     static pwiFnvHash::FNVHash computeHash(MLINT i1, MLINT i2, MLINT i3,
         MLINT i4 = MESH_TOPO_INDEX_UNUSED);
+
+    /// The index of the first point
     MLINT i1_;
+    /// The index of the second point
     MLINT i2_;
+    /// The index of the third point
     MLINT i3_;
+    /// The index of the fourth point
     MLINT i4_;
+    /// The array of ParamVertex objects associated with the face points
     ParamVertex * paramVerts_[4];
 };
+
 typedef std::map<std::string, MeshFace *> MeshFaceNameMap;
 
 #endif
+
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

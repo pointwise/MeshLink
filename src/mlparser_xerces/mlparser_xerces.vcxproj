@@ -35,12 +35,6 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>$(ProjectName)d</TargetName>
@@ -51,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>BUILD_MESHLINK;IS64BIT;WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BUILD_MESHLINK;IS64BIT;WINDOWS;_CRT_SECURE_NO_WARNINGS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(SolutionDir)\meshlink\h;$(SolutionDir)\..\external\xerces\include;$(SolutionDir)\..\external\xerces\win64\include;$(SolutionDir)\mlparser_xerces</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -74,7 +68,7 @@ xcopy /R /Q /K /Y  $(IntDir)$(ProjectName).pdb $(SolutionDir)$(Platform)\$(Confi
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\meshlink\h;$(SolutionDir)\..\external\xerces\include;$(SolutionDir)\..\external\xerces\win64\include;$(SolutionDir)\mlparser_xerces</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>STATIC_LIBRARY;BUILD_MESHLINK;IS64BIT;WINDOWS;_CRT_SECURE_NO_DEPRECATE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BUILD_MESHLINK;IS64BIT;WINDOWS;_CRT_SECURE_NO_DEPRECATE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -83,14 +77,23 @@ xcopy /R /Q /K /Y  $(IntDir)$(ProjectName).pdb $(SolutionDir)$(Platform)\$(Confi
     <PostBuildEvent>
       <Command>xcopy /R /Q /K /Y $(TargetDir)$(TargetFileName) $(ProjectDir)\dist\</Command>
     </PostBuildEvent>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="lzw.cpp" />
     <ClCompile Include="MeshLinkParser_xerces.cxx" />
     <ClCompile Include="MeshLinkParser_xerces_c.cxx" />
+    <ClCompile Include="MeshLinkWriter_xerces.cxx" />
+    <ClCompile Include="MeshLinkWriter_xerces_c.cxx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lzw.hpp" />
     <ClInclude Include="MeshLinkParser_xerces.h" />
     <ClInclude Include="MeshLinkParser_xerces_c.h" />
+    <ClInclude Include="MeshLinkWriter_xerces.h" />
+    <ClInclude Include="MeshLinkWriter_xerces_c.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

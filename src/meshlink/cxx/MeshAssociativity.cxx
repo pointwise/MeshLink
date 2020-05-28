@@ -1,3 +1,14 @@
+/****************************************************************************
+ *
+ * Copyright (c) 2019-2020 Pointwise, Inc.
+ * All rights reserved.
+ *
+ * This sample Pointwise source code is not supported by Pointwise, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
 #include "GeometryKernel.h"
 #include "MeshAssociativity.h"
 
@@ -27,7 +38,7 @@ MeshAssociativity::~MeshAssociativity()
 }
 
 
-bool 
+bool
 MeshAssociativity::addMeshModel(MeshModel *model, bool mapID) {
     if (!model) { return false; }
     if (model->name_.empty()) {
@@ -46,7 +57,7 @@ MeshAssociativity::addMeshModel(MeshModel *model, bool mapID) {
     if (!model->getRef().empty()) {
         meshModelRefToNameMap_[model->getRef()] = model->getName();
     }
-    
+
     if (mapID) {
         meshModelIDToNameMap_[model->mid_] = model->name_;
     }
@@ -81,7 +92,7 @@ MeshAssociativity::getMeshModelByRef(const char * ref) const
 }
 
 
-const MeshLinkAttribute * 
+const MeshLinkAttribute *
 MeshAssociativity::getAttributeByID(const MLINT id) const
 {
     MeshAttributeIDMap::const_iterator iter;
@@ -93,13 +104,13 @@ MeshAssociativity::getAttributeByID(const MLINT id) const
     return NULL;
 }
 
-void 
+void
 MeshAssociativity::clearAttributes() {
     meshAttributeIDMap_.clear();
     meshAttributeNameToIDMap_.clear();
 }
 
-bool 
+bool
 MeshAssociativity::addAttribute(MeshLinkAttribute &att)
 {
     if (NULL != getAttributeByID(att.attid_)) {
@@ -113,23 +124,23 @@ MeshAssociativity::addAttribute(MeshLinkAttribute &att)
     return true;
 }
 
-void 
+void
 MeshAssociativity::addGeometryFile(GeometryFile &file) {
     geometryFiles_.push_back(file);
 }
 
-void 
+void
 MeshAssociativity::addMeshFile(MeshFile &file) {
     meshFiles_.push_back(file);
 }
 
-const std::vector<GeometryFile> & 
+const std::vector<GeometryFile> &
 MeshAssociativity::getGeometryFiles() const
 {
     return geometryFiles_;
 }
 
-const std::vector<MeshFile> & 
+const std::vector<MeshFile> &
 MeshAssociativity::getMeshFiles() const
 {
     return meshFiles_;
@@ -148,15 +159,20 @@ MeshAssociativity::getNumMeshFiles() const
 }
 
 
-bool 
+bool
 MeshAssociativity::getAttribute(MLINT attID,
     const char **name,
     const char **value
 ) const {
     const MeshLinkAttribute *att = getAttributeByID(attID);
-    if (NULL == att || att->isGroup()) {
-        // can't return name-value for group
+    if (NULL == att) {
+        // no attribute for that attID
         return false;
+    }
+    if (att->isGroup()) {
+        // can't return name-value for group
+        std::cout << "Accessing group for export purposes." << std::endl;
+        // return false;
     }
     *name = att->name_.c_str();
     *value = att->contents_.c_str();
@@ -187,25 +203,31 @@ MeshAssociativity::getGeometryGroupByID(MLINT id)
 }
 
 
-void 
+void
 MeshAssociativity::addGeometryKernel(GeometryKernel *kernel)
 {
     geometry_kernel_manager_.addKernel(kernel);
 }
 
-GeometryKernel * 
+void
+MeshAssociativity::removeGeometryKernel(GeometryKernel *kernel)
+{
+    geometry_kernel_manager_.removeKernel(kernel);
+}
+
+GeometryKernel *
 MeshAssociativity::getGeometryKernelByName(const char *name)
 {
     return geometry_kernel_manager_.getByName(name);
 }
 
-GeometryKernel * 
+GeometryKernel *
 MeshAssociativity::getActiveGeometryKernel()
 {
     return geometry_kernel_manager_.getActive();
 }
 
-bool 
+bool
 MeshAssociativity::setActiveGeometryKernelByName(const char *name)
 {
     return geometry_kernel_manager_.setActiveByName(name);
@@ -224,7 +246,11 @@ MeshAssociativity::getMeshModels() const
     return models;
 }
 
-
+size_t
+MeshAssociativity::getMeshModelCount() const
+{
+    return meshModelNameMap_.size();
+}
 
 void
 GeometryKernelManager::addKernel(GeometryKernel *kernel)
@@ -237,18 +263,35 @@ GeometryKernelManager::addKernel(GeometryKernel *kernel)
     }
 }
 
+void
+GeometryKernelManager::removeKernel(GeometryKernel *kernel)
+{
+    if (kernel) {
+        GeometryKernelArray::iterator it =
+            std::find(geometry_kernels_.begin(), geometry_kernels_.end(), kernel);
+        if (it != geometry_kernels_.end()) {
+            geometry_kernels_.erase(it);
+        }
+    }
+    if (geometry_kernels_.size() == 1) {
+        active_ = geometry_kernels_[0];
+    }
+}
+
 GeometryKernel *
 GeometryKernelManager::getByName(const char *name)
 {
-    size_t num = geometry_kernels_.size();
-    size_t i;
+    GeometryKernelArray::iterator iter = geometry_kernels_.begin();
     const char * kernel_name;
-    for (i = 0; i < num; ++i) {
-        if (nullptr != (kernel_name = geometry_kernels_[i]->getName())) {
+    while (iter != geometry_kernels_.end()) {
+        GeometryKernel *kernel = *iter;
+        if (nullptr != kernel &&
+                nullptr != (kernel_name = kernel->getName())) {
             if (0 == strcmp(name, kernel_name)) {
-                return geometry_kernels_[i];
+                return kernel;
             }
         }
+        ++iter;
     }
     return NULL;
 }
@@ -298,12 +341,12 @@ MeshLinkFile::getAttributeIDs(const MeshAssociativity &meshAssoc) const {
 }
 
 
-bool 
+bool
 MeshLinkAttribute::buildGroupArefs(MeshAssociativity &meshAssoc) {
     group_arefs_.clear();
     if (is_group_) {
         // The content string is a list of Arefs, which may themselves refer to a AttGroup.
-        // At the end of the parsing below, group_arefs should be a vector 
+        // At the end of the parsing below, group_arefs should be a vector
         // of unique and existing attribute refIds.
 
         // construct a stream from the string
@@ -320,7 +363,7 @@ MeshLinkAttribute::buildGroupArefs(MeshAssociativity &meshAssoc) {
         for (i = 0; i < arefs.size(); ++i) {
             std::string &aref = arefs[i];
             int arefID = -1;
-			if (1 != sscanf(aref.c_str(), "%d", &arefID)) {
+                        if (1 != sscanf(aref.c_str(), "%d", &arefID)) {
                 std::cout << "AttributeGroup invalid content \"" << aref << "\"" << std::endl;
                 group_arefs_.clear();
                 return false;
@@ -358,3 +401,19 @@ MeshLinkAttribute::buildGroupArefs(MeshAssociativity &meshAssoc) {
     return true;
 }
 
+/****************************************************************************
+ *
+ * DISCLAIMER:
+ * TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, POINTWISE DISCLAIMS
+ * ALL WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED
+ * TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE, WITH REGARD TO THIS SCRIPT. TO THE MAXIMUM EXTENT PERMITTED
+ * BY APPLICABLE LAW, IN NO EVENT SHALL POINTWISE BE LIABLE TO ANY PARTY
+ * FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES
+ * WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+ * BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE
+ * USE OF OR INABILITY TO USE THIS SCRIPT EVEN IF POINTWISE HAS BEEN
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGES AND REGARDLESS OF THE
+ * FAULT OR NEGLIGENCE OF POINTWISE.
+ *
+ ***************************************************************************/

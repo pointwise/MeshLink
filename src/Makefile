@@ -1,6 +1,10 @@
 ########################################################################
 # Makefile (linux_x86_64)
 ########################################################################
+# Determine this makefile's path.
+# Be sure to place this BEFORE `include` directives, if any.
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
+
 # Check for valid machine types
 #
 KNOWN_MACHINES := linux_x86_64 macosx
@@ -35,6 +39,8 @@ REFINE_UNS_DIR = ../app/refine_uns_cpp
 REFINE_UNS_NAME = refine_uns
 
 HAVE_XERCES := 1
+# Define HAVE_GEODE if you have installed the Geode
+# geometry kernel library in the MLKERNEL_GEODE_DIR directory
 #HAVE_GEODE := 1
 
 
@@ -94,36 +100,9 @@ CP = cp -f
 ########################################################################
 # Rules
 #
-.PHONY: dist
+.PHONY: dist FORCE_${HARNESS_C_NAME} FORCE_${HARNESS_CPP_NAME} FORCE_${HARNESS_F_NAME}
 
 # Example executables
-${HARNESS_CPP_NAME}: $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}
-
-$(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}: $(ML_MODULES_FULLPATH) 
-	@echo ""
-	@echo "***"
-	@echo "*** $(HARNESS_CPP_NAME)"
-	@echo "***"
-	cd $(HARNESS_CPP_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
-
-${HARNESS_C_NAME}: $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}
-
-$(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}: $(ML_MODULES_FULLPATH) 
-	@echo ""
-	@echo "***"
-	@echo "*** $(HARNESS_C_NAME)"
-	@echo "***"
-	cd $(HARNESS_C_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
-
-${HARNESS_F_NAME}: $(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME}
-
-$(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME}: $(ML_MODULES_FULLPATH) 
-	@echo ""
-	@echo "***"
-	@echo "*** $(HARNESS_F_NAME)"
-	@echo "***"
-	cd $(HARNESS_F_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
-
 
 ${REFINE_STR_NAME}: $(REFINE_STR_DIR)/$(DIST_DIR)/${REFINE_STR_FULLNAME}
 
@@ -170,26 +149,92 @@ ${MLPARSER_XERCES_FULLPATH}:
 	cd $(MLPARSER_XERCES_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD)
 endif
 
+###############################################
+# C API Harness Application
+#
+${HARNESS_C_NAME}: $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}
+
+FORCE_${HARNESS_C_NAME}: 
+	@echo ""
+	@echo "***"
+	@echo "*** FORCE $(HARNESS_C_NAME)"
+	@echo "***"
+	cd $(HARNESS_C_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+$(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}: $(ML_MODULES_FULLPATH) 
+	@echo ""
+	@echo "***"
+	@echo "*** $(HARNESS_C_NAME)"
+	@echo "***"
+	cd $(HARNESS_C_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+
+###############################################
+# C++ API Harness Application
+#
+${HARNESS_CPP_NAME}: $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}
+
+FORCE_${HARNESS_CPP_NAME}: 
+	@echo ""
+	@echo "***"
+	@echo "*** FORCE $(HARNESS_CPP_NAME)"
+	@echo "***"
+	cd $(HARNESS_CPP_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+
+$(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}: $(ML_MODULES_FULLPATH) 
+	@echo ""
+	@echo "***"
+	@echo "*** $(HARNESS_CPP_NAME)"
+	@echo "***"
+	cd $(HARNESS_CPP_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+
+###############################################
+# FORTRAN API Harness Application
+#
+${HARNESS_F_NAME}: $(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME}
+
+FORCE_${HARNESS_F_NAME}: 
+	@echo ""
+	@echo "***"
+	@echo "*** FORCE $(HARNESS_F_NAME)"
+	@echo "***"
+	cd $(HARNESS_F_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+$(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME}: $(ML_MODULES_FULLPATH) 
+	@echo ""
+	@echo "***"
+	@echo "*** $(HARNESS_F_NAME)"
+	@echo "***"
+	cd $(HARNESS_F_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+
+
+
 # Tests
-test_harness_cpp: ${HARNESS_CPP_NAME}
+test_harness_cpp: $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}
 	@echo ""
 	@echo "***"
 	@echo "*** test_harness_cpp"
 	@echo "***"
+	@$(MAKE) -f $(THIS_FILE) FORCE_${HARNESS_CPP_NAME}
 	cd $(TEST_DIR) && $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME} sphere_ml.xml
 
-test_harness_c: ${HARNESS_C_NAME}
+test_harness_c: $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}
 	@echo ""
 	@echo "***"
 	@echo "*** test_harness_c"
 	@echo "***"
-	cd $(TEST_DIR) && $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME} sphere_ml.xml
+	@$(MAKE) -f $(THIS_FILE) FORCE_${HARNESS_C_NAME}
+	#cd $(HARNESS_C_DIR) && make -f Makefile.$(PLATFORM) BUILD=$(BUILD) HAVE_XERCES=$(HAVE_XERCES) HAVE_GEODE=$(HAVE_GEODE)
+	cd $(TEST_DIR) && $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME} om6.xml
 
-test_harness_f: ${HARNESS_F_NAME}
+test_harness_f: $(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME}
 	@echo ""
 	@echo "***"
 	@echo "*** test_harness_f"
 	@echo "***"
+	@$(MAKE) -f $(THIS_FILE) FORCE_${HARNESS_F_NAME}
 	cd $(TEST_DIR) && $(HARNESS_F_DIR)/$(DIST_DIR)/${HARNESS_F_FULLNAME} sphere_ml.xml
 
 test_refine_str: ${REFINE_STR_NAME}

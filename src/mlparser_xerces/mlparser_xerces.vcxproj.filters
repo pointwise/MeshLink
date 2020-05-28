@@ -21,12 +21,30 @@
     <ClCompile Include="MeshLinkParser_xerces_c.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MeshLinkWriter_xerces.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lzw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshLinkWriter_xerces_c.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MeshLinkParser_xerces.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeshLinkParser_xerces_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshLinkWriter_xerces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lzw.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshLinkWriter_xerces_c.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

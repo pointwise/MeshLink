@@ -61,6 +61,15 @@ computational evaluations on the geometric entities contained in the file.
 Typical computational operations are closest point projection and parametric
 evaluation.
 
+Read/Write
+----------
+
+New in MeshLink v1.1 is the ability to write a MeshLink XML file. This provides
+an application the ability to read and process mesh and geometry files and
+update the associativity as needed. Mesh that has been adapted can
+then be re-used later by the same or other MeshLink-aware applications
+without the need to re-do transformitive mesh operations.
+
 Getting Started
 ~~~~~~~~~~~~~~~~
 
@@ -110,6 +119,13 @@ An example build procedure:
     cd <path_to_src_dir>/mlkernel_geode
     make -f Makefile.<platform> BUILD=Release 
 
+To build the MeshLink library and Xerces parser implementation on Windows with Visual Studio 2017:
+
+.. code:: bash
+
+    cd <path_to_src_dir>/meshlink
+    devenv meshlink.sln /build "LibraryRelease|x64"
+
 
 Testing
 -------
@@ -121,7 +137,8 @@ Makefiles for Linux and Mac OSX and Microsoft Visual Studio project files are
 provided for the x86_64 architecture. 
 
 The src directory contains a top-level Makefile with targets for building the
-test applications and executing the test on Linux and Mac OSX platforms.
+test applications and executing the test on Linux and Mac OSX platforms. Note
+that all test harnesses require access to the Geode geometry kernel (not provided).
 
 To build a harness and execute the test:
 
@@ -129,6 +146,14 @@ To build a harness and execute the test:
 
     cd <path_to_src_dir>
     make BUILD=Release test_harness_cpp
+
+To build all the Geode/Xerces test harnesses on Windows with Visual Studio 2017:
+
+.. code:: bash
+
+    cd <path_to_src_dir>/meshlink
+    devenv meshlink.sln /build "GeodeTestRelease|x64"
+
 
 A successful test will parse the example MeshLink XML file and print details of
 the loaded mesh-geometry associativity data.  If building with the Pointwise

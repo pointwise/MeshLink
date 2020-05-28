@@ -67,6 +67,8 @@ CFILES := \
 CXXFILES := \
 	MeshLinkParser_xerces_c.cxx \
 	MeshLinkParser_xerces.cxx \
+	MeshLinkWriter_xerces_c.cxx \
+	MeshLinkWriter_xerces.cxx \
 	$(NULL)
 
 
@@ -90,7 +92,7 @@ $(info $$OBJS is [${OBJS}])
 # Tool Macros
 #
 AR = ar rcs
-CC = gcc 
+CC = gcc
 CXX = g++ -std=c++11
 MKDIR = mkdir -p
 CP = cp -f
@@ -98,10 +100,10 @@ CP = cp -f
 ########################################################################
 # Compiler defines
 #
-DEFINE = -D IS64BIT  
+DEFINE = -D IS64BIT
 ifeq ($(BUILD),Debug)
-	COPTS = -g 
-	CXXOPTS = -g 
+	COPTS = -g
+	CXXOPTS = -g
 else
 endif
 
@@ -129,12 +131,10 @@ $(ODIR)/%.o:	$(CXXDIR)/%.cxx
 
 
 $(DIST_DIR)/${MODULE_NAME}: ${ODIR} $(OBJS) ${DIST_DIR}
-	$(AR) $(DIST_DIR)/${MODULE_NAME}  ${OBJS} 
+	$(AR) $(DIST_DIR)/${MODULE_NAME}  ${OBJS}
 
 
 
 clean:
 	-rm -f $(OBJS)
 	-rm -f ${DIST_DIR}/${MODULE_NAME}
-
-
