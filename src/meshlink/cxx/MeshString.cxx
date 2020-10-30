@@ -34,7 +34,10 @@ MeshString::getNameCounter() {
 };
 
 MeshString::MeshString() :
-    MeshTopo() {};
+    MeshTopo() 
+{
+    edgeCounter_ = 0;
+};
 
 MeshString::MeshString(
     MLINT mid,
@@ -45,6 +48,7 @@ MeshString::MeshString(
 {
     // name arg is allowed to be empty, setName ensures a unique name
     setName(name);
+    edgeCounter_ = 0;
 };
 MeshString::MeshString(
     const std::string &ref,
@@ -56,6 +60,7 @@ MeshString::MeshString(
 {
     // name arg is allowed to be empty, setName ensures a unique name
     setName(name);
+    edgeCounter_ = 0;
 };
 
 MeshString::~MeshString()
@@ -97,6 +102,10 @@ MeshString::addEdge(MLINT i1, MLINT i2,
     if (mapID) {
         meshEdgeIDToNameMap_[mid] = edge->getName();
     }
+
+    /// Assign incremented edgeCounter as edge order
+    edge->setOrderCounter(edgeCounter_++);
+
     return true;
 }
 bool
@@ -123,6 +132,10 @@ MeshString::addEdge(
     if (mapID) {
         meshEdgeIDToNameMap_[mid] = edge->getName();
     }
+
+    /// Assign incremented edgeCounter as edge order
+    edge->setOrderCounter(edgeCounter_++);
+
     return true;
 }
 
@@ -203,17 +216,21 @@ MeshString::getNumEdges() const
     return (MLINT)meshEdgeNameMap_.size();
 }
 
-std::vector<const MeshEdge *>
-MeshString::getMeshEdges() const
+void
+MeshString::getMeshEdges(std::vector<const MeshEdge *> &edges) const
 {
-    std::vector<const MeshEdge *> edges;
+    edges.clear();;
     edges.resize(meshEdgeNameMap_.size());
     MeshEdgeNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshEdgeNameMap_.begin(); iter != meshEdgeNameMap_.end(); ++iter, ++i) {
         edges[i] = iter->second;
     }
-    return edges;
+
+    // sort by creation order in the MeshString
+    std::sort(edges.begin(), edges.end(), MeshTopo::OrderCompare);
+
+    return;
 }
 
 /****************************************************************************

@@ -124,6 +124,34 @@ MLSTATUS    ML_writerWriteMeshLinkFile(
 MLSTATUS ML_getMeshModelByName(MeshAssociativityObj meshAssocObj, 
     const char *modelname, MeshModelObj *meshModel);
 
+
+/**
+ * \brief Get MeshSheet object by name.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] sheetname Mesh Sheet name
+ * @param[out] meshModel MeshModel object containing sheet
+ * @param[out] meshSheet MeshSheet object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshSheetByName(MeshAssociativityObj meshAssocObj,
+    const char *sheetname, 
+    MeshModelObj *meshModel, MeshSheetObj *meshSheet);
+
+/**
+ * \brief Get MeshString object by name.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] stringname Mesh String name
+ * @param[out] meshModel MeshModel object containing string
+ * @param[out] meshString MeshString object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshStringByName(MeshAssociativityObj meshAssocObj,
+    const char *stringname, 
+    MeshModelObj *meshModel, MeshStringObj *meshString);
+
+
 /**
  * \brief Add GeometryKernel object to MeshAssociativity.
  * @param[in,out] meshAssocObj MeshAssociativity object
@@ -287,6 +315,15 @@ MLSTATUS ML_getMeshModels(MeshAssociativityObj meshAssocObj,
     );
 
 /**
+ * \brief Get number of ParamVertex objects in the MeshTopo.
+ * @param[in] meshTopoObj MeshTopo derived object
+ * \returns ParamVertex count
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLINT ML_getNumParamVerts(MeshTopoObj meshTopoObj
+    );
+
+/**
  * \brief Get number of MeshSheets in the MeshModel.
  * @param[in] meshModelObj MeshModel object
  * \returns MeshSheet count
@@ -309,6 +346,31 @@ MLSTATUS ML_getMeshSheets(MeshModelObj meshModelObj,
         MLINT sizeSheetObj,
         MLINT *numSheetObjs
     );
+
+/**
+ * \brief Get a MeshSheet in the MeshModel by name.
+ * @param[in] meshModelObj MeshModel object
+ * @param[in] sheetname MeshSheet name to find
+ * @param[in,out] meshSheetObj MeshSheet object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getModelMeshSheetByName(MeshModelObj meshModelObj,
+    const char *sheetname,
+    MeshSheetObj *meshSheetObj);
+
+/**
+ * \brief Get a MeshString in the MeshModel by name.
+ * @param[in] meshModelObj MeshModel object
+ * @param[in] stringname MeshString name to find
+ * @param[in,out] meshSheetObj MeshString object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getModelMeshStringByName(MeshModelObj meshModelObj,
+    const char *stringname,
+    MeshStringObj *meshStringObj);
+
 
 /**
  * \brief Get number of MeshFaces in the MeshSheet.
@@ -407,6 +469,109 @@ MLSTATUS ML_getStringMeshEdges(MeshSheetObj meshStringObj,
     MLINT sizeEdgeObj,
     MLINT *numEdgeObjs
 );
+
+
+
+/**
+ * \brief Get array of MeshElementLinkages in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in,out] linkageObjs MeshElementLinkage object array
+ * @param[in] sizeLinkageObj MeshElementLinkage object array size
+ * @param[out] numLinkageObjs MeshElementLinkage object count
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshElementLinkages(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj *linkageObjs,
+    MLINT sizeLinkageObj,
+    MLINT *numLinkageObjs
+);
+
+/**
+ * \brief Get number of MeshElementLinkages in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * \returns MeshElementLinkage count
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLINT  ML_getNumMeshElementLinkages(
+    MeshAssociativityObj meshAssocObj);
+
+
+/**
+ * \brief Get MeshLinkTransform associated with a MeshElementLinkage
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] linkageObj MeshElementLinkage object
+ * @param[out] xformObj MeshLinkTransform object (null if none)
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getTransform(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj linkageObj,
+    MeshLinkTransformConstObj *xformObj
+);
+
+
+/**
+ * \brief Get info associated with a MeshElementLinkage
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] linkageObj MeshElementLinkage object
+ * @param[in, out] nameBuf name buffer
+ * @param[in]  nameBufLen name buffer length
+ * @param[in,out] sourceEntityRefBuf Source mesh entity reference buffer
+ * @param[in] sourceEntityRefBufLen Source mesh entity reference buffer size
+ * @param[in,out] targetEntityRefBuf Target mesh entity reference buffer
+ * @param[in] targetEntityRefBufLen Target mesh entity reference buffer size
+ * @param[in,out] attIDs attribute ID array
+ * @param[in]  sizeAttIDs attribute ID array size
+ * @param[out] numAttIDs attribute count
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshElementLinkageInfo(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj linkageObj,
+    char *nameBuf, MLINT nameBufLen,
+    char *sourceEntityRefBuf, MLINT sourceEntityRefBufLen,
+    char *targetEntityRefBuf, MLINT targetEntityRefBufLen,
+    MLINT attIDs[],
+    MLINT sizeAttIDs,
+    MLINT *numAttIDs);
+
+/**
+ * \brief Get info associated with a MeshLinkTransform
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] xformObj MeshLinkTransform object
+ * @param[in, out] nameBuf name buffer
+ * @param[in]  nameBufLen name buffer length
+ * @param[in,out] attIDs attribute ID array
+ * @param[in]  sizeAttIDs attribute ID array size
+ * @param[out] numAttIDs attribute count
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshLinkTransformInfo(
+    MeshAssociativityObj meshAssocObj,
+    MeshLinkTransformConstObj xformObj,
+    char *nameBuf, MLINT nameBufLen,
+    MLINT attIDs[],
+    MLINT sizeAttIDs,
+    MLINT *numAttIDs);
+
+
+/**
+ * \brief Get the quaternion matrix associated with a MeshLinkTransform
+ * @param[in] xformObj MeshLinkTransform object
+ * @param[out] quat[4][4] quaternion matrix
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getTransformQuaternion(
+    MeshLinkTransformConstObj xformObj,
+    MLREAL quat[4][4]
+);
+
 
 /**
  * \brief Find a point index's lowest topological reference.
@@ -513,7 +678,7 @@ MLSTATUS ML_findLowestTopoEdgeByInds(MeshModelObj meshModelObj,
 
 /**
  * \brief Return array of Parametric Vertices for a MeshTopo object.
- * MeshTopo object may be a MeshPoint, MeshEdge, MeshFace object.
+ * MeshTopo object may be any MeshTopo derived object, e.g. MeshSheet, MeshFace.
  * @param[in] meshTopoObj MeshTopo object
  * @param[in,out] pvObjsArr ParamVertex array 
  * @param[in] pvObjsArrLen ParamVertex array size
@@ -683,6 +848,31 @@ MLSTATUS ML_getMeshFaceInfo(
     ParamVertexConstObj pvObjs[],
     MLINT sizepvObjs,
     MLINT *numpvObjs);
+
+
+/**
+ * \brief Get number of GeometryGroups in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * \returns GeometryGroup count
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLINT  ML_getNumGeometryGroups(
+    MeshAssociativityObj meshAssocObj);
+
+/**
+ * \brief Get array of GeometryGroup IDs in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in,out] IDs GeometryGroup ID array
+ * @param[in] sizeIDs GeometryGroup ID array size
+ * @param[out] numIDs GeometryGroup ID count
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS  ML_getGeometryGroupIDs(
+    MeshAssociativityObj meshAssocObj,
+    MLINT IDs[],
+    MLINT sizeIDs,
+    MLINT *numIDs);
 
 
 /**
@@ -862,6 +1052,26 @@ MLSTATUS ML_evalCurvatureOnSurface(
 
 
 /**
+ * \brief Evaluate model assembly tolerances on geometric surface.
+ * If the surface name given matches a model face, then the face's 
+ * boundary edges and vertices will be querried for the assembly 
+ * tolerance used to close the model.
+ * @param[in] geomKernelObj GeometryKernel object
+ * @param[in] entityName surface name
+ * @param[out] minTolerance minimum assembly tolerance on boundary
+ * @param[out] maxCurvature maximum assembly tolerance on boundary
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_evalSurfaceTolerance(
+    GeometryKernelObj geomKernelObj,
+    const char *entityName,             /* Evaluation surface name */
+    MLREAL          *minTolerance,
+    MLREAL          *maxTolerance
+);
+
+
+/**
  * \brief Allocates a new GeometryKernel-specific ProjectionData Object.
  * A ProjectionData object is used to store inverse evaluation data 
  * specific to the GeometryKernel.
@@ -907,10 +1117,12 @@ MLSTATUS ML_projectPoint(
  * stored in a ProjectionData object specific to the GeometryKernel.
  * @param[in] geomKernelObj GeometryKernel object
  * @param[in] projectionDataObj ProjectionData object
- * @param[in] xyz location
- * @param[in] UV parametric coordinates
+ * @param[out] xyz location
+ * @param[out] UV parametric coordinates
  * @param[in,out] entityNameBuf geoemtry entity name buffer
  * @param[in] entityNameBufLen  geoemtry entity name buffer length
+ * @param[out] distance the distance between the original point and projected point (can be NULL)
+ * @param[out] tolerance the error tolerance of the projection result (can be NULL)
  * \returns ML_STATUS_OK / ML_STATUS_ERROR
  */
 /** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
@@ -919,7 +1131,9 @@ MLSTATUS ML_getProjectionInfo(
     ProjectionDataObj projectionDataObj,
     MLVector3D xyz,
     MLVector2D UV,
-    char *entityNameBuf, MLINT entityNameBufLen
+    char *entityNameBuf, MLINT entityNameBufLen,
+    MLREAL *distance,
+    MLREAL *tolerance
 );
 
 

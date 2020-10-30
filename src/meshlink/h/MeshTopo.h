@@ -200,11 +200,12 @@ public:
     /// \brief Return the number of ParamVertex objects for this MeshTopo
     virtual MLINT getNumParamVerts() const;
 
+    /// \brief Return vector of ParamVertex objects for this MeshTopo
+    void getParamVerts(std::vector<const ParamVertex *> &pv) const;
+
     /// \brief Return the map of application-defined reference string to ParamVertex objects
     /// for this MeshTopo
-    virtual const ParamVertVrefMap & getParamVertVrefMap() const {
-        return paramVertVrefMap_;
-    }
+    virtual const ParamVertVrefMap & getParamVertVrefMap() const;
 
     /// \brief Set the ID of this MeshTopo
     ///
@@ -262,6 +263,14 @@ public:
     /// Returns the current value of the counter used for generating unique mesh entity names
     virtual MLUINT &getNameCounter();
 
+    /// Set order counter (in parent topo)
+    void setOrderCounter(MLUINT counter);
+
+    /// Returns order counter (in parent topo)
+    MLUINT getOrderCounter() const ;
+
+    static bool OrderCompare(const MeshTopo *topo1, const MeshTopo *topo2);
+
     /// Default constructor
     MeshTopo();
     /// Destructor
@@ -279,6 +288,8 @@ protected:
     MLINT gref_;
     /// The name of the mesh entity
     std::string name_;
+    /// creation order counter in parent entity
+    MLUINT orderCounter_;
 
     /// ParamVertex objects mapped to this entity by application-defined reference string
     ParamVertVrefMap paramVertVrefMap_;
@@ -291,6 +302,8 @@ private:
 };
 
 typedef std::map<MLINT, std::string> MeshTopoIDToNameMap;
+
+typedef std::vector<MeshTopo *> MeshTopoArray;
 
 typedef std::map<std::string, std::string> MeshTopoRefToNameMap;
 
@@ -475,12 +488,12 @@ public:
     }
 
     /// \brief Return vector of pointers to ParamVertices associated with the MeshEdge
-    std::vector<ParamVertex*> getParamVerts() const {
-        std::vector<ParamVertex*> pvs;
+    void getParamVerts(std::vector<ParamVertex*> &pvs) const {
+        pvs.clear();
         for (int i = 0; i < 2; ++i) {
             if (NULL != paramVerts_[i]) pvs.push_back(paramVerts_[i]);
         }
-        return pvs;
+        return;
     }
 
     /// \brief Return number of ParamVertices associated with the MeshEdge
@@ -629,12 +642,12 @@ public:
     }
 
     /// \brief Return vector of pointers to ParamVertices associated with the MeshFace
-    std::vector<ParamVertex*> getParamVerts() const {
-        std::vector<ParamVertex*> pvs;
+    void getParamVerts(std::vector<ParamVertex*> &pvs) const {
+        pvs.clear();
         for (int i = 0; i < 4; ++i) {
             if (NULL != paramVerts_[i]) pvs.push_back(paramVerts_[i]);
         }
-        return pvs;
+        return;
     }
 
     /// \brief Return number of ParamVertices associated with the MeshFace

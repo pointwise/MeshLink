@@ -32,6 +32,37 @@
 
 using namespace xercesc;
 
+class DOMNodeTagNameFilter: public DOMNodeFilter {
+public:
+    DOMNodeTagNameFilter(const char *tag_name)
+    {
+        tagName_ = XMLString::transcode(tag_name);
+    }
+    ~DOMNodeTagNameFilter()
+    {
+        XMLString::release(&tagName_);
+    }
+
+    FilterAction 	acceptNode(const DOMNode *node) const
+    {
+        if (node->getNodeType() == DOMNode::ELEMENT_NODE) {
+            const DOMElement *elem = dynamic_cast<const DOMElement *>(node);
+            if (nullptr != elem &&
+                XMLString::equals(tagName_, elem->getTagName())) {
+                return FILTER_ACCEPT;
+            }
+        }
+        return FILTER_REJECT;
+    }
+
+private:
+    DOMNodeTagNameFilter();
+    XMLCh *tagName_;
+};
+
+
+
+
 // Replaces xerces XMLString::transcode() method to take care of
 // releasing the transcoded result automatically
 template <typename T, typename U>
@@ -212,160 +243,342 @@ private:
 
 
 
-
 bool
 MeshLinkParserXerces::parseAttributes(xercesc_3_2::DOMElement *root)
 {
     if (!meshAssociativity_) { return false; }
     bool status = true;
     meshAssociativity_->clearAttributes();
+
     DOMNode *attr;
+    {
+        DOMNodeTagNameFilter attFilter("Attribute");
+        DOMDocument *doc = root->getOwnerDocument();
+        DOMNode *attNode;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT, 
+            &attFilter, false);
+        while ((attNode = iter->nextNode()) != nullptr) {
+            DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
+            if (nullptr != elem) {
 
-    DOMNodeList *attNodes;
-    if (nullptr == (attNodes = root->getElementsByTagName(X("Attribute")))) {
-        return true;
-    }
+                int attid;
+                std::string name;
+                std::string contents;
 
-    for (XMLSize_t i = 0; i < attNodes->getLength(); ++i) {
-        DOMNode *attNode = attNodes->item(i);
-        DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
-        if (nullptr != elem) {
+                XMLCopier<char, XMLCh> nameName("name");
+                XMLCopier<char, XMLCh> attidName("attid");
 
-            int attid;
-            std::string name;
-            std::string contents;
-
-            XMLCopier<char, XMLCh> nameName("name");
-            XMLCopier<char, XMLCh> attidName("attid");
-
-            DOMNamedNodeMap *attMap = attNode->getAttributes();
-            if (nullptr == attMap) {
-                std::cout << "Attribute node not an element" << std::endl;
-                continue;
-            }
-
-            // required atts
-            attr = attMap->getNamedItem(attidName);
-            if (nullptr == attr) {
-                std::cout << "Attribute missing attid attribute" << std::endl;
-                continue;
-            }
-            attid = XMLString::parseInt(attr->getNodeValue());
-            const MeshLinkAttribute *existing =
-                meshAssociativity_->getAttributeByID(attid);
-            if (existing) {
-                std::cout << "Attribute reuses existing attid attribute \"" <<
-                    attid << "\"" << std::endl;
-                continue;
-            }
-
-            // optional atts
-            attr = attMap->getNamedItem(nameName);
-            if (nullptr != attr) {
-                XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
-                name = (char *) xmlStr;
-            }
-
-            // contents
-            DOMNode *child = attNode->getFirstChild();
-            while (nullptr != child) {
-                if (DOMNode::TEXT_NODE == child->getNodeType()) {
-                    XMLCopier<XMLCh, char> xmlStr(child->getNodeValue());
-                    contents = (char *) xmlStr;
-                    break;
+                DOMNamedNodeMap *attMap = attNode->getAttributes();
+                if (nullptr == attMap) {
+                    std::cout << "Attribute node not an element" << std::endl;
+                    continue;
                 }
-                child = child->getNextSibling();
-            }
 
-            if (contents.empty()) {
-                std::cout << "Attribute missing content" << std::endl;
-                continue;
-            }
-            else {
-                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, false,
-                    *meshAssociativity_);
-                if (mlAtt.isValid()) {
-                    meshAssociativity_->addAttribute(mlAtt);
+                // required atts
+                attr = attMap->getNamedItem(attidName);
+                if (nullptr == attr) {
+                    std::cout << "Attribute missing attid attribute" << std::endl;
+                    continue;
+                }
+                attid = XMLString::parseInt(attr->getNodeValue());
+                const MeshLinkAttribute *existing =
+                    meshAssociativity_->getAttributeByID(attid);
+                if (existing) {
+                    std::cout << "Attribute reuses existing attid attribute \"" <<
+                        attid << "\"" << std::endl;
+                    continue;
+                }
+
+                // optional atts
+                attr = attMap->getNamedItem(nameName);
+                if (nullptr != attr) {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    name = (char *)xmlStr;
+                }
+
+                // contents
+                DOMNode *child = attNode->getFirstChild();
+                while (nullptr != child) {
+                    if (DOMNode::TEXT_NODE == child->getNodeType()) {
+                        XMLCopier<XMLCh, char> xmlStr(child->getNodeValue());
+                        contents = (char *)xmlStr;
+                        break;
+                    }
+                    child = child->getNextSibling();
+                }
+
+                if (contents.empty()) {
+                    std::cout << "Attribute missing content" << std::endl;
+                    continue;
+                }
+                else {
+                    MeshLinkAttribute mlAtt((MLINT)attid, name, contents, false,
+                        *meshAssociativity_);
+                    if (mlAtt.isValid()) {
+                        meshAssociativity_->addAttribute(mlAtt);
+                    }
                 }
             }
         }
+        iter->release();
     }
-
 
     // AttributeGroup elements
-    if (nullptr == (attNodes = root->getElementsByTagName(X("AttributeGroup")))) {
-        return true;
-    }
+    {
+        DOMNodeTagNameFilter attFilter("AttributeGroup");
+        DOMDocument *doc = root->getOwnerDocument();
+        DOMNode *attNode;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while ((attNode = iter->nextNode()) != nullptr) {
+            DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
+            if (nullptr != elem) {
 
-    for (XMLSize_t i = 0; i < attNodes->getLength(); ++i) {
-        DOMNode *attNode = attNodes->item(i);
-        DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
-        if (nullptr != elem) {
+                int attid;
+                std::string name;
+                std::string contents;
 
-            int attid;
-            std::string name;
-            std::string contents;
+                XMLCopier<char, XMLCh> nameName("name");
+                XMLCopier<char, XMLCh> attidName("attid");
 
-            XMLCopier<char, XMLCh> nameName("name");
-            XMLCopier<char, XMLCh> attidName("attid");
-
-            DOMNamedNodeMap *attMap = attNode->getAttributes();
-            if (nullptr == attMap) {
-                std::cout << "AttributeGroup node not an element" << std::endl;
-                continue;
-            }
-
-            // required atts
-            attr = attMap->getNamedItem(attidName);
-            if (nullptr == attr) {
-                std::cout << "AttributeGroup missing attid attribute" <<
-                    std::endl;
-                continue;
-            }
-            attid = XMLString::parseInt(attr->getNodeValue());
-            const MeshLinkAttribute *existing =
-                meshAssociativity_->getAttributeByID(attid);
-            if (existing) {
-                std::cout << "AttributeGroup reuses existing attid attribute \"" <<
-                    attid << "\"" << std::endl;
-                continue;
-            }
-
-
-            // optional atts
-            attr = attMap->getNamedItem(nameName);
-            if (nullptr != attr) {
-                XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
-                name = (char *)xmlStr;
-            }
-
-            // contents
-            DOMNode *child = attNode->getFirstChild();
-            while (nullptr != child) {
-                if (DOMNode::TEXT_NODE == child->getNodeType()) {
-                    XMLCopier<XMLCh, char> xmlStr(child->getNodeValue());
-                    contents = (char *)xmlStr;
-                    break;
+                DOMNamedNodeMap *attMap = attNode->getAttributes();
+                if (nullptr == attMap) {
+                    std::cout << "AttributeGroup node not an element" << std::endl;
+                    continue;
                 }
-                child = child->getNextSibling();
-            }
 
-            if (contents.empty()) {
-                std::cout << "AttributeGroup missing content" << std::endl;
-                continue;
-            }
-            else {
-                MeshLinkAttribute mlAtt((MLINT)attid, name, contents, true,
-                    *meshAssociativity_);
-                if (mlAtt.isValid()) {
-                    meshAssociativity_->addAttribute(mlAtt);
+                // required atts
+                attr = attMap->getNamedItem(attidName);
+                if (nullptr == attr) {
+                    std::cout << "AttributeGroup missing attid attribute" <<
+                        std::endl;
+                    continue;
+                }
+                attid = XMLString::parseInt(attr->getNodeValue());
+                const MeshLinkAttribute *existing =
+                    meshAssociativity_->getAttributeByID(attid);
+                if (existing) {
+                    std::cout << "AttributeGroup reuses existing attid attribute \"" <<
+                        attid << "\"" << std::endl;
+                    continue;
+                }
+
+                // optional atts
+                attr = attMap->getNamedItem(nameName);
+                if (nullptr != attr) {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    name = (char *)xmlStr;
+                }
+
+                // contents
+                DOMNode *child = attNode->getFirstChild();
+                while (nullptr != child) {
+                    if (DOMNode::TEXT_NODE == child->getNodeType()) {
+                        XMLCopier<XMLCh, char> xmlStr(child->getNodeValue());
+                        contents = (char *)xmlStr;
+                        break;
+                    }
+                    child = child->getNextSibling();
+                }
+
+                if (contents.empty()) {
+                    std::cout << "AttributeGroup missing content" << std::endl;
+                    continue;
+                }
+                else {
+                    MeshLinkAttribute mlAtt((MLINT)attid, name, contents, true,
+                        *meshAssociativity_);
+                    if (mlAtt.isValid()) {
+                        meshAssociativity_->addAttribute(mlAtt);
+                    }
                 }
             }
         }
+        iter->release();
     }
 
     return status;
 }
+
+bool
+MeshLinkParserXerces::parsePeriodicInfo(xercesc_3_2::DOMElement *root)
+{
+    if (!meshAssociativity_) { return false; }
+    bool status = true;
+    meshAssociativity_->clearTransforms();
+    meshAssociativity_->clearMeshElementLinkages();
+
+    DOMNode *attr;
+    {
+        DOMNodeTagNameFilter attFilter("Transform");
+        DOMDocument *doc = root->getOwnerDocument();
+        DOMNode *attNode;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while ((attNode = iter->nextNode()) != nullptr) {
+            DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
+            if (nullptr != elem) {
+
+                int xid;
+                std::string name;
+                std::string contents;
+
+                XMLCopier<char, XMLCh> nameName("name");
+                XMLCopier<char, XMLCh> xidName("xid");
+
+                DOMNamedNodeMap *attMap = attNode->getAttributes();
+                if (nullptr == attMap) {
+                    std::cout << "Attribute node not an element" << std::endl;
+                    continue;
+                }
+
+                // required atts
+                attr = attMap->getNamedItem(xidName);
+                if (nullptr == attr) {
+                    std::cout << "Transform missing xid attribute" << std::endl;
+                    continue;
+                }
+                xid = XMLString::parseInt(attr->getNodeValue());
+                const MeshLinkTransform *existing =
+                    meshAssociativity_->getTransformByID(xid);
+                if (existing) {
+                    std::cout << "Transform reuses existing xid attribute \"" <<
+                        xid << "\"" << std::endl;
+                    continue;
+                }
+
+                // optional name attribute
+                attr = attMap->getNamedItem(nameName);
+                if (nullptr != attr) {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    name = (char *)xmlStr;
+                }
+
+                // contents
+                DOMNode *child = attNode->getFirstChild();
+                while (nullptr != child) {
+                    if (DOMNode::TEXT_NODE == child->getNodeType()) {
+                        XMLCopier<XMLCh, char> xmlStr(child->getNodeValue());
+                        contents = (char *)xmlStr;
+                        break;
+                    }
+                    child = child->getNextSibling();
+                }
+
+                if (contents.empty()) {
+                    std::cout << "Transform missing content" << std::endl;
+                    continue;
+                }
+                else {
+                    MeshLinkTransform mlXform((MLINT)xid, name, contents,
+                        *meshAssociativity_);
+                    if (mlXform.isValid()) {
+                        // optional aref attribute
+                        DOMNode *arefAttr = attMap->getNamedItem(X("aref"));
+                        if (nullptr != arefAttr) {
+                            const XMLCh *valStr = arefAttr->getNodeValue();
+                            mlXform.setAref(XMLString::parseInt(valStr));
+                        }
+
+                        // stores a copy
+                        meshAssociativity_->addTransform(mlXform);
+                    }
+                }
+            }
+        }
+        iter->release();
+    }
+
+    {
+        DOMNodeTagNameFilter attFilter("MeshElementLinkage");
+        DOMDocument *doc = root->getOwnerDocument();
+        DOMNode *attNode;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while ((attNode = iter->nextNode()) != nullptr) {
+            DOMElement *elem = dynamic_cast<DOMElement *>(attNode);
+            if (nullptr != elem) {
+
+                std::string name;
+                std::string srcEntRef;
+                std::string tgtEntRef;
+
+                XMLCopier<char, XMLCh> nameName("name");
+                XMLCopier<char, XMLCh> srcEntRefName("sourceEntityRef");
+                XMLCopier<char, XMLCh> tgtEntRefName("targetEntityRef");
+
+                DOMNamedNodeMap *attMap = attNode->getAttributes();
+                if (nullptr == attMap) {
+                    std::cout << "Attribute node not an element" << std::endl;
+                    continue;
+                }
+
+                // required atts
+                attr = attMap->getNamedItem(srcEntRefName);
+                if (nullptr == attr) {
+                    std::cout << "MeshElementLinkage missing sourceEntityRef attribute" << std::endl;
+                    continue;
+                }
+                else {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    srcEntRef = (char *)xmlStr;
+                }
+
+                attr = attMap->getNamedItem(tgtEntRefName);
+                if (nullptr == attr) {
+                    std::cout << "MeshElementLinkage missing targetEntityRef attribute" << std::endl;
+                    continue;
+                }
+                else {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    tgtEntRef = (char *)xmlStr;
+                }
+
+
+                // optional name attribute
+                attr = attMap->getNamedItem(nameName);
+                if (nullptr != attr) {
+                    XMLCopier<XMLCh, char> xmlStr(attr->getNodeValue());
+                    name = (char *)xmlStr;
+                }
+
+                
+                MeshElementLinkage *mlLink = new MeshElementLinkage(name, srcEntRef,
+                    tgtEntRef, *meshAssociativity_);
+                if (mlLink->isValid() &&
+                    // stores and takes ownership of pointer
+                    meshAssociativity_->addMeshElementLinkage(mlLink)
+                    ) {
+                    // optional xref attribute
+                    DOMNode *xrefAttr = attMap->getNamedItem(X("xref"));
+                    if (nullptr != xrefAttr) {
+                        const XMLCh *valStr = xrefAttr->getNodeValue();
+                        if (!mlLink->setXref(XMLString::parseInt(valStr), *meshAssociativity_)) {
+                            delete mlLink; mlLink = NULL;
+                            std::cout << "MeshElementLinkage missing xref transform" << std::endl;
+                            continue;
+                        }
+                    }
+                    // optional aref attribute
+                    DOMNode *arefAttr = attMap->getNamedItem(X("aref"));
+                    if (nullptr != arefAttr) {
+                        const XMLCh *valStr = arefAttr->getNodeValue();
+                        mlLink->setAref(XMLString::parseInt(valStr));
+                    }
+                }
+                else {
+                    delete mlLink; mlLink = NULL;
+                    std::cout << "MeshElementLinkage missing source or target entity " << std::endl;
+                    continue;
+                }
+            }
+        }
+        iter->release();
+    }
+
+    return status;
+}
+
 
 
 // Valiadate MeshLink file against the schema
@@ -634,58 +847,74 @@ MeshLinkParserXerces::parseGeometryRefs(DOMElement *root)
         return false;
     }
     bool result = true;
+    DOMDocument *doc = root->getOwnerDocument();
 
     // Loop through GeometryFile nodes parsing GeometryReference elements
-    DOMNodeList *gfNode = root->getElementsByTagName(X("GeometryFile"));
-    for (XMLSize_t i = 0; i < gfNode->getLength() && result; ++i) {
-        DOMElement *elem = dynamic_cast<DOMElement *>(gfNode->item(i));
-        if ( nullptr != elem ) {
+    {
+        DOMNodeTagNameFilter attFilter("GeometryFile");
+        DOMNode *node;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while (result && (node = iter->nextNode()) != nullptr) {
+            DOMElement *elem = dynamic_cast<DOMElement *>(node);
+            if (nullptr != elem) {
 
-            std::string filename, aref;
+                std::string filename, aref;
 
-            if (elem->hasAttribute(X("filename"))) {
-                XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("filename")));
-                filename = (char *) xmlStr;
-            }
-            else {
-                std::cout << "GeometryFile node: no filename attribute." <<
-                    std::endl;
-                return false;
-            }
-            if (elem->hasAttribute(X("aref"))) {
-                XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("aref")));
-                aref = (char *)xmlStr;
-            }
-
-            GeometryFile geomFile(filename, aref);
-
-            DOMNodeList *geomRefs = elem->getElementsByTagName(X("GeometryReference"));
-
-            for (XMLSize_t i = 0; i < geomRefs->getLength() && result; ++i) {
-                DOMNode *geomRef = geomRefs->item(i);
-                GeometryGroup geom_group;
-                if ((result = parseGeomRefDOM(geomRef, geom_group))) {
-                    meshAssociativity_->addGeometryGroup(geom_group);
-                    geomFile.addGeometryGroupID(geom_group.getID());
+                if (elem->hasAttribute(X("filename"))) {
+                    XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("filename")));
+                    filename = (char *)xmlStr;
                 }
+                else {
+                    std::cout << "GeometryFile node: no filename attribute." <<
+                        std::endl;
+                    return false;
+                }
+                if (elem->hasAttribute(X("aref"))) {
+                    XMLCopier<XMLCh, char> xmlStr(elem->getAttribute(X("aref")));
+                    aref = (char *)xmlStr;
+                }
+
+                GeometryFile geomFile(filename, aref);
+
+                // Geometry references for this file
+                {
+                    DOMNodeTagNameFilter attFilter2("GeometryReference");
+                    DOMNode *geomRef;
+                    DOMNodeIterator *iter2 = doc->createNodeIterator(elem, DOMNodeFilter::SHOW_ELEMENT,
+                        &attFilter2, false);
+                    while (result && (geomRef = iter2->nextNode()) != nullptr) {
+                        GeometryGroup geom_group;
+                        if ((result = parseGeomRefDOM(geomRef, geom_group))) {
+                            meshAssociativity_->addGeometryGroup(geom_group);
+                            geomFile.addGeometryGroupID(geom_group.getID());
+                        }
+                    }
+                    iter2->release();
+                }
+                // Since we add via value instead of pointer, we better
+                // add it after we've made all our changes/additions
+                meshAssociativity_->addGeometryFile(geomFile);
             }
-            // Since we add via value instead of pointer, we better
-            // add it after we've made all our changes/additions
-            meshAssociativity_->addGeometryFile(geomFile);
         }
+        iter->release();
     }
 
     // GeometryGroup content is list of attids which must match
     // those defined by GeometryReference elements above.
-    DOMNodeList *geomGroups = root->getElementsByTagName(X("GeometryGroup"));
-
-    for (XMLSize_t i = 0; i < geomGroups->getLength() && result; ++i) {
-        DOMNode *geomGroup = geomGroups->item(i);
-        GeometryGroup geom_group;
-        if ((result = parseGeomGroupDOM(geomGroup, meshAssociativity_,
+    {
+        DOMNodeTagNameFilter attFilter("GeometryGroup");
+        DOMNode *geomGroup;
+        DOMNodeIterator *iter = doc->createNodeIterator(root, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while (result && (geomGroup = iter->nextNode()) != nullptr) {
+            GeometryGroup geom_group;
+            if ((result = parseGeomGroupDOM(geomGroup, meshAssociativity_,
                 geom_group))) {
-            meshAssociativity_->addGeometryGroup(geom_group);
+                meshAssociativity_->addGeometryGroup(geom_group);
+            }
         }
+        iter->release();
     }
 
     return result;
@@ -716,23 +945,30 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
     MeshFile mFile(filename, aref);
 
     // Model References
-    DOMNodeList *nodes;
-    if (nullptr ==
-            (nodes = meshFile->getElementsByTagName(X("MeshModelReference"))) ||
-            0 == nodes->getLength()) {
+    bool result = true;
+    int count = 0;
+    {
+        DOMNodeTagNameFilter attFilter("MeshModelReference");
+        DOMNode *node;
+        DOMDocument *doc = meshFile->getOwnerDocument();
+        DOMNodeIterator *iter = doc->createNodeIterator(meshFile, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        DOMElement *modelRef;
+        while (result && (node = iter->nextNode()) != nullptr) {
+            ++count;
+            if (DOMNode::ELEMENT_NODE == node->getNodeType()) {
+                modelRef = dynamic_cast<DOMElement*>(node);
+                result = parseMeshRefModel(mFile, modelRef);
+            }
+        }
+        iter->release();
+    }
+
+    if (0 == count) {
         std::cout << "MeshFile node: no model references." << std::endl;
         return false;
     }
 
-    bool result = true;
-    for (XMLSize_t i = 0; i < nodes->getLength() && result; ++i) {
-        DOMElement *modelRef;
-        DOMNode *node = nodes->item(i);
-        if (DOMNode::ELEMENT_NODE == node->getNodeType()) {
-            modelRef = dynamic_cast<DOMElement*>(node);
-            result = parseMeshRefModel(mFile, modelRef);
-        }
-    }
     meshAssociativity_->addMeshFile(mFile);
 
     if (!result) {
@@ -747,30 +983,40 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
 
 #define ParseMeshContainer(MeshModel, MeshObj)                          \
     {                                                                   \
-        XMLCopier<char, XMLCh> objTag(#MeshObj);                        \
-        DOMNodeList *nodes = MeshModel->getElementsByTagName(objTag);   \
-        for (XMLSize_t i = 0; i < nodes->getLength() && result; ++i) {  \
-            DOMElement *meshObj;                                        \
-            DOMNode *node = nodes->item(i);                             \
+        DOMNodeTagNameFilter attFilter(#MeshObj);                       \
+        DOMNode *node;                                                  \
+        DOMDocument *doc = MeshModel->getOwnerDocument();               \
+        DOMNodeIterator *iter = doc->createNodeIterator(MeshModel,      \
+            DOMNodeFilter::SHOW_ELEMENT, &attFilter, false);            \
+        DOMElement *meshObj;                                            \
+        XMLSize_t i = 0;                                                \
+        while (result && (node = iter->nextNode()) != nullptr) {        \
+            ++i;                                                        \
             if (DOMNode::ELEMENT_NODE == node->getNodeType()) {         \
                 meshObj = dynamic_cast<DOMElement*>(node);              \
                 result = parse##MeshObj(meshModel, meshObj);            \
             }                                                           \
-            if (!result) {                                              \
-                std::cout << "MeshModelReference node: problem "        \
-                    "parsing " << #MeshObj << " " << i << std::endl;    \
-                return false;                                           \
-            }                                                           \
+        }                                                               \
+        iter->release();                                                \
+        if (!result) {                                                  \
+            std::cout << "MeshModelReference node: problem "            \
+                "parsing " << #MeshObj << " " << i << std::endl;        \
+            return false;                                               \
         }                                                               \
     }
 
+
 #define ParseMeshContainerNoRecurse(MeshModel, MeshObj)                 \
     {                                                                   \
-        XMLCopier<char, XMLCh> objTag(#MeshObj);                        \
-        DOMNodeList *nodes = MeshModel->getElementsByTagName(objTag);   \
-        for (XMLSize_t i = 0; i < nodes->getLength() && result; ++i) {  \
-            DOMElement *meshObj;                                        \
-            DOMNode *node = nodes->item(i);                             \
+        DOMNodeTagNameFilter attFilter(#MeshObj);                       \
+        DOMNode *node;                                                  \
+        DOMDocument *doc = MeshModel->getOwnerDocument();               \
+        DOMNodeIterator *iter = doc->createNodeIterator(MeshModel,      \
+            DOMNodeFilter::SHOW_ELEMENT, &attFilter, false);            \
+        DOMElement *meshObj;                                            \
+        XMLSize_t i = 0;                                                \
+        while (result && (node = iter->nextNode()) != nullptr) {        \
+            ++i;                                                        \
             DOMNode *parentNode = node->getParentNode();                \
             if (parentNode && DOMNode::ELEMENT_NODE == parentNode->getNodeType()) { \
                 DOMElement *parentElem = dynamic_cast<DOMElement*>(parentNode); \
@@ -780,11 +1026,12 @@ MeshLinkParserXerces::parseMeshFile(xercesc_3_2::DOMElement *meshFile)
                 meshObj = dynamic_cast<DOMElement*>(node);              \
                 result = parse##MeshObj(meshModel, meshObj);            \
             }                                                           \
-            if (!result) {                                              \
-                std::cout << "MeshModelReference node: problem "        \
-                    "parsing " << #MeshObj << " " << i << std::endl;    \
-                return false;                                           \
-            }                                                           \
+        }                                                               \
+        iter->release();                                                \
+        if (!result) {                                                  \
+            std::cout << "MeshModelReference node: problem "            \
+                "parsing " << #MeshObj << " " << i << std::endl;        \
+            return false;                                               \
         }                                                               \
     }
 
@@ -869,16 +1116,13 @@ MeshLinkParserXerces::parseMeshRefModel(MeshFile &meshFile,
         // Parse MeshPoints
 
         // Param vertices (do prior to MeshPointRef)
-        DOMNodeList *verts;
-        if (nullptr !=
-                (verts = modelRef->getElementsByTagName(X("ParamVertex"))) &&
-                0 != verts->getLength()) {
-
-            for (XMLSize_t i = 0; i < verts->getLength() && result; ++i) {
-                DOMNode *node;
-                if (nullptr == (node = verts->item(i))) {
-                    continue;
-                }
+        {
+            DOMNodeTagNameFilter attFilter("ParamVertex");
+            DOMNode *node;
+            DOMDocument *doc = modelRef->getOwnerDocument();
+            DOMNodeIterator *iter = doc->createNodeIterator(modelRef, DOMNodeFilter::SHOW_ELEMENT,
+                &attFilter, false);
+            while (result && (node = iter->nextNode()) != nullptr) {
 
                 DOMNode *parentNode = node->getParentNode();
                 if (parentNode && DOMNode::ELEMENT_NODE == parentNode->getNodeType()) {
@@ -893,17 +1137,18 @@ MeshLinkParserXerces::parseMeshRefModel(MeshFile &meshFile,
                 DOMElement *vertNode = dynamic_cast<DOMElement*>(node);
                 result = parseParamVertex(meshModel, vertNode);
             }
+            iter->release();
+        }
 
-            if (!result) {
-                std::cout << "MeshModel: error parsing vertex." << std::endl;
-                return false;
-            }
+        if (!result) {
+            std::cout << "MeshModel: error parsing vertex." << std::endl;
+            return false;
         }
 
         ParseMeshContainerNoRecurse(modelRef, MeshPointReference);
 
 
-        if (result) {
+        if (result && verbose_level_ > 0) {
             DOMAttr *attNode = modelRef->getAttributeNode(X("name"));
             if (attNode) {
                 XMLCopier<XMLCh, char> val(attNode->getValue());
@@ -1028,23 +1273,21 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
     bool result = true;
 
     // Param vertices
-    DOMNodeList *verts;
-    if (nullptr != (verts = xmlObj->getElementsByTagName(X("ParamVertex"))) &&
-            0 != verts->getLength()) {
-
-        for (XMLSize_t i = 0; i < verts->getLength() && result; ++i) {
-            DOMNode *node;
-            if (nullptr == (node = verts->item(i))) {
-                continue;
-            }
+    {
+        DOMNodeTagNameFilter attFilter("ParamVertex");
+        DOMNode *node;
+        DOMDocument *doc = xmlObj->getOwnerDocument();
+        DOMNodeIterator *iter = doc->createNodeIterator(xmlObj, DOMNodeFilter::SHOW_ELEMENT,
+            &attFilter, false);
+        while (result && (node = iter->nextNode()) != nullptr) {
             DOMElement *vertNode = dynamic_cast<DOMElement*>(node);
             result = parseParamVertex(meshTopo, vertNode);
         }
-
-        if (!result) {
-            std::cout << objName << ": error parsing vertex." << std::endl;
-            return false;
-        }
+        iter->release();
+    }
+    if (!result) {
+        std::cout << objName << ": error parsing vertex." << std::endl;
+        return false;
     }
 
     // Child mesh objects
@@ -1054,23 +1297,19 @@ MeshLinkParserXerces::parseMeshObject(MeshModel *model,
              meshObjIter != parseMeshObjMap.end(); ++meshObjIter) {
         const char *meshObjName = meshObjIter->first;
         pParseMeshObj parseMeshObj = meshObjIter->second;
-        XMLCopier<char, XMLCh> childMeshObj(meshObjName);
-        DOMNodeList *items;
-        if (nullptr == (items = xmlObj->getElementsByTagName(childMeshObj)) ||
-            0 == items->getLength()) {
-            // element not found
-            continue;
-        }
-        totalItems += items->getLength();
-        for (XMLSize_t i = 0; i < items->getLength() && result; ++i) {
+        {
+            DOMNodeTagNameFilter attFilter(meshObjName);
             DOMNode *node;
-            if (nullptr == (node = items->item(i))) {
-                continue;
+            DOMDocument *doc = xmlObj->getOwnerDocument();
+            DOMNodeIterator *iter = doc->createNodeIterator(xmlObj, DOMNodeFilter::SHOW_ELEMENT,
+                &attFilter, false);
+            while (result && (node = iter->nextNode()) != nullptr) {
+                ++totalItems;
+                DOMElement *itemNode = dynamic_cast<DOMElement*>(node);
+                result = (this->*parseMeshObj)(model, meshTopo, itemNode);
             }
-            DOMElement *itemNode = dynamic_cast<DOMElement*>(node);
-            result = (this->*parseMeshObj)(model, meshTopo, itemNode);
+            iter->release();
         }
-
         if (!result) {
             std::cout << objName << ": error parsing " << meshObjName << "." <<
                 std::endl;
@@ -1128,9 +1367,11 @@ MeshLinkParserXerces::parseMeshString(MeshModel *model,
         return result;
     }
 
-    printf("MeshString %s geometry associations:\n", meshString->getName().c_str());
-    printf("%8" MLINT_FORMAT " parametric vertices\n", meshString->getNumParamVerts());
-    printf("%8" MLINT_FORMAT " mesh edges\n", meshString->getNumEdges());
+    if (verbose_level_ > 0) {
+        printf("MeshString %s geometry associations:\n", meshString->getName().c_str());
+        printf("%8" MLINT_FORMAT " parametric vertices\n", meshString->getNumParamVerts());
+        printf("%8" MLINT_FORMAT " mesh edges\n", meshString->getNumEdges());
+    }
 
     return true;
 }
@@ -1329,10 +1570,12 @@ MeshLinkParserXerces::parseMeshSheet(MeshModel *model,
         return result;
     }
 
-    printf("MeshSheet %s geometry associations:\n", meshSheet->getName().c_str());
-    printf("%8" MLINT_FORMAT " parametric vertices\n", meshSheet->getNumParamVerts());
-    printf("%8" MLINT_FORMAT " mesh edges\n", meshSheet->getNumFaceEdges());
-    printf("%8" MLINT_FORMAT " mesh faces\n", meshSheet->getNumFaces());
+    if (verbose_level_ > 0) {
+        printf("MeshSheet %s geometry associations:\n", meshSheet->getName().c_str());
+        printf("%8" MLINT_FORMAT " parametric vertices\n", meshSheet->getNumParamVerts());
+        printf("%8" MLINT_FORMAT " mesh edges\n", meshSheet->getNumFaceEdges());
+        printf("%8" MLINT_FORMAT " mesh faces\n", meshSheet->getNumFaces());
+    }
 
     return true;
 }
@@ -1704,7 +1947,7 @@ MeshLinkParserXerces::parseMeshFaceReference(MeshModel *model,
         if (attrs[iattr] != "") {
             format = attrs[iattr];
         }
-        if ("text" != format) {
+        if ("text" != format && "base64" != format) {
             std::cout << "MeshFaceReference: illegal format value: " <<
                 format << std::endl;
             return false;
@@ -2176,47 +2419,63 @@ MeshLinkParserXerces::parseMeshLinkFile(
         parseGeometryRefs(meshLinkRoot);
 
         // MeshFile elements
-        DOMNodeList *meshFiles = meshLinkRoot->getElementsByTagName(X("MeshFile"));
-        if (nullptr == meshFiles) {
-            std::cout << "Mesh Link File element(s) not found." << std::endl;
-            XMLPlatformUtils::Terminate();
-            result = false;
-            return result;
-        }
 
         // Parse MeshFiles - multiple ModelReferences each containing
         // multiple MeshSheets, each containing multiple ParamVertices
         // (points) and one MeshFaceArray
         result = true;
-        for (XMLSize_t i = 0; i < meshFiles->getLength() && result; ++i) {
+
+        XMLSize_t count = 0;
+        {
+            DOMNodeTagNameFilter attFilter("MeshFile");
+            DOMDocument *doc = meshLinkRoot->getOwnerDocument();
+            DOMNode *node;
+            DOMNodeIterator *iter = doc->createNodeIterator(meshLinkRoot, DOMNodeFilter::SHOW_ELEMENT,
+                &attFilter, false);
             DOMElement *meshFile;
-            DOMNode *node = meshFiles->item(i);
-            if (nullptr != node &&
+            while ((node = iter->nextNode()) != nullptr) {
+                ++count;
+                if (nullptr != node &&
                     DOMNode::ELEMENT_NODE == node->getNodeType()) {
-                meshFile = dynamic_cast<DOMElement*>(node);
-                result = parseMeshFile(meshFile);
+                    meshFile = dynamic_cast<DOMElement*>(node);
+                    result = parseMeshFile(meshFile);
+                }
             }
+            iter->release();
         }
+
+        if (!result || 0 == count) {
+            std::cout << "Mesh Link File element(s) not found." << std::endl;
+            XMLPlatformUtils::Terminate();
+            return result;
+        }
+
+
+        // Transform and MeshElementLinkage elements
+        parsePeriodicInfo(meshLinkRoot);
+
 
         // Cached items for later use if/when writing out Xml file based
         // on parsed/modified Meshassociativity.
         XMLCopier<XMLCh, char> uri = doc->getDocumentURI();
         DOMNode *node = doc->getFirstChild();
         DOMNamedNodeMap *atts = node->getAttributes();
-        XMLSize_t size = atts->getLength();
-        if (size > 3) {
-            // Version
-            DOMNode *attNode = atts->getNamedItem(X("version"));
-            xmlVersion_ = Char(attNode->getNodeValue());
-            // Xml Namespace
-            attNode = atts->getNamedItem(X("xmlns"));
-            xmlns_ = Char(attNode->getNodeValue());
-            // Xml Namespace schema instance
-            attNode = atts->getNamedItem(X("xmlns:xsi"));
-            xmlns_xsi_ = Char(attNode->getNodeValue());
-            // Xml schema location
-            attNode = atts->getNamedItem(X("xsi:schemaLocation"));
-            schemaLocation_ = Char(attNode->getNodeValue());
+        if (nullptr != atts) {
+            XMLSize_t size = atts->getLength();
+            if (size > 3) {
+                // Version
+                DOMNode *attNode = atts->getNamedItem(X("version"));
+                xmlVersion_ = Char(attNode->getNodeValue());
+                // Xml Namespace
+                attNode = atts->getNamedItem(X("xmlns"));
+                xmlns_ = Char(attNode->getNodeValue());
+                // Xml Namespace schema instance
+                attNode = atts->getNamedItem(X("xmlns:xsi"));
+                xmlns_xsi_ = Char(attNode->getNodeValue());
+                // Xml schema location
+                attNode = atts->getNamedItem(X("xsi:schemaLocation"));
+                schemaLocation_ = Char(attNode->getNodeValue());
+            }
         }
     }
 

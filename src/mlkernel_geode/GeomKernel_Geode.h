@@ -93,6 +93,10 @@ public:
 
     bool getProjectionEntityName(ProjectionData &projectionData, std::string &name);
 
+    bool getProjectionTolerance(ProjectionData &projectionData, MLREAL &tolerance);
+
+    bool getProjectionDistance(ProjectionData &projectionData, MLREAL &distance);
+
     bool evalXYZ(MLVector3D UV, const std::string &entityName, MLVector3D xyz);
 
     bool evalRadiusOfCurvature(MLVector2D UV, const std::string &entityName, 
@@ -112,6 +116,11 @@ public:
             bool        *Linear              // If true, the curve is linear and has no unique normal
         );
 
+    bool evalSurfaceTolerance(
+        const std::string &entityName,
+        MLREAL            &minTolerance,
+        MLREAL            &maxTolerance);
+    
     bool evalDerivativesOnCurve(
         MLVector2D UV,                // Parametric location
         const std::string &entityName,

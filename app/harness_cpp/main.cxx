@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <cmath>
 
 
@@ -47,6 +48,8 @@ static int hemi_cyl_tests(MeshAssociativity &meshAssoc);
 // Test the mesh-geometry associativity in om6.xml
 static int oneraM6_tests(MeshAssociativity &meshAssoc);
 
+// Print MeshElementLinkage data
+static void printMeshElementLinkages(MeshAssociativity &meshAssoc);
 
 // Closest point projection onto geometry of constrained meshTopo entity
 static int projectToMeshTopoGeometry(
@@ -85,7 +88,7 @@ static int interpolateFaceMidPoint(
 int main(int argc, char** argv)
 {
     int ret = 0;
-    if (argc != 2) {
+    if (argc < 2) {
         printf("usage: <program name> <xml file name>\n");
         ::exit(1);
     }
@@ -121,6 +124,8 @@ int main(int argc, char** argv)
     printf("Error parsing geometry-mesh associativity\n");
     return (-1);
 #endif
+
+    printMeshElementLinkages(*meshAssoc);
 
 #if defined(HAVE_GEODE)
     if (meshlink_fname.compare("sphere_ml.xml") == 0) {
@@ -300,7 +305,8 @@ testMeshSheets(
         return 1;
     }
 
-    std::vector<MeshSheet *> meshSheets = meshModel->getMeshSheets();
+    std::vector<MeshSheet *> meshSheets;
+    meshModel->getMeshSheets(meshSheets);
     sizeMeshSheets = (MLINT) meshSheets.size();
     if (sizeMeshSheets != numMeshSheets) {
         /* error */
@@ -313,7 +319,8 @@ testMeshSheets(
         sheet_gref = meshSheets[i]->getGref();
 
         /* loop over faces in the sheet */
-        std::vector<const MeshFace *> meshFaces = meshSheets[i]->getMeshFaces();
+        std::vector<const MeshFace *> meshFaces;
+        meshSheets[i]->getMeshFaces(meshFaces);
         numFaces = meshSheets[i]->getNumFaces();
         if ((MLINT)meshFaces.size() != numFaces) {
             /* error */
@@ -347,7 +354,8 @@ testMeshSheets(
                         ret = 1;
                     }
 
-                    std::vector<ParamVertex *> paramVerts = meshFace->getParamVerts();
+                    std::vector<ParamVertex *> paramVerts;
+                    meshFace->getParamVerts(paramVerts);
                     numParamVerts = meshFace->getNumParamVerts();
 
                     for (ipv = 0; ipv < numParamVerts; ++ipv) {
@@ -398,7 +406,8 @@ testMeshStrings(
         return 1;
     }
 
-    std::vector<MeshString *> meshStrings = meshModel->getMeshStrings();
+    std::vector<MeshString *> meshStrings;
+    meshModel->getMeshStrings(meshStrings);
     sizeMeshStrings = (MLINT)meshStrings.size();
     if (sizeMeshStrings != numMeshStrings) {
         /* error */
@@ -411,7 +420,8 @@ testMeshStrings(
         string_gref = meshStrings[i]->getGref();
 
         /* loop over edges in the string */
-        std::vector<const MeshEdge *> meshEdges = meshStrings[i]->getMeshEdges();
+        std::vector<const MeshEdge *> meshEdges;
+        meshStrings[i]->getMeshEdges(meshEdges);
         numEdges = (MLINT)meshEdges.size();
 
         for (j = 0; 0 == ret && j < numEdges; ++j) {
@@ -440,7 +450,8 @@ testMeshStrings(
                         /* error */
                         ret = 1;
                     }
-                    std::vector<ParamVertex *> paramVerts = meshEdge->getParamVerts();
+                    std::vector<ParamVertex *> paramVerts;
+                    meshEdge->getParamVerts(paramVerts);
                     numpParamVerts = paramVerts.size();
 
                     for (ipv = 0; ipv < numpParamVerts; ++ipv) {
@@ -1066,6 +1077,84 @@ hemi_cyl_tests(MeshAssociativity &meshAssoc)
     return ret;
 }
 
+void printTransformQuaternion(const MeshLinkTransform *xform)
+{
+    MLREAL quat[4][4];
+    xform->getQuaternion(quat);
+    int i, j;
+    printf("  Transform:\n   ");
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 4; ++j) {
+            printf("%11.2e", quat[i][j]);
+        }
+        printf("\n   ");
+    }
+
+}
+
+void printMeshElementLinkages(MeshAssociativity &meshAssoc)
+{
+    std::vector<MeshElementLinkage *> links;
+    meshAssoc.getMeshElementLinkages(links);
+    for (auto link : links) {
+        const std::string &name = link->getName();
+        printf("\nLinkage: %s\n", name.c_str());
+
+        std::string sourceEntityRef;
+        std::string targetEntityRef;
+        link->getEntityRefs(sourceEntityRef, targetEntityRef);
+        printf("  Source Entity Name: %s\n", sourceEntityRef.c_str());
+
+        MeshModel *model;
+        MeshSheet *sheet;
+        MeshString *string;
+        MLINT count;
+        const char *topoStr;
+        const char *entStr;
+        if (meshAssoc.getMeshSheetByName(sourceEntityRef, &model, &sheet)) {
+            count = sheet->getNumFaces();
+            // get ordered array of faces in the sheet
+            //std::vector<const MeshFace*> faces = sheet->getMeshFaces();
+            topoStr = "MeshSheet";
+            entStr = "faces";
+        }
+        else if (meshAssoc.getMeshStringByName(sourceEntityRef, &model, &string)) {
+            count = string->getNumEdges();
+            // get ordered array of edges in the string
+            //std::vector<const MeshEdge *> edges = string->getMeshEdges();
+            topoStr = "MeshString";
+            entStr = "edges";
+        }
+        else {
+            printf("error: missing source entity\n");
+            continue;
+        }
+        printf("    %s with %" MLINT_FORMAT " %s\n", topoStr, count, entStr);
+
+        printf("  Target Entity Name: %s\n", targetEntityRef.c_str());
+        if (meshAssoc.getMeshSheetByName(targetEntityRef, &model, &sheet)) {
+            count = sheet->getNumFaces();
+            // get ordered array of faces in the sheet
+            //std::vector<const MeshFace*> faces = sheet->getMeshFaces();
+            topoStr = "MeshSheet";
+            entStr = "faces";
+        }
+        else if (meshAssoc.getMeshStringByName(targetEntityRef, &model, &string)) {
+            count = string->getNumEdges();
+            // get ordered array of edges in the string
+            //std::vector<const MeshEdge *> edges = string->getMeshEdges();
+            topoStr = "MeshString";
+            entStr = "edges";
+        }
+        else {
+            printf("error: missing target entity\n");
+            continue;
+        }
+        printf("    %s with %" MLINT_FORMAT " %s\n", topoStr, count, entStr);
+
+        printTransformQuaternion(link->getTransform(meshAssoc));
+    }
+}
 
 
 //===============================================================================
@@ -1827,7 +1916,7 @@ oneraM6_tests(MeshAssociativity &meshAssoc)
 
                     std::vector<ParamVertex *> paramVerts;
                     MLINT num_pvObjs;
-                    paramVerts = meshEdge->getParamVerts();
+                    meshEdge->getParamVerts(paramVerts);
                     num_pvObjs = meshEdge->getNumParamVerts();
                     if (num_pvObjs == 2) {
                         /* have parametric data */
@@ -1928,7 +2017,7 @@ oneraM6_tests(MeshAssociativity &meshAssoc)
 
                     std::vector<ParamVertex *> paramVerts;
                     MLINT num_pvObjs;
-                    paramVerts = meshFace->getParamVerts();
+                    meshFace->getParamVerts(paramVerts);
                     num_pvObjs = meshFace->getNumParamVerts();
                     if (num_pvObjs == 3) {
                         /* have parametric data */

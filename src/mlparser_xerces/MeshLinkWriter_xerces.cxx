@@ -137,9 +137,10 @@ bool
 MeshLinkWriterXerces::writeRootAttributes()
 {
     bool result = true;
-    MLINT attID = 1;
-    const MeshLinkAttribute *att = meshAssoc_->getAttributeByID(attID);
-    while (nullptr != att && MAX_ID > attID) {
+
+    std::vector<const MeshLinkAttribute *> atts = meshAssoc_->getAttributes();
+    for (auto att : atts) {
+        MLINT attID = att->getAttID();
         const char *name{ nullptr };
         const char *value{ nullptr };
         meshAssoc_->getAttribute(attID, &name, &value);
@@ -169,6 +170,72 @@ MeshLinkWriterXerces::writeRootAttributes()
     return result;
 }
 
+
+bool
+MeshLinkWriterXerces::writePeriodicInfo()
+{
+    bool result = true;
+
+    std::vector<const MeshLinkTransform *> xforms;
+    meshAssoc_->getTransforms(xforms);
+    for (auto xform : xforms) {
+        // Create the element, assign the attributes
+        DOMElement *node;
+        node = meshDoc_->createElementNS(X(NSStr), X("Transform"));
+        if (node) {
+            setUintAtt(xform->getXID(), node, "xid");
+
+            const std::string &name = xform->getName();
+            if (!name.empty()) {
+                node->setAttribute(X("name"), X(name.c_str()));
+            }
+
+            if (xform->hasAref()) {
+                setUintAtt(xform->getAref(), node, "aref");
+            }
+
+            const std::string &contents = xform->getContents();
+            if (!contents.empty()) {
+                // Add child node of type DOMNode::TEXT_NODE to hold the contents
+                DOMText *textNode = meshDoc_->createTextNode(X(contents.c_str()));
+                node->appendChild(textNode);
+            }
+            meshLinkRoot_->appendChild(node);
+        }
+    }
+
+
+    std::vector<MeshElementLinkage *> links;
+    meshAssoc_->getMeshElementLinkages(links);
+    for (auto link : links) {
+        // Create the element, assign the attributes
+        DOMElement *node;
+        node = meshDoc_->createElementNS(X(NSStr), X("MeshElementLinkage"));
+        if (node) {
+            std::string sourceEntityRef;
+            std::string targetEntityRef;
+            link->getEntityRefs(sourceEntityRef, targetEntityRef);
+            node->setAttribute(X("sourceEntityRef"), X(sourceEntityRef.c_str()));
+            node->setAttribute(X("targetEntityRef"), X(targetEntityRef.c_str()));
+
+
+            const char *name{ nullptr };
+            link->getName(&name);
+            node->setAttribute(X("name"), X(name));
+
+            if (link->hasAref()) {
+                setUintAtt(link->getAref(), node, "aref");
+            }
+            MLINT xref;
+            if (link->getXref(&xref)) {
+                setUintAtt(xref, node, "xref");
+            }
+            meshLinkRoot_->appendChild(node);
+        }
+    }
+
+    return result;
+}
 
 bool
 MeshLinkWriterXerces::writeGeometryRefs()
@@ -354,7 +421,8 @@ MeshLinkWriterXerces::writeMeshFace(xercesc_3_2::DOMElement *sheet,
     if (nullptr == meshSheet) {
         return false;
     }
-    std::vector<const MeshFace *> faces = meshSheet->getMeshFaces();
+    std::vector<const MeshFace *> faces;
+    meshSheet->getMeshFaces(faces);
     if (faces.empty()) {
         return false;
     }
@@ -493,7 +561,8 @@ MeshLinkWriterXerces::writeMeshEdge(xercesc_3_2::DOMElement *string,
     if (nullptr == meshString) {
         return false;
     }
-    std::vector<const MeshEdge *> edges = meshString->getMeshEdges();
+    std::vector<const MeshEdge *> edges;
+    meshString->getMeshEdges(edges);
     if (edges.empty()) {
         return false;
     }
@@ -553,7 +622,8 @@ MeshLinkWriterXerces::writeMeshEdge(xercesc_3_2::DOMElement *string,
 
 #define WriteMeshContainer(ParentNode, MeshObj, MeshTopo)               \
 {                                                                       \
-    std::vector<MeshObj *> objs = meshModelRef->get##MeshObj##s();      \
+    std::vector<MeshObj *> objs;                                        \
+    meshModelRef->get##MeshObj##s(objs);                                \
     for (auto obj : objs) {                                             \
         DOMElement *node = meshDoc_->createElementNS(X(NSStr), X(#MeshObj)); \
         node->setAttribute(X("name"), X(obj->getName().c_str()));       \
@@ -705,6 +775,13 @@ MeshLinkWriterXerces::writeMeshLinkFile(const std::string &fname,
         std::cout << "Failed to write Mesh Files." << std::endl;
         return false;
     }
+
+    // Transform and MeshElementLinkage elements
+    if (!writePeriodicInfo()) {
+        std::cout << "Failed to write Mesh Link transform and linkage info." << std::endl;
+        return false;
+    }
+
 
     // Set up raw buffer, output stream objects
     MemBufFormatTarget *buffer = new MemBufFormatTarget();

@@ -367,7 +367,8 @@ SurfMesh::computeEdgeMinRadiusOfCurvature(
 
     // determine radius of curvature from surface geometry
     // by using the face-edge (MeshSheet) associativity
-    std::vector<MeshSheet *> meshSheets = meshModel.getMeshSheets();
+    std::vector<MeshSheet *> meshSheets;
+    meshModel.getMeshSheets(meshSheets);
     std::vector<MeshSheet *>::iterator iter;
     std::map<MLINT, MeshEdge *> edgesToCheck;
     for (iter = meshSheets.begin(); iter != meshSheets.end(); ++iter) {

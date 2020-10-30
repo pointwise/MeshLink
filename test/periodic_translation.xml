@@ -1,0 +1,1809 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MeshLink version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://pointwise.com ../schema/MeshLink.xsd" xmlns="https://pointwise.com">
+  <!-- Wed Aug 26 18:07:38 2020 -->
+  <Attribute attid="1" name="mesh generator">Pointwise V18.3R3C1</Attribute>
+  <Attribute attid="2" name="geometry format">NMB</Attribute>
+  <Attribute attid="3" name="model size">1000</Attribute>
+  <AttributeGroup attid="4" name="geometry atts">2 3 </AttributeGroup>
+  <Attribute attid="5" name="mesh format">CGNS</Attribute>
+  <Attribute attid="6" name="transform type">translation</Attribute>
+  <Attribute attid="7" name="linkage type">periodic</Attribute>
+  <GeometryFile filename="periodic_translation.nmb" aref="4">
+    <GeometryReference gid="1" ref="tsurf-1"/>
+    <GeometryReference gid="2" ref="tsurf-3"/>
+    <GeometryReference gid="3" ref="tsurf-2"/>
+    <GeometryReference gid="7" ref="con-5_1"/>
+    <GeometryReference gid="8" ref="con-6_1"/>
+    <GeometryReference gid="9" ref="con-7_1"/>
+    <GeometryReference gid="10" ref="con-8_1"/>
+    <GeometryReference gid="11" ref="con-9_1"/>
+    <GeometryReference gid="12" ref="con-9_2"/>
+    <GeometryReference gid="13" ref="con-9_3"/>
+    <GeometryReference gid="14" ref="con-9_4"/>
+    <GeometryReference gid="15" ref="con-9_5"/>
+    <GeometryReference gid="16" ref="con-9_6"/>
+    <GeometryReference gid="18" ref="con-10_1"/>
+    <GeometryReference gid="19" ref="con-10_2"/>
+    <GeometryReference gid="21" ref="con-1_1"/>
+    <GeometryReference gid="22" ref="con-1_2"/>
+    <GeometryReference gid="24" ref="con-12_1"/>
+    <GeometryReference gid="25" ref="con-12_2"/>
+    <GeometryReference gid="27" ref="con-4_1"/>
+    <GeometryReference gid="28" ref="con-15_1"/>
+    <GeometryReference gid="29" ref="con-16_1"/>
+    <GeometryReference gid="30" ref="con-18_1"/>
+  </GeometryFile>
+  <!-- grefs for: root/con-9 -->
+  <GeometryGroup gid="17">11 12 13 14 15 16</GeometryGroup>
+  <!-- grefs for: root/con-10 -->
+  <GeometryGroup gid="20">18 19</GeometryGroup>
+  <!-- grefs for: root/con-1 -->
+  <GeometryGroup gid="23">21 22</GeometryGroup>
+  <!-- grefs for: root/con-12 -->
+  <GeometryGroup gid="26">24 25</GeometryGroup>
+  <MeshFile filename="periodic_translation.cgns" aref="5">
+    <!-- HYBRID EXPORT -->
+    <MeshModelReference ref="/Base/blk-1">
+      <!-- UNSTRUCTURED -->
+      <MeshSheet name="root/dom-2" gref="1">
+        <ParamVertex vref="1" gref="1" dim="2">-1.00000000000728 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="2" gref="1" dim="2">-0.750000000000094 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="3" gref="1" dim="2">-0.500000000000094 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="4" gref="1" dim="2">-0.250000000007276 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="5" gref="1" dim="2">-9.37028232783632e-14 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="6" gref="1" dim="2">0.249999999992724 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="7" gref="1" dim="2">0.499999999999906 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="8" gref="1" dim="2">0.749999999992724 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="9" gref="1" dim="2">1 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="10" gref="1" dim="2">1 -0.249999999996497</ParamVertex>
+        <ParamVertex vref="11" gref="1" dim="2">1 3.50358630996084e-12</ParamVertex>
+        <ParamVertex vref="12" gref="1" dim="2">1 0.250000000003504</ParamVertex>
+        <ParamVertex vref="13" gref="1" dim="2">1 0.500000000001671</ParamVertex>
+        <ParamVertex vref="14" gref="1" dim="2">0.749999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="15" gref="1" dim="2">0.499999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="16" gref="1" dim="2">0.249999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="17" gref="1" dim="2">-9.37028232783632e-14 0.499999999992724</ParamVertex>
+        <ParamVertex vref="18" gref="1" dim="2">-0.250000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="19" gref="1" dim="2">-0.500000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="20" gref="1" dim="2">-0.750000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="21" gref="1" dim="2">-1.00000000000009 0.499999999992724</ParamVertex>
+        <ParamVertex vref="22" gref="1" dim="2">-1.00000000000728 0.250000000003503</ParamVertex>
+        <ParamVertex vref="23" gref="1" dim="2">-1.00000000000728 3.5033365097803e-12</ParamVertex>
+        <ParamVertex vref="24" gref="1" dim="2">-1.00000000000728 -0.249999999996497</ParamVertex>
+        <ParamVertex vref="25" gref="1" dim="2">0.272315819999517 -0.189430461602972</ParamVertex>
+        <ParamVertex vref="26" gref="1" dim="2">0.541594135141739 -0.148798592575317</ParamVertex>
+        <ParamVertex vref="27" gref="1" dim="2">0.383506022999535 -0.00318419380089048</ParamVertex>
+        <ParamVertex vref="28" gref="1" dim="2">-0.861797742681783 -0.396136657828396</ParamVertex>
+        <ParamVertex vref="29" gref="1" dim="2">0.829824068193217 -0.321994031630834</ParamVertex>
+        <ParamVertex vref="30" gref="1" dim="2">-0.852247249802491 0.34754503239167</ParamVertex>
+        <ParamVertex vref="31" gref="1" dim="2">0.831667361983671 0.323338753020722</ParamVertex>
+        <ParamVertex vref="32" gref="1" dim="2">-0.51134634633901 -0.129496305442805</ParamVertex>
+        <ParamVertex vref="33" gref="1" dim="2">-0.532157669143486 -0.338091262280653</ParamVertex>
+        <ParamVertex vref="34" gref="1" dim="2">-0.394227504949487 -0.247405955651474</ParamVertex>
+        <ParamVertex vref="35" gref="1" dim="2">-0.697190970705303 -0.334546631324094</ParamVertex>
+        <ParamVertex vref="36" gref="1" dim="2">-0.834376715246065 0.16461684711128</ParamVertex>
+        <ParamVertex vref="37" gref="1" dim="2">-0.834403853735884 -0.0182427344461046</ParamVertex>
+        <ParamVertex vref="38" gref="1" dim="2">-0.677366200198024 -0.121951986693773</ParamVertex>
+        <ParamVertex vref="39" gref="1" dim="2">-0.827079551757901 -0.215212658539509</ParamVertex>
+        <ParamVertex vref="40" gref="1" dim="2">-0.415322543183569 0.263675470541001</ParamVertex>
+        <ParamVertex vref="41" gref="1" dim="2">-0.230568087997606 0.139701706969101</ParamVertex>
+        <ParamVertex vref="42" gref="1" dim="2">-0.127950673008696 0.316936271702543</ParamVertex>
+        <ParamVertex vref="43" gref="1" dim="2">-0.0104412877551389 0.153534635818084</ParamVertex>
+        <ParamVertex vref="44" gref="1" dim="2">-0.159161676513705 -0.0476910313209903</ParamVertex>
+        <ParamVertex vref="45" gref="1" dim="2">0.113566816417067 -0.0065591414352112</ParamVertex>
+        <ParamVertex vref="46" gref="1" dim="2">0.261419544141487 0.184373613170957</ParamVertex>
+        <ParamVertex vref="47" gref="1" dim="2">0.107656445052826 0.336851811308809</ParamVertex>
+        <ParamVertex vref="48" gref="1" dim="2">-0.119979353043565 -0.327243765066824</ParamVertex>
+        <ParamVertex vref="49" gref="1" dim="2">0.116452989717141 -0.339352186169276</ParamVertex>
+        <ParamVertex vref="50" gref="1" dim="2">0.00417567844494843 -0.184220193391506</ParamVertex>
+        <ParamVertex vref="51" gref="1" dim="2">0.554246130896387 -0.00320702132940585</ParamVertex>
+        <ParamVertex vref="52" gref="1" dim="2">0.537274175185635 0.142742964899686</ParamVertex>
+        <ParamVertex vref="53" gref="1" dim="2">0.727850160998807 -0.000554915803784764</ParamVertex>
+        <ParamVertex vref="54" gref="1" dim="2">0.71953521679285 -0.191320105236009</ParamVertex>
+        <ParamVertex vref="55" gref="1" dim="2">0.717249416013487 0.189274832606154</ParamVertex>
+        <ParamVertex vref="56" gref="1" dim="2">0.857666284125582 0.153709428968911</ParamVertex>
+        <ParamVertex vref="57" gref="1" dim="2">0.312411028201494 0.364441598122036</ParamVertex>
+        <ParamVertex vref="58" gref="1" dim="2">-0.663355721442168 0.306459377235316</ParamVertex>
+        <ParamVertex vref="59" gref="1" dim="2">0.442979151827708 0.300982566123408</ParamVertex>
+        <ParamVertex vref="60" gref="1" dim="2">0.636998934775923 -0.330354370167543</ParamVertex>
+        <ParamVertex vref="61" gref="1" dim="2">0.454266573708117 -0.307239193550091</ParamVertex>
+        <ParamVertex vref="62" gref="1" dim="2">0.320423978630683 -0.367612543408127</ParamVertex>
+        <ParamVertex vref="63" gref="1" dim="2">0.631789097773741 0.327137931945239</ParamVertex>
+        <ParamVertex vref="64" gref="1" dim="2">-0.641770410269515 0.101256977352521</ParamVertex>
+        <ParamVertex vref="65" gref="1" dim="2">0.861408784854566 -0.154898616002564</ParamVertex>
+        <ParamVertex vref="66" gref="1" dim="2">-0.312513258240457 -0.105389677465535</ParamVertex>
+        <ParamVertex vref="67" gref="1" dim="2">-0.425797427811382 0.0129848903674089</ParamVertex>
+        <ParamVertex vref="68" gref="1" dim="2">-0.170839921944337 -0.201873161923335</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshFace etype="Tri3" format="text" count="110">
+         35 39 38
+         28 24 39
+         4 3 33
+         35 33 3
+         41 44 66
+         68 34 66
+         64 67 32
+         66 34 32
+         31 12 56
+         11 53 56
+         29 54 65
+         53 65 54
+         26 54 60
+         29 8 60
+         31 55 63
+         52 59 63
+         44 45 50
+         25 49 50
+         60 61 26
+         27 51 26
+         63 55 52
+         53 51 52
+         67 64 40
+         36 58 64
+         4 48 5
+         34 68 48
+         44 41 43
+         42 47 43
+         30 58 36
+         64 37 36
+         37 39 23
+         38 64 32
+         49 25 62
+         61 62 25
+         46 57 59
+         47 16 57
+         26 61 25
+         45 46 27
+         43 41 42
+         40 18 42
+         67 40 41
+         50 68 44
+         12 31 13
+         63 14 31
+         8 29 9
+         65 10 29
+         24 28 1
+         35 2 28
+         20 30 21
+         36 22 30
+         68 50 48
+         45 25 50
+         39 24 23
+         22 36 23
+         10 65 11
+         52 55 53
+         60 8 7
+         6 62 7
+         14 63 15
+         52 27 46
+         67 41 66
+         58 19 40
+         66 44 68
+         34 4 33
+         57 46 47
+         45 43 46
+         5 48 49
+         67 66 32
+         65 53 11
+         54 29 60
+         30 20 58
+         64 58 40
+         35 28 39
+         64 38 37
+         51 53 26
+         63 59 15
+         62 61 7
+         5 49 6
+         47 17 16
+         46 59 52
+         35 38 33
+         40 19 18
+         6 49 62
+         47 42 17
+         61 60 7
+         59 57 15
+         58 20 19
+         4 34 48
+         12 11 56
+         56 55 31
+         16 15 57
+         56 53 55
+         54 26 53
+         25 45 27
+         52 51 27
+         18 17 42
+         50 49 48
+         43 47 46
+         45 44 43
+         42 41 40
+         38 39 37
+         32 33 38
+         37 23 36
+         2 35 3
+         34 33 32
+         31 14 13
+         30 22 21
+         29 10 9
+         28 2 1
+         27 26 25
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-3" gref="2">
+        <ParamVertex vref="69" gref="2" dim="2">-1.00000000000728 1.49999999999474</ParamVertex>
+        <ParamVertex vref="70" gref="2" dim="2">-1.00000000000728 1.24999999999272</ParamVertex>
+        <ParamVertex vref="71" gref="2" dim="2">-1.00000000000728 0.999999999992724</ParamVertex>
+        <ParamVertex vref="72" gref="2" dim="2">-1.00000000001455 0.75000000000613</ParamVertex>
+        <ParamVertex vref="73" gref="2" dim="2">-1.00000000001455 0.500000000004116</ParamVertex>
+        <ParamVertex vref="74" gref="2" dim="2">-1.00000000001455 0.250000000004116</ParamVertex>
+        <ParamVertex vref="75" gref="2" dim="2">-1.00000000000728 -7.27602866848321e-12</ParamVertex>
+        <ParamVertex vref="76" gref="2" dim="2">-1.00000000000728 -0.250000000007276</ParamVertex>
+        <ParamVertex vref="77" gref="2" dim="2">-1.00000000001455 -0.499999999995884</ParamVertex>
+        <ParamVertex vref="78" gref="2" dim="2">-1.00000000001455 -0.749999999995884</ParamVertex>
+        <ParamVertex vref="79" gref="2" dim="2">-1.00000000000728 -1.00000000000728</ParamVertex>
+        <ParamVertex vref="80" gref="2" dim="2">-1.00000000001455 -1.24999999999588</ParamVertex>
+        <ParamVertex vref="1" gref="2" dim="2">-1.00000000000728 -1.50000000000728</ParamVertex>
+        <ParamVertex vref="2" gref="2" dim="2">-0.749999999992911 -1.5</ParamVertex>
+        <ParamVertex vref="3" gref="2" dim="2">-0.499999999992911 -1.5</ParamVertex>
+        <ParamVertex vref="4" gref="2" dim="2">-0.250000000000094 -1.5</ParamVertex>
+        <ParamVertex vref="5" gref="2" dim="2">7.0885519676267e-12 -1.5</ParamVertex>
+        <ParamVertex vref="6" gref="2" dim="2">0.249999999999906 -1.5</ParamVertex>
+        <ParamVertex vref="7" gref="2" dim="2">0.500000000007088 -1.5</ParamVertex>
+        <ParamVertex vref="8" gref="2" dim="2">0.749999999999906 -1.5</ParamVertex>
+        <ParamVertex vref="9" gref="2" dim="2">1 -1.49999999999799</ParamVertex>
+        <ParamVertex vref="81" gref="2" dim="2">0.999999999999394 -1.25000000001455</ParamVertex>
+        <ParamVertex vref="82" gref="2" dim="2">0.999999999998787 -1.00000000001455</ParamVertex>
+        <ParamVertex vref="83" gref="2" dim="2">0.999999999998181 -0.750000000014552</ParamVertex>
+        <ParamVertex vref="84" gref="2" dim="2">0.999999999997575 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="85" gref="2" dim="2">0.999999999996968 -0.250000000014552</ParamVertex>
+        <ParamVertex vref="86" gref="2" dim="2">0.999999999996362 -1.45516776406266e-11</ParamVertex>
+        <ParamVertex vref="87" gref="2" dim="2">0.999999999995756 0.249999999985448</ParamVertex>
+        <ParamVertex vref="88" gref="2" dim="2">0.999999999995149 0.499999999985448</ParamVertex>
+        <ParamVertex vref="89" gref="2" dim="2">0.999999999994543 0.749999999985448</ParamVertex>
+        <ParamVertex vref="90" gref="2" dim="2">0.999999999993937 0.999999999985448</ParamVertex>
+        <ParamVertex vref="91" gref="2" dim="2">0.99999999999333 1.24999999998545</ParamVertex>
+        <ParamVertex vref="92" gref="2" dim="2">1 1.49999999999474</ParamVertex>
+        <ParamVertex vref="93" gref="2" dim="2">0.749999999992724 1.49999999998636</ParamVertex>
+        <ParamVertex vref="94" gref="2" dim="2">0.499999999992724 1.49999999998727</ParamVertex>
+        <ParamVertex vref="95" gref="2" dim="2">0.249999999992724 1.49999999998818</ParamVertex>
+        <ParamVertex vref="96" gref="2" dim="2">-7.27595761418343e-12 1.49999999998909</ParamVertex>
+        <ParamVertex vref="97" gref="2" dim="2">-0.250000000007276 1.49999999999</ParamVertex>
+        <ParamVertex vref="98" gref="2" dim="2">-0.500000000007276 1.49999999999091</ParamVertex>
+        <ParamVertex vref="99" gref="2" dim="2">-0.750000000007276 1.49999999999181</ParamVertex>
+        <ParamVertex vref="100" gref="2" dim="2">-0.85972235851951 -1.14153390086654</ParamVertex>
+        <ParamVertex vref="101" gref="2" dim="2">-0.740245276233149 -0.988165913896295</ParamVertex>
+        <ParamVertex vref="102" gref="2" dim="2">-0.866316076151024 1.377711986379</ParamVertex>
+        <ParamVertex vref="103" gref="2" dim="2">0.839901225979958 1.3448888808599</ParamVertex>
+        <ParamVertex vref="104" gref="2" dim="2">0.835726737317759 -1.36788175887358</ParamVertex>
+        <ParamVertex vref="105" gref="2" dim="2">-0.821486575027938 -1.3270783533502</ParamVertex>
+        <ParamVertex vref="106" gref="2" dim="2">-0.869499039097441 0.745524215563895</ParamVertex>
+        <ParamVertex vref="107" gref="2" dim="2">-0.826895230447575 1.10530315779379</ParamVertex>
+        <ParamVertex vref="108" gref="2" dim="2">-0.62622009710756 1.06657107053847</ParamVertex>
+        <ParamVertex vref="109" gref="2" dim="2">-0.712870698978575 1.27118058491403</ParamVertex>
+        <ParamVertex vref="110" gref="2" dim="2">0.410541425030633 1.30165169298742</ParamVertex>
+        <ParamVertex vref="111" gref="2" dim="2">0.161519860003332 1.31175588810041</ParamVertex>
+        <ParamVertex vref="112" gref="2" dim="2">-0.465326333138294 1.19280042482876</ParamVertex>
+        <ParamVertex vref="113" gref="2" dim="2">-0.0354194046173313 0.661906019018957</ParamVertex>
+        <ParamVertex vref="114" gref="2" dim="2">0.053251557737157 0.778840670948291</ParamVertex>
+        <ParamVertex vref="115" gref="2" dim="2">-0.135734362568042 0.833153772078439</ParamVertex>
+        <ParamVertex vref="116" gref="2" dim="2">0.783092579166328 -0.420972338347579</ParamVertex>
+        <ParamVertex vref="117" gref="2" dim="2">0.859472365681672 -0.6296193499605</ParamVertex>
+        <ParamVertex vref="118" gref="2" dim="2">0.823276000457507 -1.04208690238965</ParamVertex>
+        <ParamVertex vref="119" gref="2" dim="2">0.610373182185899 -1.01837593912469</ParamVertex>
+        <ParamVertex vref="120" gref="2" dim="2">0.713028135866515 -1.21728773628826</ParamVertex>
+        <ParamVertex vref="121" gref="2" dim="2">0.277148273754311 1.16287638701892</ParamVertex>
+        <ParamVertex vref="122" gref="2" dim="2">0.800968174231112 1.1642106409624</ParamVertex>
+        <ParamVertex vref="123" gref="2" dim="2">0.002649437212147 -0.503295186623506</ParamVertex>
+        <ParamVertex vref="124" gref="2" dim="2">0.120513086060204 -0.659394301141019</ParamVertex>
+        <ParamVertex vref="125" gref="2" dim="2">0.181868650734004 -0.468346017484545</ParamVertex>
+        <ParamVertex vref="126" gref="2" dim="2">0.467618133706669 -1.17219424986446</ParamVertex>
+        <ParamVertex vref="127" gref="2" dim="2">-0.367552176480746 -1.27194889356699</ParamVertex>
+        <ParamVertex vref="128" gref="2" dim="2">-0.118965254215783 -1.31446843380646</ParamVertex>
+        <ParamVertex vref="129" gref="2" dim="2">-0.710682816818589 -1.17981277206532</ParamVertex>
+        <ParamVertex vref="130" gref="2" dim="2">-0.185230479295715 -1.11756838213787</ParamVertex>
+        <ParamVertex vref="131" gref="2" dim="2">0.594799248433565 1.17697976657047</ParamVertex>
+        <ParamVertex vref="132" gref="2" dim="2">0.45824927252248 1.07229151792713</ParamVertex>
+        <ParamVertex vref="133" gref="2" dim="2">0.685312422943239 0.967083392104488</ParamVertex>
+        <ParamVertex vref="134" gref="2" dim="2">-0.482953561315542 1.37272144617081</ParamVertex>
+        <ParamVertex vref="135" gref="2" dim="2">-0.528287769161015 0.562123862057552</ParamVertex>
+        <ParamVertex vref="136" gref="2" dim="2">-0.65227336698419 0.417992458947933</ParamVertex>
+        <ParamVertex vref="137" gref="2" dim="2">-0.487940423429572 0.370375244663107</ParamVertex>
+        <ParamVertex vref="138" gref="2" dim="2">0.59536141915774 0.461200813555944</ParamVertex>
+        <ParamVertex vref="139" gref="2" dim="2">0.810127092912027 0.596477556456486</ParamVertex>
+        <ParamVertex vref="140" gref="2" dim="2">0.609931666999361 0.718488384141551</ParamVertex>
+        <ParamVertex vref="141" gref="2" dim="2">-0.82768374026964 0.371599047905404</ParamVertex>
+        <ParamVertex vref="142" gref="2" dim="2">-0.818782077556113 0.161467085099517</ParamVertex>
+        <ParamVertex vref="143" gref="2" dim="2">-0.660994633496887 0.251551899278689</ParamVertex>
+        <ParamVertex vref="144" gref="2" dim="2">0.473495144226969 -0.101932336751628</ParamVertex>
+        <ParamVertex vref="145" gref="2" dim="2">0.532242952743206 0.0811413852939509</ParamVertex>
+        <ParamVertex vref="146" gref="2" dim="2">0.361376617288626 0.0757740849565787</ParamVertex>
+        <ParamVertex vref="147" gref="2" dim="2">0.332591912387321 -0.553044877989534</ParamVertex>
+        <ParamVertex vref="148" gref="2" dim="2">0.322931712908977 -0.777131896844072</ParamVertex>
+        <ParamVertex vref="149" gref="2" dim="2">0.667578555451483 -0.0248857207313555</ParamVertex>
+        <ParamVertex vref="150" gref="2" dim="2">-0.224073686472845 -0.291573467253358</ParamVertex>
+        <ParamVertex vref="151" gref="2" dim="2">-0.387335195592834 -0.419141473846051</ParamVertex>
+        <ParamVertex vref="152" gref="2" dim="2">-0.210128603350774 -0.497052365400585</ParamVertex>
+        <ParamVertex vref="153" gref="2" dim="2">0.858834779739297 -0.0682615626182264</ParamVertex>
+        <ParamVertex vref="154" gref="2" dim="2">-0.848276513363312 -0.634901943640258</ParamVertex>
+        <ParamVertex vref="155" gref="2" dim="2">-0.809360621411128 -0.385773185174847</ParamVertex>
+        <ParamVertex vref="156" gref="2" dim="2">0.555776327466856 -1.32390579377343</ParamVertex>
+        <ParamVertex vref="157" gref="2" dim="2">0.780321139596453 -0.21377149621604</ParamVertex>
+        <ParamVertex vref="158" gref="2" dim="2">0.653721202529002 -1.3776465316136</ParamVertex>
+        <ParamVertex vref="159" gref="2" dim="2">0.12726586477617 -1.33774990783023</ParamVertex>
+        <ParamVertex vref="160" gref="2" dim="2">-0.300265195144652 0.497087847211255</ParamVertex>
+        <ParamVertex vref="161" gref="2" dim="2">-0.335186875863106 0.26006201292533</ParamVertex>
+        <ParamVertex vref="162" gref="2" dim="2">0.238958132537292 0.791080427791143</ParamVertex>
+        <ParamVertex vref="163" gref="2" dim="2">0.450846465917183 0.856352265416868</ParamVertex>
+        <ParamVertex vref="164" gref="2" dim="2">0.270877531876186 0.971582776408551</ParamVertex>
+        <ParamVertex vref="165" gref="2" dim="2">-0.564190387278631 -0.337581983515691</ParamVertex>
+        <ParamVertex vref="166" gref="2" dim="2">-0.492390986343726 -0.526680495764452</ParamVertex>
+        <ParamVertex vref="167" gref="2" dim="2">-0.501366712166763 0.196075876955632</ParamVertex>
+        <ParamVertex vref="168" gref="2" dim="2">-0.412329237486929 0.0452972637856279</ParamVertex>
+        <ParamVertex vref="169" gref="2" dim="2">-0.721701660381265 -0.226520357887206</ParamVertex>
+        <ParamVertex vref="170" gref="2" dim="2">-0.875841824088978 -0.184166354217212</ParamVertex>
+        <ParamVertex vref="171" gref="2" dim="2">0.832994844731695 0.121192677788974</ParamVertex>
+        <ParamVertex vref="172" gref="2" dim="2">0.0913486140227442 -0.3260428778163</ParamVertex>
+        <ParamVertex vref="173" gref="2" dim="2">0.137367912855813 -0.147884389221634</ParamVertex>
+        <ParamVertex vref="174" gref="2" dim="2">-0.057360794484358 -0.193659668226221</ParamVertex>
+        <ParamVertex vref="175" gref="2" dim="2">0.380861851490145 0.616135839370154</ParamVertex>
+        <ParamVertex vref="176" gref="2" dim="2">0.378378732326441 0.404718578206816</ParamVertex>
+        <ParamVertex vref="177" gref="2" dim="2">0.254693006042127 0.248511546433465</ParamVertex>
+        <ParamVertex vref="178" gref="2" dim="2">0.47224975310373 0.25134733796025</ParamVertex>
+        <ParamVertex vref="179" gref="2" dim="2">0.184594629312871 0.435511378724175</ParamVertex>
+        <ParamVertex vref="180" gref="2" dim="2">0.0231639677574302 0.253713013802317</ParamVertex>
+        <ParamVertex vref="181" gref="2" dim="2">0.65003981677237 1.31995830481797</ParamVertex>
+        <ParamVertex vref="182" gref="2" dim="2">-0.101242561297792 1.07863708014795</ParamVertex>
+        <ParamVertex vref="183" gref="2" dim="2">-0.224567474182974 1.29607116752686</ParamVertex>
+        <ParamVertex vref="184" gref="2" dim="2">-0.298208719495606 1.10188962012477</ParamVertex>
+        <ParamVertex vref="185" gref="2" dim="2">-0.273993775316356 0.945710265112506</ParamVertex>
+        <ParamVertex vref="186" gref="2" dim="2">-0.756508426923706 0.545608771546209</ParamVertex>
+        <ParamVertex vref="187" gref="2" dim="2">-0.498873811825374 -0.873431123828458</ParamVertex>
+        <ParamVertex vref="188" gref="2" dim="2">-0.54274530055941 -1.11073674940386</ParamVertex>
+        <ParamVertex vref="189" gref="2" dim="2">-0.36108811744821 -1.04992591809043</ParamVertex>
+        <ParamVertex vref="190" gref="2" dim="2">-0.69089437271741 -0.761718116623827</ParamVertex>
+        <ParamVertex vref="191" gref="2" dim="2">-0.664009599300122 -0.544954355398309</ParamVertex>
+        <ParamVertex vref="192" gref="2" dim="2">-0.622130919005394 0.0740445049084569</ParamVertex>
+        <ParamVertex vref="193" gref="2" dim="2">-0.1233624625865 -0.669252798520475</ParamVertex>
+        <ParamVertex vref="194" gref="2" dim="2">-0.230657825109416 -0.877341995806784</ParamVertex>
+        <ParamVertex vref="195" gref="2" dim="2">-0.0347571717482034 -0.805540830883082</ParamVertex>
+        <ParamVertex vref="196" gref="2" dim="2">0.154854187066519 -1.03541932127118</ParamVertex>
+        <ParamVertex vref="197" gref="2" dim="2">0.241022682684098 -1.1971904227036</ParamVertex>
+        <ParamVertex vref="198" gref="2" dim="2">0.314919300256264 -1.0663090697668</ParamVertex>
+        <ParamVertex vref="199" gref="2" dim="2">0.130075473407811 -0.866505719553409</ParamVertex>
+        <ParamVertex vref="200" gref="2" dim="2">0.270036260086722 -0.934470042427773</ParamVertex>
+        <ParamVertex vref="201" gref="2" dim="2">0.539108940161281 -0.4743832541197</ParamVertex>
+        <ParamVertex vref="202" gref="2" dim="2">0.478184206872744 -0.653338796491594</ParamVertex>
+        <ParamVertex vref="203" gref="2" dim="2">-0.774261215703119 -0.0493155119259137</ParamVertex>
+        <ParamVertex vref="204" gref="2" dim="2">-0.181503135202702 0.315605623059477</ParamVertex>
+        <ParamVertex vref="205" gref="2" dim="2">-0.21984033218416 -0.0804967623153789</ParamVertex>
+        <ParamVertex vref="206" gref="2" dim="2">-0.183810551546671 0.135418498092851</ParamVertex>
+        <ParamVertex vref="207" gref="2" dim="2">0.6809659983865 -0.668663948740838</ParamVertex>
+        <ParamVertex vref="208" gref="2" dim="2">0.532863592996569 -0.821436557697304</ParamVertex>
+        <ParamVertex vref="209" gref="2" dim="2">0.810223230014301 0.35712871683082</ParamVertex>
+        <ParamVertex vref="210" gref="2" dim="2">0.653547629093648 0.211287105296899</ParamVertex>
+        <ParamVertex vref="211" gref="2" dim="2">0.824663747413804 0.810482550682434</ParamVertex>
+        <ParamVertex vref="212" gref="2" dim="2">-0.760475054073742 0.918945193553683</ParamVertex>
+        <ParamVertex vref="213" gref="2" dim="2">0.343165429030567 -1.3383882672737</ParamVertex>
+        <ParamVertex vref="214" gref="2" dim="2">0.841376489587644 -0.831569522176382</ParamVertex>
+        <ParamVertex vref="215" gref="2" dim="2">-0.854054528081356 -0.841353404222537</ParamVertex>
+        <ParamVertex vref="216" gref="2" dim="2">-0.361598287376044 -0.660532707829792</ParamVertex>
+        <ParamVertex vref="217" gref="2" dim="2">-0.535756781937825 -0.674573684302791</ParamVertex>
+        <ParamVertex vref="218" gref="2" dim="2">-0.0161685846623981 1.25619145063776</ParamVertex>
+        <ParamVertex vref="219" gref="2" dim="2">0.0611566560780135 0.931026499609334</ParamVertex>
+        <ParamVertex vref="220" gref="2" dim="2">-0.0260085544878444 -0.978548622723784</ParamVertex>
+        <ParamVertex vref="221" gref="2" dim="2">0.590829115848393 -0.26479434396452</ParamVertex>
+        <ParamVertex vref="222" gref="2" dim="2">0.133211939186844 0.621674179333421</ParamVertex>
+        <ParamVertex vref="223" gref="2" dim="2">-0.385851683003558 0.757163279485221</ParamVertex>
+        <ParamVertex vref="224" gref="2" dim="2">0.0299479271675029 -1.16412177746389</ParamVertex>
+        <ParamVertex vref="225" gref="2" dim="2">-0.606190127018416 -1.32173406928745</ParamVertex>
+        <ParamVertex vref="226" gref="2" dim="2">-0.642246595172233 0.732217276045309</ParamVertex>
+        <ParamVertex vref="227" gref="2" dim="2">0.429628737979342 -0.969367054926711</ParamVertex>
+        <ParamVertex vref="228" gref="2" dim="2">-0.572703950893418 0.890293251865808</ParamVertex>
+        <ParamVertex vref="229" gref="2" dim="2">0.106209489184245 1.12144563751985</ParamVertex>
+        <ParamVertex vref="230" gref="2" dim="2">0.702783351590205 -0.874671010123291</ParamVertex>
+        <ParamVertex vref="231" gref="2" dim="2">-0.0276183928189302 0.0050352368121116</ParamVertex>
+        <ParamVertex vref="232" gref="2" dim="2">0.16439251245617 0.0651342551463265</ParamVertex>
+        <ParamVertex vref="233" gref="2" dim="2">-0.188241567107301 0.643564401007668</ParamVertex>
+        <ParamVertex vref="234" gref="2" dim="2">0.340348365502917 -0.304111019640696</ParamVertex>
+        <ParamVertex vref="235" gref="2" dim="2">-0.0534945715883044 0.475074225141393</ParamVertex>
+        <ParamVertex vref="236" gref="2" dim="2">0.294169254881176 -0.0803121480348883</ParamVertex>
+        <ParamVertex vref="237" gref="2" dim="2">-0.0792400011512017 -0.359507624291122</ParamVertex>
+        <ParamVertex vref="238" gref="2" dim="2">-0.401525024462377 -0.208291441828899</ParamVertex>
+        <ParamVertex vref="239" gref="2" dim="2">-0.436556944865102 0.98458592973217</ParamVertex>
+        <ParamVertex vref="240" gref="2" dim="2">-0.565076275838112 -0.121252753193557</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshFace etype="Tri3" format="text" count="320">
+         132 121 164
+         122 181 131
+         219 164 229
+         219 114 162
+         213 6 7
+         213 197 159
+         156 158 120
+         158 8 104
+         215 190 154
+         190 215 101
+         240 192 203
+         240 238 168
+         151 166 216
+         151 238 165
+         231 174 173
+         231 206 205
+         78 154 77
+         154 191 155
+         170 76 155
+         170 203 75
+         204 206 180
+         206 204 161
+         142 203 192
+         142 74 75
+         211 89 90
+         89 211 139
+         108 228 239
+         228 226 223
+         115 233 113
+         233 160 235
+         200 227 148
+         200 196 198
+         214 230 118
+         214 83 117
+         236 173 234
+         236 146 232
+         178 177 146
+         177 180 232
+         193 195 124
+         193 216 194
+         126 198 197
+         126 119 227
+         172 237 123
+         237 150 152
+         127 189 188
+         189 194 187
+         84 117 83
+         207 230 214
+         112 184 183
+         112 108 239
+         179 176 175
+         176 178 138
+         222 113 235
+         222 162 114
+         100 80 105
+         80 100 79
+         194 220 195
+         220 196 199
+         125 172 123
+         125 147 234
+         136 141 143
+         141 136 186
+         224 159 197
+         224 130 128
+         106 212 71
+         106 186 226
+         153 86 171
+         153 157 85
+         185 239 223
+         185 182 184
+         174 205 150
+         205 168 238
+         225 127 188
+         127 225 3
+         122 90 91
+         227 208 148
+         208 230 207
+         181 110 131
+         110 181 94
+         115 114 219
+         162 164 219
+         182 229 218
+         229 121 111
+         210 178 145
+         178 210 138
+         131 133 122
+         150 238 151
+         152 123 237
+         203 169 240
+         75 76 170
+         146 145 178
+         149 171 210
+         163 140 133
+         140 163 175
+         217 166 191
+         166 217 216
+         126 213 156
+         159 5 6
+         165 155 191
+         165 238 240
+         183 97 134
+         183 218 96
+         135 160 223
+         160 135 137
+         128 159 224
+         128 4 5
+         111 218 229
+         111 95 96
+         202 148 208
+         148 202 147
+         240 168 192
+         165 240 169
+         188 129 225
+         188 187 101
+         187 194 216
+         130 224 220
+         173 232 231
+         234 144 236
+         119 230 208
+         227 198 126
+         221 201 116
+         221 144 234
+         124 199 148
+         198 227 200
+         140 211 133
+         139 209 88
+         223 239 228
+         136 135 186
+         212 226 228
+         239 184 112
+         162 175 163
+         164 121 229
+         180 235 204
+         235 180 179
+         160 204 235
+         161 137 167
+         234 147 201
+         201 202 207
+         116 201 207
+         116 157 221
+         138 209 139
+         209 210 171
+         175 162 222
+         164 163 132
+         172 234 173
+         174 150 237
+         143 167 137
+         168 206 161
+         223 160 233
+         184 239 185
+         238 150 205
+         169 155 165
+         232 173 236
+         179 177 176
+         175 222 179
+         233 235 113
+         174 237 172
+         193 124 123
+         231 180 206
+         205 174 231
+         144 146 236
+         234 201 221
+         223 226 135
+         235 179 222
+         187 217 190
+         152 193 123
+         234 172 125
+         220 199 195
+         177 232 146
+         223 233 115
+         180 231 232
+         193 152 216
+         9 104 8
+         104 81 120
+         69 102 99
+         102 70 109
+         1 105 80
+         105 2 225
+         92 103 91
+         103 93 181
+         155 76 77
+         169 203 170
+         141 74 142
+         74 141 73
+         107 109 70
+         107 212 108
+         118 120 81
+         118 230 119
+         7 8 158
+         126 197 213
+         134 98 99
+         112 183 134
+         85 116 84
+         149 144 221
+         88 89 139
+         209 171 87
+         191 190 217
+         154 78 215
+         229 182 219
+         96 97 183
+         224 196 220
+         213 159 6
+         79 215 78
+         101 129 188
+         225 129 105
+         130 194 189
+         87 88 209
+         171 149 153
+         117 116 207
+         214 117 207
+         106 71 72
+         212 228 108
+         82 83 214
+         119 208 227
+         81 82 118
+         158 104 120
+         70 71 107
+         109 99 102
+         143 137 136
+         143 192 167
+         140 139 211
+         132 133 131
+         106 226 212
+         186 135 226
+         187 190 101
+         2 3 225
+         163 133 132
+         93 94 181
+         224 197 196
+         200 148 199
+         182 218 183
+         185 223 115
+         176 138 175
+         114 113 222
+         216 152 151
+         195 199 124
+         165 191 166
+         192 143 142
+         149 221 157
+         149 210 145
+         130 189 127
+         220 194 130
+         115 219 182
+         96 218 111
+         187 216 217
+         79 101 215
+         214 118 82
+         213 7 156
+         71 212 107
+         134 97 98
+         90 133 211
+         209 138 210
+         207 202 208
+         124 147 125
+         205 206 168
+         204 160 161
+         75 203 142
+         141 186 73
+         201 147 202
+         199 196 200
+         196 197 198
+         193 194 195
+         168 167 192
+         190 191 154
+         105 129 100
+         187 188 189
+         73 186 106
+         115 182 185
+         182 183 184
+         132 110 121
+         103 181 122
+         177 179 180
+         176 177 178
+         175 138 140
+         172 173 174
+         86 87 171
+         155 169 170
+         161 167 168
+         151 165 166
+         149 157 153
+         162 163 164
+         160 137 161
+         128 5 159
+         7 158 156
+         116 85 157
+         120 126 156
+         154 155 77
+         153 85 86
+         150 151 152
+         145 144 149
+         147 124 148
+         144 145 146
+         141 142 143
+         138 139 140
+         135 136 137
+         99 109 134
+         109 112 134
+         133 90 122
+         131 110 132
+         127 128 130
+         101 100 129
+         128 127 4
+         4 127 3
+         120 119 126
+         123 124 125
+         103 122 91
+         110 111 121
+         118 119 120
+         116 117 84
+         113 114 115
+         109 108 112
+         111 110 95
+         95 110 94
+         107 108 109
+         73 106 72
+         1 2 105
+         9 81 104
+         92 93 103
+         69 70 102
+         100 101 79
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-6" gref="3">
+        <ParamVertex vref="241" gref="3" dim="2">-0.50000000001819 1.49999999999474</ParamVertex>
+        <ParamVertex vref="242" gref="3" dim="2">-0.499999999995598 1.24999999999272</ParamVertex>
+        <ParamVertex vref="243" gref="3" dim="2">-0.4999999999947 0.999999999992724</ParamVertex>
+        <ParamVertex vref="244" gref="3" dim="2">-0.499999999993802 0.749999999992724</ParamVertex>
+        <ParamVertex vref="245" gref="3" dim="2">-0.499999999992904 0.499999999992724</ParamVertex>
+        <ParamVertex vref="246" gref="3" dim="2">-0.499999999992005 0.249999999992724</ParamVertex>
+        <ParamVertex vref="247" gref="3" dim="2">-0.499999999991107 -7.27612192719108e-12</ParamVertex>
+        <ParamVertex vref="248" gref="3" dim="2">-0.499999999990209 -0.250000000007276</ParamVertex>
+        <ParamVertex vref="249" gref="3" dim="2">-0.49999999998931 -0.500000000007276</ParamVertex>
+        <ParamVertex vref="250" gref="3" dim="2">-0.499999999988412 -0.750000000007276</ParamVertex>
+        <ParamVertex vref="251" gref="3" dim="2">-0.499999999987514 -1.00000000000728</ParamVertex>
+        <ParamVertex vref="252" gref="3" dim="2">-0.499999999986616 -1.25000000000728</ParamVertex>
+        <ParamVertex vref="21" gref="3" dim="2">-0.499999999985717 -1.50000000000728</ParamVertex>
+        <ParamVertex vref="22" gref="3" dim="2">-0.249999999996497 -1.5</ParamVertex>
+        <ParamVertex vref="23" gref="3" dim="2">3.50358630996084e-12 -1.5</ParamVertex>
+        <ParamVertex vref="24" gref="3" dim="2">0.250000000003504 -1.5</ParamVertex>
+        <ParamVertex vref="1" gref="3" dim="2">0.499999999992724 -1.49999999999799</ParamVertex>
+        <ParamVertex vref="80" gref="3" dim="2">0.499999999992724 -1.24999999999387</ParamVertex>
+        <ParamVertex vref="79" gref="3" dim="2">0.499999999992724 -1.00000000000526</ParamVertex>
+        <ParamVertex vref="78" gref="3" dim="2">0.499999999992724 -0.74999999999387</ParamVertex>
+        <ParamVertex vref="77" gref="3" dim="2">0.499999999992724 -0.49999999999387</ParamVertex>
+        <ParamVertex vref="76" gref="3" dim="2">0.499999999992724 -0.250000000005262</ParamVertex>
+        <ParamVertex vref="75" gref="3" dim="2">0.499999999992724 -5.26190202521093e-12</ParamVertex>
+        <ParamVertex vref="74" gref="3" dim="2">0.499999999992724 0.25000000000613</ParamVertex>
+        <ParamVertex vref="73" gref="3" dim="2">0.499999999992724 0.50000000000613</ParamVertex>
+        <ParamVertex vref="72" gref="3" dim="2">0.499999999992724 0.749999999994738</ParamVertex>
+        <ParamVertex vref="71" gref="3" dim="2">0.499999999992724 0.999999999994738</ParamVertex>
+        <ParamVertex vref="70" gref="3" dim="2">0.499999999992724 1.24999999999474</ParamVertex>
+        <ParamVertex vref="69" gref="3" dim="2">0.499999999992724 1.49999999999474</ParamVertex>
+        <ParamVertex vref="253" gref="3" dim="2">0.249999999995419 1.49999999999423</ParamVertex>
+        <ParamVertex vref="254" gref="3" dim="2">-1.88635218556499e-12 1.49999999999373</ParamVertex>
+        <ParamVertex vref="255" gref="3" dim="2">-0.249999999999192 1.49999999999323</ParamVertex>
+        <ParamVertex vref="256" gref="3" dim="2">0.0842991340461667 -0.861235094994945</ParamVertex>
+        <ParamVertex vref="257" gref="3" dim="2">-0.137654152810754 -0.721115790846302</ParamVertex>
+        <ParamVertex vref="258" gref="3" dim="2">-0.135733358031342 -0.92662220993362</ParamVertex>
+        <ParamVertex vref="259" gref="3" dim="2">-0.339738528582415 1.33087027804535</ParamVertex>
+        <ParamVertex vref="260" gref="3" dim="2">0.349463962681907 -1.34505082495791</ParamVertex>
+        <ParamVertex vref="261" gref="3" dim="2">-0.352647445150595 -1.34859495633247</ParamVertex>
+        <ParamVertex vref="262" gref="3" dim="2">0.351700021865892 1.33850450783913</ParamVertex>
+        <ParamVertex vref="263" gref="3" dim="2">-0.29286785349136 1.10179598526675</ParamVertex>
+        <ParamVertex vref="264" gref="3" dim="2">-0.324839222111846 0.838578344886037</ParamVertex>
+        <ParamVertex vref="265" gref="3" dim="2">0.323920082990028 -1.15828595065384</ParamVertex>
+        <ParamVertex vref="266" gref="3" dim="2">0.274630827727898 -0.977492278256683</ParamVertex>
+        <ParamVertex vref="267" gref="3" dim="2">0.313050441370677 -0.817449957169291</ParamVertex>
+        <ParamVertex vref="268" gref="3" dim="2">-0.155824789431226 1.30255540498181</ParamVertex>
+        <ParamVertex vref="269" gref="3" dim="2">0.0192720628536635 1.25707932045334</ParamVertex>
+        <ParamVertex vref="270" gref="3" dim="2">0.325162176395071 1.1420423606366</ParamVertex>
+        <ParamVertex vref="271" gref="3" dim="2">0.293729667160419 0.888395832268595</ParamVertex>
+        <ParamVertex vref="272" gref="3" dim="2">0.17159488220192 0.716504978711112</ParamVertex>
+        <ParamVertex vref="273" gref="3" dim="2">0.335170536684304 0.625298823064155</ParamVertex>
+        <ParamVertex vref="274" gref="3" dim="2">0.166835469167983 0.519003225996395</ParamVertex>
+        <ParamVertex vref="275" gref="3" dim="2">-0.00752713275373611 0.666886364326227</ParamVertex>
+        <ParamVertex vref="276" gref="3" dim="2">0.0102469741032736 0.438507537230348</ParamVertex>
+        <ParamVertex vref="277" gref="3" dim="2">0.328208045299661 0.378206639532574</ParamVertex>
+        <ParamVertex vref="278" gref="3" dim="2">-0.328456648397652 0.598129862265463</ParamVertex>
+        <ParamVertex vref="279" gref="3" dim="2">-0.30308557098538 0.330350183207621</ParamVertex>
+        <ParamVertex vref="280" gref="3" dim="2">-0.14733574350901 0.490506200629818</ParamVertex>
+        <ParamVertex vref="281" gref="3" dim="2">-0.186282490802979 0.014465551211958</ParamVertex>
+        <ParamVertex vref="282" gref="3" dim="2">-0.342896383832653 0.100177708279574</ParamVertex>
+        <ParamVertex vref="283" gref="3" dim="2">-0.329798317368262 -0.125421416651262</ParamVertex>
+        <ParamVertex vref="284" gref="3" dim="2">0.187029202359786 -0.0862042033473738</ParamVertex>
+        <ParamVertex vref="285" gref="3" dim="2">0.302029553471138 0.118420413946904</ParamVertex>
+        <ParamVertex vref="286" gref="3" dim="2">0.105338414764987 0.105316601242028</ParamVertex>
+        <ParamVertex vref="287" gref="3" dim="2">0.351999305525888 -0.107951913780941</ParamVertex>
+        <ParamVertex vref="288" gref="3" dim="2">-0.319315783772323 -0.368444151061701</ParamVertex>
+        <ParamVertex vref="289" gref="3" dim="2">-0.0105863576283873 -0.0390371375959672</ParamVertex>
+        <ParamVertex vref="290" gref="3" dim="2">-0.131525144048095 -0.23747276805262</ParamVertex>
+        <ParamVertex vref="291" gref="3" dim="2">0.0765180996872083 -0.230364898130204</ParamVertex>
+        <ParamVertex vref="292" gref="3" dim="2">-0.313837966789423 -0.616776034078383</ParamVertex>
+        <ParamVertex vref="293" gref="3" dim="2">0.174304040646669 -0.542840522910148</ParamVertex>
+        <ParamVertex vref="294" gref="3" dim="2">0.33080534670265 -0.619795029230138</ParamVertex>
+        <ParamVertex vref="295" gref="3" dim="2">0.27423462858453 -0.34942464378339</ParamVertex>
+        <ParamVertex vref="296" gref="3" dim="2">-0.0154072764130323 -1.04064175315706</ParamVertex>
+        <ParamVertex vref="297" gref="3" dim="2">0.139597625135885 -1.09456221291745</ParamVertex>
+        <ParamVertex vref="298" gref="3" dim="2">0.0391129797482747 -0.628928774578268</ParamVertex>
+        <ParamVertex vref="299" gref="3" dim="2">0.188567339740342 -0.696177340519427</ParamVertex>
+        <ParamVertex vref="300" gref="3" dim="2">-0.329980555562833 -1.17697759354075</ParamVertex>
+        <ParamVertex vref="301" gref="3" dim="2">-0.183256670200653 -1.31599718809976</ParamVertex>
+        <ParamVertex vref="302" gref="3" dim="2">0.177326759489569 -1.3025632049268</ParamVertex>
+        <ParamVertex vref="303" gref="3" dim="2">-0.00718377702532005 -1.22715499551536</ParamVertex>
+        <ParamVertex vref="304" gref="3" dim="2">-0.290660194804425 -1.01021046719533</ParamVertex>
+        <ParamVertex vref="305" gref="3" dim="2">-0.317525611515956 -0.831494891774726</ParamVertex>
+        <ParamVertex vref="306" gref="3" dim="2">0.138217698162284 1.092934263107</ParamVertex>
+        <ParamVertex vref="307" gref="3" dim="2">-0.0693705273901198 1.08942675560428</ParamVertex>
+        <ParamVertex vref="308" gref="3" dim="2">0.062037114791504 0.886759248922084</ParamVertex>
+        <ParamVertex vref="309" gref="3" dim="2">-0.0761516014518966 0.221618328119522</ParamVertex>
+        <ParamVertex vref="310" gref="3" dim="2">-0.226737140488584 0.166928593172501</ParamVertex>
+        <ParamVertex vref="311" gref="3" dim="2">0.0387999084575496 -0.41987682643952</ParamVertex>
+        <ParamVertex vref="312" gref="3" dim="2">0.183337932923877 1.3004801785809</ParamVertex>
+        <ParamVertex vref="313" gref="3" dim="2">-0.161030279091403 -1.11826702373786</ParamVertex>
+        <ParamVertex vref="314" gref="3" dim="2">-0.138286411278251 0.881719741987799</ParamVertex>
+        <ParamVertex vref="315" gref="3" dim="2">-0.189424419510822 0.699824479810765</ParamVertex>
+        <ParamVertex vref="316" gref="3" dim="2">0.141631906340633 0.28957577399659</ParamVertex>
+        <ParamVertex vref="317" gref="3" dim="2">-0.143810763671675 -0.496403480151597</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshFace etype="Tri3" format="text" count="154">
+         302 265 297
+         302 297 303
+         300 301 313
+         313 301 303
+         273 277 73
+         312 253 254
+         312 270 262
+         317 290 288
+         317 298 311
+         314 264 315
+         314 307 263
+         302 24 260
+         267 294 299
+         294 77 295
+         302 260 265
+         265 266 297
+         300 252 261
+         258 313 296
+         258 257 305
+         311 293 295
+         293 299 294
+         281 289 309
+         281 283 290
+         280 276 275
+         280 279 309
+         311 291 290
+         291 284 289
+         316 286 285
+         286 289 284
+         282 310 279
+         282 247 283
+         245 278 244
+         278 315 264
+         257 298 317
+         311 290 317
+         308 314 275
+         314 263 264
+         297 296 303
+         313 304 300
+         296 256 258
+         274 276 316
+         274 272 275
+         268 263 307
+         268 255 259
+         267 299 256
+         78 77 294
+         288 290 283
+         288 292 317
+         306 312 269
+         306 308 271
+         305 257 292
+         305 304 258
+         287 284 295
+         284 287 285
+         277 316 285
+         309 276 280
+         276 309 316
+         273 272 274
+         273 72 271
+         272 271 308
+         275 315 280
+         304 313 258
+         299 293 298
+         1 260 24
+         260 80 265
+         69 262 70
+         262 253 312
+         241 259 255
+         259 242 263
+         21 261 252
+         261 22 301
+         23 301 22
+         312 306 270
+         307 306 269
+         257 317 292
+         256 298 257
+         309 286 316
+         285 75 74
+         278 280 315
+         279 310 309
+         251 252 300
+         251 305 250
+         79 78 267
+         79 265 80
+         282 281 310
+         281 290 289
+         73 72 273
+         316 277 274
+         308 275 272
+         271 71 270
+         315 275 314
+         264 243 244
+         295 284 291
+         295 77 76
+         75 285 287
+         295 291 311
+         279 278 245
+         308 307 314
+         313 303 296
+         23 303 301
+         306 271 270
+         254 269 312
+         268 259 263
+         307 269 268
+         251 304 305
+         250 292 249
+         78 294 267
+         256 297 266
+         246 279 245
+         286 309 289
+         248 283 247
+         293 311 298
+         309 310 281
+         306 307 308
+         72 71 271
+         305 292 250
+         287 295 76
+         288 283 248
+         277 285 74
+         282 279 246
+         251 300 304
+         79 267 266
+         71 70 270
+         278 264 244
+         302 23 24
+         23 302 303
+         300 261 301
+         298 256 299
+         256 296 297
+         293 294 295
+         288 249 292
+         289 290 291
+         249 288 248
+         75 287 76
+         246 247 282
+         284 285 286
+         281 282 283
+         73 277 74
+         278 279 280
+         273 274 277
+         274 275 276
+         271 272 273
+         262 270 70
+         268 254 255
+         254 268 269
+         267 256 266
+         265 79 266
+         263 243 264
+         243 263 242
+         69 253 262
+         21 22 261
+         1 80 260
+         241 242 259
+         256 257 258
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-7">
+        <ParamVertex vref="241" gref="3" dim="2">-0.50000000001819 1.49999999999474</ParamVertex>
+        <ParamVertex vref="242" gref="3" dim="2">-0.499999999995598 1.24999999999272</ParamVertex>
+        <ParamVertex vref="243" gref="3" dim="2">-0.4999999999947 0.999999999992724</ParamVertex>
+        <ParamVertex vref="244" gref="3" dim="2">-0.499999999993802 0.749999999992724</ParamVertex>
+        <ParamVertex vref="245" gref="3" dim="2">-0.499999999992904 0.499999999992724</ParamVertex>
+        <ParamVertex vref="246" gref="3" dim="2">-0.499999999992005 0.249999999992724</ParamVertex>
+        <ParamVertex vref="247" gref="3" dim="2">-0.499999999991107 -7.27612192719108e-12</ParamVertex>
+        <ParamVertex vref="248" gref="3" dim="2">-0.499999999990209 -0.250000000007276</ParamVertex>
+        <ParamVertex vref="249" gref="3" dim="2">-0.49999999998931 -0.500000000007276</ParamVertex>
+        <ParamVertex vref="250" gref="3" dim="2">-0.499999999988412 -0.750000000007276</ParamVertex>
+        <ParamVertex vref="251" gref="3" dim="2">-0.499999999987514 -1.00000000000728</ParamVertex>
+        <ParamVertex vref="252" gref="3" dim="2">-0.499999999986616 -1.25000000000728</ParamVertex>
+        <ParamVertex vref="21" gref="1" dim="2">-1.00000000000009 0.499999999992724</ParamVertex>
+        <ParamVertex vref="20" gref="1" dim="2">-0.750000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="19" gref="1" dim="2">-0.500000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="18" gref="1" dim="2">-0.250000000000094 0.499999999992724</ParamVertex>
+        <ParamVertex vref="17" gref="1" dim="2">-9.37028232783632e-14 0.499999999992724</ParamVertex>
+        <ParamVertex vref="16" gref="1" dim="2">0.249999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="15" gref="1" dim="2">0.499999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="14" gref="1" dim="2">0.749999999999906 0.499999999992724</ParamVertex>
+        <ParamVertex vref="13" gref="1" dim="2">1 0.500000000001671</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshFace etype="Tri3" format="text" count="320">
+         401 358 369
+         368 418 359
+         466 401 456
+         399 351 456
+         15 16 450
+         396 434 450
+         357 395 393
+         341 14 395
+         391 427 452
+         338 452 427
+         440 429 477
+         405 475 477
+         453 403 388
+         402 475 388
+         410 411 468
+         442 443 468
+         249 391 250
+         392 428 391
+         392 248 407
+         247 440 407
+         417 443 441
+         398 441 443
+         429 440 379
+         247 246 379
+         327 326 448
+         376 448 326
+         476 465 345
+         460 463 465
+         350 470 352
+         472 397 470
+         385 464 437
+         435 433 437
+         355 467 451
+         354 320 451
+         471 410 473
+         469 383 473
+         383 414 415
+         469 417 414
+         361 432 430
+         431 453 430
+         434 435 363
+         464 356 363
+         360 474 409
+         389 387 474
+         425 426 364
+         424 431 426
+         320 354 321
+         451 467 444
+         420 421 349
+         476 345 349
+         412 413 416
+         375 415 413
+         472 350 459
+         351 399 459
+         342 252 337
+         251 337 252
+         432 457 431
+         436 433 457
+         360 409 362
+         471 384 362
+         380 378 373
+         423 373 378
+         434 396 461
+         365 367 461
+         243 449 343
+         463 423 343
+         408 323 390
+         322 394 390
+         460 476 422
+         421 419 422
+         387 442 411
+         475 405 442
+         425 364 462
+         19 462 364
+         328 327 359
+         385 445 464
+         444 467 445
+         368 347 418
+         331 418 347
+         456 351 352
+         456 401 399
+         455 466 419
+         348 358 466
+         382 415 447
+         375 447 415
+         359 370 368
+         388 475 387
+         474 360 389
+         477 406 440
+         407 248 247
+         415 382 383
+         447 408 386
+         370 377 400
+         412 400 377
+         428 403 454
+         453 454 403
+         393 450 363
+         16 17 396
+         428 392 402
+         477 475 402
+         371 334 420
+         333 455 420
+         460 397 372
+         374 372 397
+         461 396 365
+         17 18 365
+         466 455 348
+         333 332 348
+         445 385 439
+         384 439 385
+         429 405 477
+         406 477 402
+         462 366 425
+         338 424 425
+         453 431 424
+         457 461 367
+         468 469 410
+         473 381 471
+         445 467 356
+         363 435 464
+         353 438 458
+         471 381 458
+         385 436 361
+         437 464 435
+         370 448 377
+         325 446 376
+         465 476 460
+         423 372 373
+         465 463 449
+         349 421 476
+         400 412 399
+         466 358 401
+         441 472 417
+         416 417 472
+         472 441 397
+         404 374 398
+         438 384 471
+         444 439 438
+         444 438 353
+         458 394 353
+         376 446 375
+         408 447 446
+         459 399 412
+         369 400 401
+         410 471 409
+         474 387 411
+         374 404 380
+         398 443 405
+         470 397 460
+         422 476 421
+         442 387 475
+         402 392 406
+         473 410 469
+         413 414 416
+         416 459 412
+         350 472 470
+         409 474 411
+         360 361 430
+         443 417 468
+         468 411 442
+         473 383 381
+         458 438 471
+         372 463 460
+         459 416 472
+         427 454 424
+         360 430 389
+         362 409 471
+         432 436 457
+         383 469 414
+         352 470 460
+         469 468 417
+         453 389 430
+         14 341 13
+         357 318 341
+         336 339 241
+         346 242 339
+         252 342 21
+         462 20 342
+         328 340 329
+         418 330 340
+         249 248 392
+         407 440 406
+         379 246 378
+         245 378 246
+         242 346 344
+         345 449 344
+         318 357 355
+         356 467 355
+         395 14 15
+         450 434 363
+         336 335 371
+         371 420 349
+         321 353 322
+         458 381 386
+         376 326 325
+         324 408 446
+         454 427 428
+         452 250 391
+         456 419 466
+         420 334 333
+         457 433 461
+         16 396 450
+         250 452 251
+         425 366 338
+         342 366 462
+         426 431 367
+         446 325 324
+         390 386 408
+         444 353 354
+         444 354 451
+         244 243 343
+         345 465 449
+         451 320 319
+         464 445 356
+         355 319 318
+         357 341 395
+         344 243 242
+         339 336 346
+         373 374 380
+         404 429 380
+         448 376 377
+         368 370 369
+         449 463 343
+         463 372 423
+         338 427 424
+         462 19 20
+         369 370 400
+         418 331 330
+         433 434 461
+         436 385 437
+         420 455 419
+         352 460 422
+         412 375 413
+         459 350 351
+         388 389 453
+         361 436 432
+         403 428 402
+         379 380 429
+         394 458 386
+         382 447 386
+         364 426 367
+         367 431 457
+         419 456 352
+         348 455 333
+         454 453 424
+         452 338 251
+         319 355 451
+         393 15 450
+         344 449 243
+         335 334 371
+         448 370 327
+         447 375 446
+         445 439 444
+         362 384 361
+         405 443 442
+         398 397 441
+         379 440 247
+         245 423 378
+         439 384 438
+         437 433 436
+         435 434 433
+         432 431 430
+         429 404 405
+         391 428 427
+         337 366 342
+         426 425 424
+         343 423 245
+         422 419 352
+         421 420 419
+         358 347 369
+         359 418 340
+         417 416 414
+         415 414 413
+         377 375 412
+         411 410 409
+         408 324 323
+         407 406 392
+         405 404 398
+         403 402 388
+         390 394 386
+         401 400 399
+         398 374 397
+         396 17 365
+         393 395 15
+         394 322 353
+         393 363 357
+         249 392 391
+         323 322 390
+         389 388 387
+         386 381 382
+         385 361 384
+         383 382 381
+         380 379 378
+         377 376 375
+         374 373 372
+         371 346 336
+         371 349 346
+         359 327 370
+         369 347 368
+         367 365 364
+         366 337 338
+         18 364 365
+         19 364 18
+         363 356 357
+         362 361 360
+         328 359 340
+         358 348 347
+         357 356 355
+         321 354 353
+         352 351 350
+         349 345 346
+         332 347 348
+         331 347 332
+         346 345 344
+         244 343 245
+         342 20 21
+         341 318 13
+         340 330 329
+         339 242 241
+         251 338 337
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-8" >
+        <ParamVertex vref="69" gref="3" dim="2">0.499999999992724 1.49999999999474</ParamVertex>
+        <ParamVertex vref="99" gref="2" dim="2">-0.750000000007276 1.49999999999181</ParamVertex>
+        <ParamVertex vref="98" gref="2" dim="2">-0.500000000007276 1.49999999999091</ParamVertex>
+        <ParamVertex vref="97" gref="2" dim="2">-0.250000000007276 1.49999999999</ParamVertex>
+        <ParamVertex vref="96" gref="2" dim="2">-7.27595761418343e-12 1.49999999998909</ParamVertex>
+        <ParamVertex vref="95" gref="2" dim="2">0.249999999992724 1.49999999998818</ParamVertex>
+        <ParamVertex vref="94" gref="2" dim="2">0.499999999992724 1.49999999998727</ParamVertex>
+        <ParamVertex vref="93" gref="2" dim="2">0.749999999992724 1.49999999998636</ParamVertex>
+        <ParamVertex vref="92" gref="2" dim="2">1 1.49999999999474</ParamVertex>
+        <ParamVertex vref="241" gref="3" dim="2">-0.50000000001819 1.49999999999474</ParamVertex>
+        <ParamVertex vref="255" gref="3" dim="2">-0.249999999999192 1.49999999999323</ParamVertex>
+        <ParamVertex vref="254" gref="3" dim="2">-1.88635218556499e-12 1.49999999999373</ParamVertex>
+        <ParamVertex vref="253" gref="3" dim="2">0.249999999995419 1.49999999999423</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshFace etype="Tri3" format="text" count="110">
+         494 495 491
+         495 253 484
+         489 98 97
+         98 489 491
+         522 500 497
+         522 490 524
+         488 523 520
+         488 490 522
+         512 480 487
+         512 509 479
+         521 510 485
+         510 521 509
+         516 510 482
+         516 93 485
+         519 511 487
+         519 515 508
+         506 501 500
+         506 505 481
+         482 517 516
+         482 507 483
+         508 511 519
+         508 507 509
+         496 520 523
+         520 514 492
+         96 504 97
+         504 524 490
+         499 497 500
+         499 503 498
+         492 514 486
+         492 493 520
+         254 495 493
+         488 520 494
+         518 481 505
+         481 518 517
+         515 513 502
+         513 332 503
+         481 517 482
+         483 502 501
+         498 497 499
+         498 334 496
+         497 496 523
+         500 524 506
+         329 487 480
+         487 330 519
+         92 485 93
+         485 478 521
+         69 484 253
+         484 99 491
+         241 486 336
+         486 255 492
+         504 506 524
+         506 481 501
+         254 253 495
+         254 492 255
+         479 521 478
+         509 511 508
+         94 93 516
+         94 518 95
+         331 519 330
+         502 483 508
+         522 497 523
+         496 335 514
+         524 500 522
+         489 97 490
+         503 502 513
+         502 499 501
+         505 504 96
+         488 522 523
+         479 509 521
+         516 485 510
+         514 336 486
+         496 514 520
+         495 484 491
+         493 494 520
+         482 509 507
+         331 515 519
+         94 517 518
+         95 505 96
+         332 333 503
+         508 515 502
+         489 494 491
+         334 335 496
+         518 505 95
+         333 498 503
+         94 516 517
+         331 513 515
+         335 336 514
+         504 490 97
+         512 479 480
+         487 511 512
+         513 331 332
+         511 509 512
+         509 482 510
+         483 501 481
+         483 507 508
+         498 333 334
+         504 505 506
+         502 503 499
+         499 500 501
+         496 497 498
+         493 495 494
+         494 489 488
+         492 254 493
+         98 491 99
+         488 489 490
+         329 330 487
+         241 255 486
+         92 478 485
+         69 99 484
+         481 482 483
+        </MeshFace>
+      </MeshSheet>
+      <MeshSheet name="root/dom-9" >
+        <ParamVertex vref="13" gref="1" dim="2">1 0.500000000001671</ParamVertex>
+        <ParamVertex vref="12" gref="1" dim="2">1 0.250000000003504</ParamVertex>
+        <ParamVertex vref="11" gref="1" dim="2">1 3.50358630996084e-12</ParamVertex>
+        <ParamVertex vref="10" gref="1" dim="2">1 -0.249999999996497</ParamVertex>
+        <ParamVertex vref="9" gref="1" dim="2">1 -0.499999999996497</ParamVertex>
+        <ParamVertex vref="81" gref="2" dim="2">0.999999999999394 -1.25000000001455</ParamVertex>
+        <ParamVertex vref="82" gref="2" dim="2">0.999999999998787 -1.00000000001455</ParamVertex>
+        <ParamVertex vref="83" gref="2" dim="2">0.999999999998181 -0.750000000014552</ParamVertex>
+        <ParamVertex vref="84" gref="2" dim="2">0.999999999997575 -0.500000000014552</ParamVertex>
+        <ParamVertex vref="85" gref="2" dim="2">0.999999999996968 -0.250000000014552</ParamVertex>
+        <ParamVertex vref="86" gref="2" dim="2">0.999999999996362 -1.45516776406266e-11</ParamVertex>
+        <ParamVertex vref="87" gref="2" dim="2">0.999999999995756 0.249999999985448</ParamVertex>
+        <ParamVertex vref="88" gref="2" dim="2">0.999999999995149 0.499999999985448</ParamVertex>
+        <ParamVertex vref="89" gref="2" dim="2">0.999999999994543 0.749999999985448</ParamVertex>
+        <ParamVertex vref="90" gref="2" dim="2">0.999999999993937 0.999999999985448</ParamVertex>
+        <ParamVertex vref="91" gref="2" dim="2">0.99999999999333 1.24999999998545</ParamVertex>
+        <ParamVertex vref="92" gref="2" dim="2">1 1.49999999999474</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshFace etype="Tri3" format="text" count="154">
+         566 534 571
+         572 566 571
+         582 570 569
+         572 570 582
+         88 546 542
+         479 478 581
+         531 539 581
+         557 559 586
+         580 567 586
+         584 533 583
+         532 576 583
+         529 10 571
+         568 563 536
+         564 84 563
+         534 529 571
+         566 535 534
+         530 318 569
+         565 582 527
+         574 526 527
+         564 562 580
+         563 568 562
+         578 558 550
+         559 552 550
+         544 545 549
+         578 548 549
+         559 560 580
+         558 553 560
+         554 555 585
+         553 558 555
+         548 579 551
+         552 323 551
+         326 547 325
+         533 584 547
+         586 567 526
+         586 559 580
+         544 583 577
+         533 532 583
+         572 565 566
+         569 573 582
+         527 525 565
+         585 545 543
+         544 541 543
+         576 532 537
+         528 480 537
+         525 568 536
+         563 84 83
+         552 559 557
+         586 561 557
+         538 581 575
+         540 577 575
+         561 526 574
+         527 573 574
+         564 553 556
+         554 556 553
+         554 585 546
+         549 545 578
+         585 578 545
+         543 541 542
+         540 89 542
+         577 540 541
+         549 584 544
+         527 582 573
+         567 562 568
+         10 529 9
+         534 81 529
+         91 531 92
+         581 478 531
+         480 528 329
+         532 328 528
+         318 530 13
+         570 12 530
+         12 570 11
+         539 575 581
+         538 575 576
+         561 586 526
+         526 567 525
+         585 555 578
+         87 86 554
+         584 549 547
+         578 579 548
+         569 318 319
+         320 574 319
+         536 83 82
+         81 534 82
+         579 550 551
+         558 559 550
+         542 89 88
+         543 546 585
+         541 544 577
+         539 90 540
+         583 544 584
+         326 327 533
+         560 553 564
+         85 84 564
+         556 554 86
+         580 560 564
+         325 547 548
+         583 576 577
+         565 572 582
+         570 572 11
+         539 540 575
+         581 538 479
+         532 528 537
+         537 538 576
+         574 573 319
+         321 561 320
+         536 563 83
+         535 566 525
+         325 548 324
+         558 578 555
+         323 552 322
+         567 580 562
+         550 579 578
+         577 576 575
+         540 90 89
+         320 561 574
+         85 564 556
+         322 552 557
+         87 554 546
+         324 548 551
+         573 569 319
+         535 536 82
+         539 91 90
+         326 533 547
+         10 11 571
+         572 571 11
+         570 530 569
+         568 525 567
+         566 565 525
+         564 563 562
+         561 321 557
+         560 559 558
+         322 557 321
+         85 556 86
+         551 323 324
+         555 554 553
+         552 551 550
+         87 546 88
+         549 548 547
+         546 543 542
+         545 544 543
+         542 541 540
+         91 539 531
+         480 479 537
+         538 537 479
+         535 525 536
+         535 82 534
+         533 327 532
+         328 532 327
+         531 478 92
+         530 12 13
+         529 81 9
+         528 328 329
+         527 526 525
+        </MeshFace>
+      </MeshSheet>
+      <MeshString name="root/con-5" gref="7">
+        <ParamVertex vref="1" gref="7" dim="1">0</ParamVertex>
+        <ParamVertex vref="2" gref="7" dim="1">1.00000000001378</ParamVertex>
+        <ParamVertex vref="3" gref="7" dim="1">2.00000000001621</ParamVertex>
+        <ParamVertex vref="4" gref="7" dim="1">3.00000000001099</ParamVertex>
+        <ParamVertex vref="5" gref="7" dim="1">4.00000000000183</ParamVertex>
+        <ParamVertex vref="6" gref="7" dim="1">4.99999999999245</ParamVertex>
+        <ParamVertex vref="7" gref="7" dim="1">5.99999999998654</ParamVertex>
+        <ParamVertex vref="8" gref="7" dim="1">6.99999999998782</ParamVertex>
+        <ParamVertex vref="9" gref="7" dim="1">8</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="8">1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-6" gref="8">
+        <ParamVertex vref="9" gref="8" dim="1">0</ParamVertex>
+        <ParamVertex vref="10" gref="8" dim="1">1.0000000000015</ParamVertex>
+        <ParamVertex vref="11" gref="8" dim="1">2.00000000000433</ParamVertex>
+        <ParamVertex vref="12" gref="8" dim="1">3.00000000000499</ParamVertex>
+        <ParamVertex vref="13" gref="8" dim="1">4</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="4">9 10 10 11 11 12 12 13</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-7" gref="9">
+        <ParamVertex vref="21" gref="9" dim="1">0</ParamVertex>
+        <ParamVertex vref="20" gref="9" dim="1">0.999999999999999</ParamVertex>
+        <ParamVertex vref="19" gref="9" dim="1">1.99999999999994</ParamVertex>
+        <ParamVertex vref="18" gref="9" dim="1">2.99999999999985</ParamVertex>
+        <ParamVertex vref="17" gref="9" dim="1">3.99999999999977</ParamVertex>
+        <ParamVertex vref="16" gref="9" dim="1">4.99999999999971</ParamVertex>
+        <ParamVertex vref="15" gref="9" dim="1">5.99999999999971</ParamVertex>
+        <ParamVertex vref="14" gref="9" dim="1">6.9999999999998</ParamVertex>
+        <ParamVertex vref="13" gref="9" dim="1">8</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="8">20 21 19 20 18 19 17 18 16 17 15 16 14 15 13 14</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-8" gref="10">
+        <ParamVertex vref="1" gref="10" dim="1">0</ParamVertex>
+        <ParamVertex vref="24" gref="10" dim="1">1.00000000000882</ParamVertex>
+        <ParamVertex vref="23" gref="10" dim="1">2.00000000002546</ParamVertex>
+        <ParamVertex vref="22" gref="10" dim="1">3.00000000002937</ParamVertex>
+        <ParamVertex vref="21" gref="10" dim="1">4</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="4">24 1 23 24 22 23 21 22</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-9" gref="17">
+        <ParamVertex vref="69" gref="11" dim="1">0</ParamVertex>
+        <ParamVertex vref="70" gref="11" dim="1">1</ParamVertex>
+        <ParamVertex vref="71" gref="12" dim="1">2</ParamVertex>
+        <ParamVertex vref="72" gref="13" dim="1">3</ParamVertex>
+        <ParamVertex vref="73" gref="14" dim="1">4</ParamVertex>
+        <ParamVertex vref="74" gref="15" dim="1">5.00000000001744</ParamVertex>
+        <ParamVertex vref="75" gref="15" dim="1">6.00000000002657</ParamVertex>
+        <ParamVertex vref="76" gref="15" dim="1">7.0000000000289</ParamVertex>
+        <ParamVertex vref="77" gref="15" dim="1">8.00000000002591</ParamVertex>
+        <ParamVertex vref="78" gref="15" dim="1">9.0000000000191</ParamVertex>
+        <ParamVertex vref="79" gref="15" dim="1">10.00000000001</ParamVertex>
+        <ParamVertex vref="80" gref="15" dim="1">11</ParamVertex>
+        <ParamVertex vref="1" gref="16" dim="1">12</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="12">69 70 70 71 71 72 72 73 73 74 74 75 75 76 76 77 77 78 78 79 79 80 80 1</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-10" gref="20">
+        <ParamVertex vref="92" gref="18" dim="1">0</ParamVertex>
+        <ParamVertex vref="91" gref="18" dim="1">1.0000000000161</ParamVertex>
+        <ParamVertex vref="90" gref="18" dim="1">2.00000000002559</ParamVertex>
+        <ParamVertex vref="89" gref="18" dim="1">3.0000000000296</ParamVertex>
+        <ParamVertex vref="88" gref="18" dim="1">4.00000000002926</ParamVertex>
+        <ParamVertex vref="87" gref="18" dim="1">5.0000000000257</ParamVertex>
+        <ParamVertex vref="86" gref="18" dim="1">6.00000000002005</ParamVertex>
+        <ParamVertex vref="85" gref="18" dim="1">7.00000000001344</ParamVertex>
+        <ParamVertex vref="84" gref="18" dim="1">8.000000000007</ParamVertex>
+        <ParamVertex vref="83" gref="18" dim="1">9.00000000000186</ParamVertex>
+        <ParamVertex vref="82" gref="18" dim="1">9.99999999999915</ParamVertex>
+        <ParamVertex vref="81" gref="18" dim="1">11</ParamVertex>
+        <ParamVertex vref="9" gref="19" dim="1">12</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="12">91 92 90 91 89 90 88 89 87 88 86 87 85 86 84 85 83 84 82 83 81 82 9 81</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-1" gref="23">
+        <ParamVertex vref="69" gref="21" dim="1">0</ParamVertex>
+        <ParamVertex vref="99" gref="21" dim="1">1</ParamVertex>
+        <ParamVertex vref="98" gref="22" dim="1">1.99999999999935</ParamVertex>
+        <ParamVertex vref="97" gref="22" dim="1">2.99999999999352</ParamVertex>
+        <ParamVertex vref="96" gref="22" dim="1">3.99999999998574</ParamVertex>
+        <ParamVertex vref="95" gref="22" dim="1">4.99999999997926</ParamVertex>
+        <ParamVertex vref="94" gref="22" dim="1">5.99999999997731</ParamVertex>
+        <ParamVertex vref="93" gref="22" dim="1">6.99999999998315</ParamVertex>
+        <ParamVertex vref="92" gref="22" dim="1">8</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="8">99 69 98 99 97 98 96 97 95 96 94 95 93 94 92 93</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-12" gref="26">
+        <ParamVertex vref="241" gref="24" dim="1">0</ParamVertex>
+        <ParamVertex vref="242" gref="24" dim="1">1.00000000000349</ParamVertex>
+        <ParamVertex vref="243" gref="24" dim="1">2.00000000000555</ParamVertex>
+        <ParamVertex vref="244" gref="24" dim="1">3.00000000000642</ParamVertex>
+        <ParamVertex vref="245" gref="24" dim="1">4.00000000000634</ParamVertex>
+        <ParamVertex vref="246" gref="24" dim="1">5.00000000000557</ParamVertex>
+        <ParamVertex vref="247" gref="24" dim="1">6.00000000000434</ParamVertex>
+        <ParamVertex vref="248" gref="24" dim="1">7.00000000000291</ParamVertex>
+        <ParamVertex vref="249" gref="24" dim="1">8.00000000000151</ParamVertex>
+        <ParamVertex vref="250" gref="24" dim="1">9.0000000000004</ParamVertex>
+        <ParamVertex vref="251" gref="24" dim="1">9.99999999999981</ParamVertex>
+        <ParamVertex vref="252" gref="24" dim="1">11</ParamVertex>
+        <ParamVertex vref="21" gref="25" dim="1">12</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="12">241 242 242 243 243 244 244 245 245 246 246 247 247 248 248 249 249 250 250 251 251 252 252 21</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-4" gref="27">
+        <ParamVertex vref="69" gref="27" dim="1">0</ParamVertex>
+        <ParamVertex vref="253" gref="27" dim="1">0.99999999998224</ParamVertex>
+        <ParamVertex vref="254" gref="27" dim="1">1.99999999994876</ParamVertex>
+        <ParamVertex vref="255" gref="27" dim="1">2.9999999999409</ParamVertex>
+        <ParamVertex vref="241" gref="27" dim="1">4</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="4">69 253 253 254 254 255 255 241</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-15" gref="28">
+        <ParamVertex vref="329" gref="28" dim="1">0</ParamVertex>
+        <ParamVertex vref="328" gref="28" dim="1">0.0833333333333333</ParamVertex>
+        <ParamVertex vref="327" gref="28" dim="1">0.166666666666667</ParamVertex>
+        <ParamVertex vref="326" gref="28" dim="1">0.25</ParamVertex>
+        <ParamVertex vref="325" gref="28" dim="1">0.333333333333333</ParamVertex>
+        <ParamVertex vref="324" gref="28" dim="1">0.416666666666667</ParamVertex>
+        <ParamVertex vref="323" gref="28" dim="1">0.5</ParamVertex>
+        <ParamVertex vref="322" gref="28" dim="1">0.583333333333333</ParamVertex>
+        <ParamVertex vref="321" gref="28" dim="1">0.666666666666667</ParamVertex>
+        <ParamVertex vref="320" gref="28" dim="1">0.75</ParamVertex>
+        <ParamVertex vref="319" gref="28" dim="1">0.833333333333333</ParamVertex>
+        <ParamVertex vref="318" gref="28" dim="1">0.916666666666667</ParamVertex>
+        <ParamVertex vref="13" gref="28" dim="1">1</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="12">328 329 327 328 326 327 325 326 324 325 323 324 322 323 321 322 320 321 319 320 318 319 13 318</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-16" gref="29">
+        <ParamVertex vref="241" gref="29" dim="1">0</ParamVertex>
+        <ParamVertex vref="336" gref="29" dim="1">0.125</ParamVertex>
+        <ParamVertex vref="335" gref="29" dim="1">0.25</ParamVertex>
+        <ParamVertex vref="334" gref="29" dim="1">0.375</ParamVertex>
+        <ParamVertex vref="333" gref="29" dim="1">0.5</ParamVertex>
+        <ParamVertex vref="332" gref="29" dim="1">0.625</ParamVertex>
+        <ParamVertex vref="331" gref="29" dim="1">0.75</ParamVertex>
+        <ParamVertex vref="330" gref="29" dim="1">0.875</ParamVertex>
+        <ParamVertex vref="329" gref="29" dim="1">1</ParamVertex>
+        <!-- DIR=OPPOSITE -->
+        <MeshEdge etype="Edge2" count="8">336 241 335 336 334 335 333 334 332 333 331 332 330 331 329 330</MeshEdge>
+      </MeshString>
+      <MeshString name="root/con-18" gref="30">
+        <ParamVertex vref="92" gref="30" dim="1">0</ParamVertex>
+        <ParamVertex vref="478" gref="30" dim="1">0.25</ParamVertex>
+        <ParamVertex vref="479" gref="30" dim="1">0.5</ParamVertex>
+        <ParamVertex vref="480" gref="30" dim="1">0.75</ParamVertex>
+        <ParamVertex vref="329" gref="30" dim="1">1</ParamVertex>
+        <!-- DIR=SAME -->
+        <MeshEdge etype="Edge2" count="4">92 478 478 479 479 480 480 329</MeshEdge>
+      </MeshString>
+    </MeshModelReference>
+  </MeshFile>
+  
+  <!-- Periodic Transform -->
+  <Transform xid="1" name="x_translation" aref="6">1 0 0 0 0 1 0 0 0 0 1 0 0 0 -3 1</Transform>
+  <Transform xid="2" name="z_translation" aref="6">1 0 0 0 0 1 0 0 0 0 1 0 -1 0 0 1</Transform>
+  <Transform xid="3" name="y_translation" aref="6">1 0 0 0 0 1 0 0 0 0 1 0 0 2 0 1</Transform>
+  
+  <!-- Periodic Domain -->
+  <MeshElementLinkage xref="1" name="x_periodicity" aref="7" sourceEntityRef="root/dom-2" targetEntityRef="root/dom-8"/>
+  <MeshElementLinkage xref="2" name="z_periodicity" aref="7" sourceEntityRef="root/dom-3" targetEntityRef="root/dom-7"/>
+  <MeshElementLinkage xref="3" name="y_periodicity" aref="7" sourceEntityRef="root/dom-6" targetEntityRef="root/dom-9"/>
+  
+</MeshLink>

@@ -254,7 +254,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
             NULL, NULL, false);
 
         // Repeat the edge add in any MeshString containing the parent edge
-        std::vector<MeshString *> meshStrings = meshModel->getMeshStrings();
+        std::vector<MeshString *> meshStrings;
+        meshModel->getMeshStrings(meshStrings);
         std::vector<MeshString *>::iterator stringIter;
 
         for (stringIter = meshStrings.begin(); stringIter != meshStrings.end(); ++stringIter) {
@@ -305,7 +306,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
             NULL, NULL);
 
         // Repeat the face-edge add in every MeshSheet containing the parent edge
-        std::vector<MeshSheet *> meshSheets = meshModel->getMeshSheets();
+        std::vector<MeshSheet *> meshSheets;
+        meshModel->getMeshSheets(meshSheets);
         std::vector<MeshSheet *>::iterator iter;
 
         for (iter = meshSheets.begin(); iter != meshSheets.end(); ++iter) {
@@ -525,7 +527,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
     meshModel->deleteFaceByInds(parentInds[0], parentInds[1], parentInds[3]);
 
     // Repeat the edge delete in any MeshString containing the parent edge
-    std::vector<MeshString *> meshStringsX = meshModel->getMeshStrings();
+    std::vector<MeshString *> meshStringsX;
+    meshModel->getMeshStrings(meshStringsX);
     std::vector<MeshString *>::iterator stringIter;
     for (stringIter = meshStringsX.begin(); stringIter != meshStringsX.end(); ++stringIter) {
         MeshString *meshString = *stringIter;
@@ -534,7 +537,8 @@ SurfMesh::splitEdge(MeshAssociativity &meshAssoc,
     }
 
     // Repeat the edge and face delete in any MeshSheet containing the parent edge/face
-    std::vector<MeshSheet *> meshSheets = meshModel->getMeshSheets();
+    std::vector<MeshSheet *> meshSheets;
+    meshModel->getMeshSheets(meshSheets);
     std::vector<MeshSheet *>::iterator iter;
     for (iter = meshSheets.begin(); iter != meshSheets.end(); ++iter) {
         MeshSheet *meshSheet = *iter;

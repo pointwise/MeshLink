@@ -76,6 +76,7 @@ public:
 
 private:
     bool writeRootAttributes();
+    bool writePeriodicInfo();
     bool writeGeometryRefs();
     bool writeMeshFiles(bool compress);
 

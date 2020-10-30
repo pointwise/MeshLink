@@ -14,15 +14,32 @@
 
 #include "Types.h"
 
-
-/* Allocate a new MeshLinkParserXercesObj */
-ML_EXTERN ML_STORAGE_CLASS
+/**
+ * \brief Allocates a new MeshLinkParserXerces Object.
+ * @param[in,out] MeshLinkParserObj MeshLinkParserXerces object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
 int  ML_createMeshLinkParserXercesObj(MeshLinkParserObj *parseObj);
 
-/* Free MeshLinkParserXercesObj memory */
-ML_EXTERN ML_STORAGE_CLASS
+/**
+ * \brief Frees a MeshLinkParserXerces Object.
+ * @param[in,out] MeshLinkParserObj MeshLinkParserXerces object
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
 void   ML_freeMeshLinkParserXercesObj(MeshLinkParserObj *parseObj);
 
+/* Set the MeshLinkParser output message verbosity */
+
+/**
+ * \brief Set the MeshLinkParserXerces output message verbosity.
+ * @param[in,out] MeshLinkParserObj MeshLinkParserXerces object
+ * @param[in] level verbosity (0 = errors only, larger values generate more messages)
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+void   ML_setMeshLinkParserVerboseLevel(MeshLinkParserObj parseObj,
+    MLINT level);
 
 
 #endif

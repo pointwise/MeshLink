@@ -36,6 +36,15 @@ ML_freeMeshLinkParserXercesObj(MeshLinkParserObj *parseObj)
     }
 }
 
+void
+ML_setMeshLinkParserVerboseLevel(MeshLinkParserObj parseObj, MLINT level)
+{
+    MeshLinkParserXerces *parser = (MeshLinkParserXerces *)parseObj;
+    if (parser) {
+        parser->setVerboseLevel((int)level);
+    }
+}
+
 
 /****************************************************************************
  *

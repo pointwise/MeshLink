@@ -484,21 +484,21 @@ public:
     /// \brief Return list of MeshEdge in the MeshModel
     ///
     ///  Return will include all MeshEdge objects from all MeshString objects in this model
-    std::vector<const MeshEdge *> getMeshEdges() const;
+    void getMeshEdges(std::vector<const MeshEdge *> &edges) const;
 
     /// \brief Return list of all MeshFace in the MeshModel
-    std::vector<const MeshFace *> getMeshFaces() const;
+    void getMeshFaces(std::vector<const MeshFace *> &faces) const;
 
     /// \brief Return list of MeshString in the MeshModel
     ///
     /// Return will include all MeshString objects in this model
-    std::vector<MeshString *> getMeshStrings() const;
+    void getMeshStrings(std::vector<MeshString *> &strings) const;
 
     /// \brief Return count of MeshString in the MeshModel
     size_t getMeshStringCount() const;
 
     /// \brief Return list of all MeshSheet in the MeshModel
-    std::vector<MeshSheet *> getMeshSheets() const;
+    void getMeshSheets(std::vector<MeshSheet *> &sheets) const;
 
     /// \brief Return count of MeshSheets in the MeshModel
     size_t getMeshSheetCount() const;

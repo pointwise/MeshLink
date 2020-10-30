@@ -23,9 +23,12 @@
 #include <geom/ProjectionBSPTree.h>
 #include <geom/Surface.h>
 #include <nmb/NativeTopologyReader.h>
+#include <nmb/CurvedCoedge.h>
+#include <nmb/CurvedEdge.h>
 #include <nmb/CurvedFace.h>
 #include <nmb/CurvedModel.h>
 #include <nmb/CurvedSheet.h>
+#include <nmb/CurvedVertex.h>
 #include <nmb/TopologyProjectionBSPTreeWrapper.h>
 
 #include <algorithm>
@@ -250,6 +253,115 @@ GeometryKernelGeode::getProjectionEntityName(ProjectionData &projectionData, std
     }
     return true;
 }
+
+
+bool
+GeometryKernelGeode::getProjectionTolerance(ProjectionData &projectionData, MLREAL &tolerance)
+{
+    if (!projectionData.getData()) { return false; }
+    GE::IsectProjPoint *projection = (GE::IsectProjPoint *)projectionData.getData();
+    if (NULL == projection) {
+        return false;
+    }
+    tolerance = GE::Tolerance::GetSamePoint();
+    const GE::CurvedVertex *cvert = NULL;
+    const GE::CurvedCoedge *ccoedge = NULL;
+    const GE::CurvedEdge *cedge = NULL;
+    const GE::CurvedFace *cface = NULL;
+    if (NULL != (cvert = GE::CurvedVertex::Downcast(projection->End1.subEntity))) {
+        GE::Real64 vtol = 0.0;
+        if (GE::Error::No_errors == cvert->Inquire_Tolerance(&vtol)) {
+            tolerance = (std::max)(tolerance, vtol);
+        }
+    }
+    else if (NULL != (ccoedge = GE::CurvedCoedge::Downcast(projection->End1.subEntity))) {
+        GE::Real64 etol = 0.0;
+        if (GE::Error::No_errors == ccoedge->Inquire_Edge()->Inquire_Tolerance(&etol)) {
+            tolerance = (std::max)(tolerance, etol);
+        }
+    }
+    else if (NULL != (cedge = GE::CurvedEdge::Downcast(projection->End1.entity)) ||
+            NULL != (cedge = GE::CurvedEdge::Downcast(projection->End1.subEntity))) {
+        GE::Real64 etol = 0.0;
+        if (GE::Error::No_errors == cedge->Inquire_Tolerance(&etol)) {
+            tolerance = (std::max)(tolerance, etol);
+        }
+    }
+    else if (NULL != (cface = GE::CurvedFace::Downcast(projection->End1.entity)) ||
+            NULL != (cface = GE::CurvedFace::Downcast(projection->End1.subEntity))) {
+        tolerance = (std::max)(tolerance, cface->Inquire_Surface()->Inquire_Tolerance());
+    }
+    return true;
+}
+
+
+/// \brief Evaluate the model assembly tolerance on a surface entity
+bool
+GeometryKernelGeode::evalSurfaceTolerance(
+    const std::string &entityName,
+    MLREAL            &minTolerance,
+    MLREAL            &maxTolerance)
+{
+    GE::Entity *entity = getEntity(entityName);
+    if (NULL == entity) {
+        return false;
+    }
+
+    MLREAL samePtTol = GE::Tolerance::GetSamePoint();
+    minTolerance = 1e30;
+    maxTolerance = samePtTol;
+    
+    GE::Real64 tol = 0.0;
+    const GE::CurvedFace *cface = NULL;
+    if (NULL != (cface = GE::CurvedFace::Downcast(entity))) {
+        // surface tolerance
+        tol = (std::max)(samePtTol, cface->Inquire_Surface()->Inquire_Tolerance());
+        minTolerance = (std::min)(minTolerance, tol);
+        maxTolerance = (std::max)(maxTolerance, tol);
+
+        // coedge tolerance
+        GE::EntityList<GE::CurvedCoedge> coedgeList;
+        GE::Int32 i,numCoedges;
+        cface->Inquire_Coedges(&coedgeList, NULL);
+        numCoedges = coedgeList.Size();
+        for (i = 0; i < numCoedges; ++i) {
+            if (GE::Error::No_errors == coedgeList[i]->Inquire_Edge()->Inquire_Tolerance(&tol)) {
+                minTolerance = (std::min)(minTolerance, tol);
+                maxTolerance = (std::max)(maxTolerance, tol);
+            }
+        }
+
+        // vertex tolerance
+        GE::EntityList<GE::CurvedVertex> vertexList;
+        GE::Int32 numVertices;
+        cface->Inquire_Vertices(&vertexList, NULL);
+        numVertices = vertexList.Size();
+        for (i = 0; i < numVertices; ++i) {
+            if (GE::Error::No_errors == vertexList[i]->Inquire_Tolerance(&tol)) {
+                minTolerance = (std::min)(minTolerance, tol);
+                maxTolerance = (std::max)(maxTolerance, tol);
+            }
+        }
+        minTolerance = (std::max)(samePtTol, minTolerance);
+        return true;
+    }
+
+    return false;
+}
+
+
+bool
+GeometryKernelGeode::getProjectionDistance(ProjectionData &projectionData, MLREAL &distance)
+{
+    if (!projectionData.getData()) { return false; }
+    GE::IsectProjPoint *projection = (GE::IsectProjPoint *)projectionData.getData();
+    if (NULL == projection) {
+        return false;
+    }
+    distance = projection->Distance;
+    return true;
+}
+
 
 bool
 GeometryKernelGeode::evalXYZ(MLVector2D UV, const std::string &entityName, MLVector3D xyz)

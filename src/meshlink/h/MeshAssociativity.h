@@ -67,9 +67,9 @@
 
 \section test_api_sec API Test Harness
  &nbsp;&nbsp;&nbsp;&nbsp; A C++ test harness and programming reference is available in 
- app/harness_cpp/main.cxx.<BR>
+ app/harness_cpp/%main.cxx.<BR>
  &nbsp;&nbsp;&nbsp;&nbsp; A C test harness and programming reference is available in 
- app/harness_c/main.c.<BR>
+ app/harness_c/%main.c.<BR>
  */
 
 
@@ -85,6 +85,201 @@
 class GeometryKernelManager;
 class MeshAssociativity;
 
+/****************************************************************************
+ * MeshLinkTransform class
+ ***************************************************************************/
+ /**
+  * \class MeshLinkTransform
+  *
+  * \brief Storage for MeshLink Transform data.
+  *
+  * MeshElementLinkages reference a transform through an XREF attribute
+  * which is the integer ID of the %MeshLinkTransform associated with
+  * the entity. 
+  *
+  * MeshLink transforms define an affine transform from one position to another.
+  * Access to transforms by an application are through MeshElementLinkage.getTransform 
+  * and MeshAssociativity.getTransformByID.
+  *
+  */
+class ML_STORAGE_CLASS MeshLinkTransform {
+public:
+    friend class MeshAssociativity;
+
+    /// Default constructor
+    MeshLinkTransform();
+
+    /// Constructor for an transform with a unique transform ID (AttID) and name.
+    /// The transform's definition is given by its contents.
+    MeshLinkTransform(MLINT xid, std::string &name, std::string &contents,
+        MeshAssociativity &meshAssoc);
+
+    /// \brief Set the MeshLinkAttribute AttID referenced by this MeshLinkTransform
+    ///
+    /// \param aref the attribute reference ID (AttID) for this transform
+    virtual void setAref(MLINT aref);
+
+    /// \brief Whether the MeshLinkTransform has a MeshLinkAttribute AttID reference defined
+    bool hasAref() const;
+
+    /// \brief Get the MeshLinkAttribute AttID referenced by this MeshLinkTransform
+    MLINT getAref() const;
+
+    /// \brief Get the XID of this MeshLinkTransform
+    MLINT getXID() const;
+
+    /// \brief Get the name attribute of this MeshLinkTransform
+    const std::string & getName() const;
+
+    /// \brief Get the contents of this MeshLinkTransform
+    const std::string & getContents() const;
+
+    /// Whether this transform is valid. A transform may be invalid if it's content
+    /// does not define a valid transformation.
+    bool isValid() const { return is_valid_; }
+
+    /// \brief Get the transform quaternion
+    ///
+    /// \param[out] 4x4 matrix of the transform quaternion
+    void getQuaternion(MLREAL xform_quaternion[4][4]) const;
+
+private:
+    /// The XID of this transform
+    MLINT xid_;
+    /// The name of this transform
+    std::string name_;
+    /// The attribute reference ID (AttID)
+    MLINT aref_;
+    /// The application-defined contents of the transform, from the MeshLink file.
+    std::string contents_;
+    /// The quaternion transform
+    MLREAL xform_[4][4];
+    /// Whether this transform is valid.
+    bool is_valid_;
+};
+
+
+/****************************************************************************
+ * MeshElementLinkage class
+ ***************************************************************************/
+ /**
+  * \class MeshElementLinkage
+  *
+  * \brief Storage for MeshLink ElementLinkage data.
+  *
+  * A MeshElementLinkage provides a mapping of one referenced mesh element
+  * (sheet, face, string, edge or vertex) to another, with an optional
+  * transform (to identify slaved periodic transformations, for example).
+  *
+  * sourceEntityRef and targetEntityRef attributes are defined in an
+  * application-specific manner; for example, mesh element reference IDs or
+  * mesh element names.
+  *
+  */
+class ML_STORAGE_CLASS MeshElementLinkage {
+public:
+    friend class MeshAssociativity;
+
+    /// Default constructor
+    MeshElementLinkage();
+
+    /// Constructor for an transform with a unique transform ID (AttID) and name.
+    /// The transform's definition is given by its contents.
+    MeshElementLinkage(std::string &name, 
+        std::string &sourceEntityRef,
+        std::string &targetEntityRef,
+        MeshAssociativity &meshAssoc);
+
+    /// \brief Set the MeshLinkAttribute AttID referenced by this MeshElementLinkage
+    ///
+    /// \param aref the attribute reference ID (AttID) for this linkage
+    virtual void setAref(MLINT aref);
+
+    /// \brief Whether the MeshElementLinkage has a MeshLinkAttribute AttID reference defined
+    bool hasAref() const;
+
+    /// \brief Get the MeshLinkAttribute AttID referenced by this MeshElementLinkage
+    MLINT getAref() const;
+
+    /// \brief Set the Transform XID referenced by this MeshElementLinkage
+    ///
+    /// \param xref the transform reference ID (XID) for this linkage
+    virtual bool setXref(MLINT xref, MeshAssociativity &meshAssoc);
+
+    /// \brief Whether the MeshElementLinkage has a Transform XID reference defined
+    bool hasXref() const;
+
+    /// \brief Get the Transform XID referenced by this MeshElementLinkage
+    ///
+    /// \param[out] xref the transform reference ID (XID) for this linkage
+    virtual bool getXref(MLINT *xref) const;
+
+    /// \brief Get the Transform referenced by this MeshElementLinkage
+    ///
+    /// returns NULL if XREF is unset or invalid
+    const MeshLinkTransform * getTransform(const MeshAssociativity &meshAssoc) const;
+
+    /// Whether this linkage is valid. A linkage may be invalid if the sourceEntityRef
+    /// or targetEntityRef are unknown.
+    bool isValid() const { return is_valid_; }
+
+    /// \brief Return the name of this MeshElementLinkage
+    ///
+    /// N.B. return value subject to change
+    ///
+    /// \param[out] name the non-modifiable name of the entity
+    virtual void getName(const char **name) const;
+
+    /// \brief Return the name of this MeshElementLinkage
+    virtual const std::string & getName() const;
+
+    /// \brief Set the name of this MeshElementLinkage
+    ///
+    /// setName is special and should not be overridden, as
+    /// it provides a mechanism for generating unique names
+    ///
+    /// \param name the name of the mesh entity, or empty if a unique name is to be generated
+    void setName(const std::string &name);
+
+    /// \brief Set the name of this MeshElementLinkage
+    ///
+    /// setName is special and should not be overrided
+    /// it provides a mechanism for generating unique names
+    //
+    /// \param name the name of the mesh entity, or null if a unique name is to be generated
+    void setName(const char *name);
+
+    /// Generate and return a unique name for the entity
+    std::string getNextName();
+
+    /// \brief Return the Entity references linked by this MeshElementLinkage
+    ///
+    /// \param[out] sourceEntityRef reference to the source entity
+    /// \param[out] targetEntityRef reference to the target entity
+    void getEntityRefs(std::string &sourceEntityRef, std::string &targetEntityRef) const;
+
+    /// Return the base name used for generating unique names for linkages
+    virtual const std::string &getBaseName() const;
+    /// Return the current value used for generating unique names for linkages
+    virtual MLUINT &getNameCounter();
+
+private:
+    /// The unique name counter for linkages
+    static MLUINT nameCounter_;
+
+    /// The name of this linkage
+    std::string name_;
+    /// The attribute reference ID (AttID)
+    MLINT aref_;
+    /// The transform reference ID (XID)
+    MLINT xref_;
+    /// The source entity reference.
+    std::string sourceEntityRef_;
+    /// The target entity reference.
+    std::string targetEntityRef_;
+    /// Whether this linkage is valid.
+    bool is_valid_;
+};
 
 /****************************************************************************
  * MeshLinkAttribute class
@@ -108,43 +303,28 @@ public:
     friend class MeshAssociativity;
 
     /// Default constructor
-    MeshLinkAttribute():
-        attid_(-1),
-        is_group_(false),
-        is_valid_(true)
-    {}
+    MeshLinkAttribute();
 
     /// Constructor for an attribute with a unique attribute ID (AttID) and name.
     /// The attribute's definition is given by its contents.
     MeshLinkAttribute(MLINT attid, std::string &name, std::string &contents,
-        bool is_group, MeshAssociativity &meshAssoc) :
-        attid_(attid),
-        name_(name),
-        contents_(contents),
-        is_group_(is_group)
-    {
-        if (is_group) {
-            is_valid_ = buildGroupArefs(meshAssoc);
-        }
-        else {
-            is_valid_ = true;
-        }
-    }
+        bool is_group, MeshAssociativity &meshAssoc);
+
+    /// \brief Get the AttID of this attribute.
+    MLINT getAttID() const;
 
     /// Whether this attribute is a group of other MeshLinkAttribute s.
-    bool isGroup() const { return is_group_; }
+    bool isGroup() const;
 
     /// Whether this attribute is valid. An attribute may be invalid if it is a group
     /// of other attribute IDs, and any one of which do not exist.
-    bool isValid() const { return is_valid_; }
+    bool isValid() const;
 
     /// \brief Get the AttIDs referenced by this attribute.
     ///
     /// If the %MeshLinkAttribute is a group, the AttIDs of the group
     /// members are returned, otherwise, this attribute's AttID is returned
-    const std::vector<MLINT> & getAttributeIDs() const {
-        return group_arefs_;
-    }
+    const std::vector<MLINT> & getAttributeIDs() const;
 private:
 
     /**
@@ -323,6 +503,10 @@ private:
 typedef std::map<std::string, MLINT> MeshAttributeNameToIDMap;
 typedef std::map<MLINT, MeshLinkAttribute> MeshAttributeIDMap;
 
+typedef std::map<std::string, MLINT> MeshTransformNameToIDMap;
+typedef std::map<MLINT, MeshLinkTransform> MeshTransformIDMap;
+typedef std::map<std::string, MeshElementLinkage *> MeshElementLinkageNameMap;
+
 
 /****************************************************************************
  * MeshAssociativity class
@@ -349,6 +533,16 @@ public:
     /// \param[in] geometry_group the group to add
     /// \return true if group was added
     bool addGeometryGroup(GeometryGroup &geometry_group);
+
+    /// \brief Get count of GeometryGroups in the database
+    ///
+    /// \return GeometryGroup count
+    MLINT getGeometryGroupCount() const;
+
+    /// \brief Get list of GeometryGroup IDs in the database
+    ///
+    /// \param[in,out] gids array of GIDs
+    void getGeometryGroupIDs(std::vector<MLINT> &gids) const;
 
     /// \brief Get GeometryGroup by name
     ///
@@ -385,6 +579,28 @@ public:
     /// \param[in] ref the application-defined reference string of the desired model
     /// \return model or NULL if not found
     MeshModel* getMeshModelByRef(const char * ref) const;
+
+    /// \brief Get MeshSheet by name
+    ///
+    /// Search all MeshModels for a MeshSheet with the given name.
+    ///
+    /// \param[in] name the name of the desired sheet
+    /// \param[out] model containing the desired sheet
+    /// \param[out] the desired sheet
+    /// \return true if found
+    bool getMeshSheetByName(const std::string &name,
+        MeshModel **model, MeshSheet **sheet) const;
+
+    /// \brief Get MeshString by name
+    ///
+    /// Search all MeshModels for a MeshString with the given name.
+    ///
+    /// \param[in] name the name of the desired string
+    /// \param[out] model containing the desired string
+    /// \param[out] the desired string
+    /// \return true if found
+    bool getMeshStringByName(const std::string &name,
+        MeshModel **model, MeshString **string) const;
 
     /// \brief Add a GeometryKernel to the database
     ///
@@ -435,6 +651,56 @@ public:
     /// \return true if the attribute was added
     bool addAttribute(MeshLinkAttribute &att);
 
+    /// \brief Return list of MeshLinkAttributes in the MeshAssociativity database
+    std::vector<const MeshLinkAttribute *> getAttributes() const;
+
+
+    /// \brief Get MeshLinkTransform by ID
+    ///
+    /// \param[in] id the unique ID of the desired transform
+    /// \return transform or NULL if not found
+    const MeshLinkTransform * getTransformByID(const MLINT id) const;
+
+    /// \brief Remove all MeshLinkTransform objects from the database
+    void clearTransforms();
+
+    /// \brief Add a MeshLinkTransform to the database
+    ///
+    /// \param[in] trans the transform to add
+    /// \return true if the transform was added
+    bool addTransform(MeshLinkTransform &att);
+
+    /// \brief Return list of MeshLinkTransforms in the MeshAssociativity database
+    void getTransforms(std::vector<const MeshLinkTransform *> &xforms) const;
+
+    /// \brief Return count of MeshLinkTransforms in the MeshAssociativity database
+    size_t  getTransformCount() const;
+
+
+    /// \brief Remove all MeshElementLinkage objects from the database
+    void clearMeshElementLinkages();
+
+    /// \brief Add a MeshElementLinkage to the database
+    ///
+    /// \param[in] trans the transform to add
+    /// \return true if the transform was added
+    bool addMeshElementLinkage(MeshElementLinkage *linkage);
+
+
+    /// \brief Get MeshElementLinkage by name
+    ///
+    /// \param[in] name the name of the desired linkage
+    /// \return linkage or NULL if not found
+    MeshElementLinkage*
+        getMeshElementLinkageByName(const std::string &name) const;
+
+
+    /// \brief Return list of MeshElementLinkages in the MeshAssociativity database
+    void getMeshElementLinkages(std::vector<MeshElementLinkage *> &linkages) const;
+
+    /// \brief Return count of MeshElementLinkages in the MeshAssociativity database
+    size_t  getMeshElementLinkageCount() const;
+
     /// \brief Return the number of GeometryFile objects in the database
     MLINT getNumGeometryFiles() const;
 
@@ -466,7 +732,7 @@ public:
     const std::vector<MeshFile> & getMeshFiles() const;
 
     /// \brief Return list of MeshModels in the MeshAssociativity database
-    std::vector<MeshModel *> getMeshModels() const;
+    void getMeshModels(std::vector<MeshModel *> &models) const;
 
     /// \brief Return count of MeshModels in the MeshModel
     size_t getMeshModelCount() const;
@@ -487,6 +753,15 @@ private:
     MeshAttributeIDMap meshAttributeIDMap_;
     /// Map of MeshAttribute name to associated ID (aref)
     MeshAttributeNameToIDMap meshAttributeNameToIDMap_;
+
+    /// Map of MeshTransform to associated XID (xref)
+    MeshTransformIDMap meshTransformIDMap_;
+    /// Map of MeshTransform name to associated XID (xref)
+    MeshTransformNameToIDMap meshTransformNameToIDMap_;
+
+    /// Map of element linkage name to MeshElementLinkage
+    MeshElementLinkageNameMap   meshElementLinkageNameMap_;
+
 
     /// Map of mesh model name to MeshModel
     MeshModelNameMap   meshModelNameMap_;

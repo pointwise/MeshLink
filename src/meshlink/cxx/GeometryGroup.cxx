@@ -54,6 +54,21 @@ GeometryGroupManager::addGroup(GeometryGroup &group)
     return true;
 }
 
+MLINT
+GeometryGroupManager::getCount() const
+{
+    return (MLINT)geometry_groups_.size();
+}
+
+void
+GeometryGroupManager::getIDs(std::vector<MLINT> &idList) const
+{
+    idList.clear();
+    for (MLUINT i = 0; i < geometry_groups_.size(); ++i) {
+        idList.emplace_back(geometry_groups_[i].getID());
+    }
+    return;
+}
 
 GeometryGroup *
 GeometryGroupManager::getByName(std::string name)

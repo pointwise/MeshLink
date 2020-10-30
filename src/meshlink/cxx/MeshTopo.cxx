@@ -175,6 +175,23 @@ MeshTopo::getNumParamVerts() const
     return (MLINT)paramVertVrefMap_.size();
 }
 
+void
+MeshTopo::getParamVerts(std::vector<const ParamVertex *> &pv) const
+{
+    pv.resize(paramVertVrefMap_.size());
+    ParamVertVrefMap::const_iterator iter;
+    size_t i;
+    for (i = 0, iter = paramVertVrefMap_.begin(); iter != paramVertVrefMap_.end(); ++iter, ++i) {
+        pv[i] = iter->second;
+    }
+}
+
+const ParamVertVrefMap & 
+MeshTopo::getParamVertVrefMap() const {
+    return paramVertVrefMap_;
+}
+
+
 MLINT
 MeshTopo::getID() const
 {
@@ -273,6 +290,24 @@ MeshTopo::getAttributeIDs(const MeshAssociativity &meshAssoc) const
         ref_attids.push_back(aref);
     }
     return ref_attids;
+}
+
+void 
+MeshTopo::setOrderCounter(MLUINT counter)
+{
+    orderCounter_ = counter;
+}
+
+MLUINT
+MeshTopo::getOrderCounter() const
+{
+    return orderCounter_;
+}
+
+bool 
+MeshTopo::OrderCompare(const MeshTopo *topo1, const MeshTopo *topo2)
+{
+    return (topo1->getOrderCounter() < topo2->getOrderCounter());
 }
 
 

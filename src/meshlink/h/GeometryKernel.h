@@ -136,6 +136,21 @@ public:
     /// \param[out] name the geometric entity name
     virtual bool getProjectionEntityName(ProjectionData &projectionData, std::string &name);
 
+    /// \brief Return the projection distance
+    ///
+    /// \param[in] projectionData the projection data from which to extract
+    /// \param[out] distance the distance between the original point and the projected point
+    virtual bool getProjectionDistance(ProjectionData &projectionData, MLREAL &distance);
+
+    /// \brief Return the projection tolerance
+    ///
+    /// Defined by kernel implementation, the projection tolerance typically indicates local
+    /// error tolerance within the geometry or solid topology.
+    ///
+    /// \param[in] projectionData the projection data from which to extract
+    /// \param[out] tolerance the maximum error tolerance of the projection result
+    virtual bool getProjectionTolerance(ProjectionData &projectionData, MLREAL &tolerance);
+
     /// \brief Evaluate the Cartesian coordinates at the entity parametric coordinates
     ///
     /// Defined by kernel implementation.
@@ -240,6 +255,25 @@ public:
         MLREAL            *gauss,
         MLORIENT          *orientation
     );
+
+
+
+    /// \brief Evaluate the model assembly tolerance on a surface entity
+    ///
+    /// Defined by kernel implementation, but in general:
+    /// If the surface name given matches a model face, then the face's 
+    /// boundary edges and vertices will be querried for the assembly
+    /// tolerance used to close the model.
+    ///
+    /// \param[in] entityName the name of the geometric entity to evaluate
+    /// \param[out] minTolerance,maxTolerance minimum and maximum model assembly
+    ///     tolerance used to make the model watertight at the shared 
+    ///     boundary vertices and edges.
+    /// \return true if model assembly tolerance is available for the surface
+    virtual bool evalSurfaceTolerance(
+        const std::string &entityName,
+        MLREAL            &minTolerance,
+        MLREAL            &maxTolerance);
 
     /// \brief Determine entity type 
     ///

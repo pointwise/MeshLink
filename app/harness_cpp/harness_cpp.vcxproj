@@ -99,6 +99,10 @@
       <AdditionalDependencies>nmb.lib;geom.lib;vmath.lib;meshlinkd.lib;mlparser_xercesd.lib;xerces-c_3D.lib;mlkernel_geoded.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /R /Q /K /Y $(TargetDir)$(TargetFileName) $(ProjectDir)\dist\
+xcopy /R /Q /K /Y $(SolutionDir)\..\external\xerces\win64\lib\*.dll $(ProjectDir)\dist\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

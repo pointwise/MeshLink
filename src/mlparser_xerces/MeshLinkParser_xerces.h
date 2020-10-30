@@ -61,7 +61,8 @@ class MeshLinkParserXerces : public MeshLinkParser {
 public:
     /// Default constructor
     MeshLinkParserXerces():
-        meshAssociativity_(NULL)
+        meshAssociativity_(NULL),
+        verbose_level_(0)
     {}
     /// Destructor
     ~MeshLinkParserXerces();
@@ -107,9 +108,18 @@ public:
     /// It is the responsibility of the caller to delete the returned object.
     MeshLinkWriterXerces *getXMLWriter();
 
+    /// \brief Set the verbosity of the parser message output.
+    ///
+    /// Larger values result in more output. 0 = errors only.
+    void setVerboseLevel(int level) {
+        verbose_level_ = level;
+    }
 private:
     /// \brief Populate the MeshLinkAttribute objects
     bool parseAttributes(xercesc_3_2::DOMElement *root);
+
+    /// \brief Populate the Transform and MeshElementLinkage objects
+    bool parsePeriodicInfo(xercesc_3_2::DOMElement *root);
 
     /// \brief Populate the GeometryGroup objects
     bool parseGeometryRefs(xercesc_3_2::DOMElement *root);
@@ -166,6 +176,8 @@ private:
 
     /// \brief the MeshAssociativity object to be populated
     MeshAssociativity *meshAssociativity_;
+
+    int verbose_level_;
 
     // Parsed Xml 'header' attributes cached for use when writing out
     // Xml file based on parsed/modified Meshassociativity. Supports

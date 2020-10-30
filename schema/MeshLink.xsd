@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="MeshLinkSchema"
+    version="1.1"
     targetNamespace="https://pointwise.com"
     elementFormDefault="qualified"
     xmlns:ml="https://pointwise.com"
@@ -86,6 +87,16 @@
     <xs:attribute name="gref" type="ml:GeometryReferenceIDType" use="optional"/>
   </xs:attributeGroup>
 
+  <xs:simpleType name="TransformIDType">
+    <xs:annotation>
+      <xs:documentation>
+        A transform ID is a positive integer that must be unique for the
+        set of all Transform elements within a MeshLink file.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:positiveInteger"/>
+  </xs:simpleType>
+
   <!-- Define parameter vertex element type -->
 
   <xs:complexType name="ParamVertexType">
@@ -146,6 +157,7 @@
               </xs:simpleContent>
             </xs:complexType>
           </xs:element>
+
           <xs:element name="AttributeGroup">
             <xs:annotation>
               <xs:documentation>
@@ -170,6 +182,7 @@
               </xs:simpleContent>
             </xs:complexType>
           </xs:element>
+
           <xs:element name="GeometryFile">
             <xs:annotation>
               <xs:documentation>
@@ -198,6 +211,7 @@
               <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
             </xs:complexType>
           </xs:element>
+
           <xs:element name="GeometryGroup">
             <xs:annotation>
               <xs:documentation>
@@ -225,6 +239,7 @@
               </xs:simpleContent>
             </xs:complexType>
           </xs:element>
+
           <xs:element name="MeshFile" type="ml:MeshFileType">
             <xs:annotation>
               <xs:documentation>
@@ -234,6 +249,53 @@
               </xs:documentation>
             </xs:annotation>
           </xs:element>
+
+          <xs:element name="Transform">
+            <xs:annotation>
+              <xs:documentation>
+                A Transform provides a geometric transformation in an application-specific
+                manner.  A typical transform is a 4x4 matrix of floating-point values
+                specified in row-first notation. For example, an identity transform could
+                be specified as:
+
+                1.0 0.0 0.0 0.0
+                0.0 1.0 0.0 0.0
+                0.0 0.0 1.0 0.0
+                0.0 0.0 0.0 1.0
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="xs:string">
+                  <xs:attribute name="xid" type="ml:TransformIDType" use="required"/>
+                  <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
+
+          <xs:element name="MeshElementLinkage">
+            <xs:annotation>
+              <xs:documentation>
+                A MeshElementLinkage provides a mapping of one referenced mesh element
+                (sheet, face, string, edge or vertex) to another, with an optional
+                transform (to identify slaved periodic transformations, for example).
+
+                sourceEntityRef and targetEntityRef attributes are defined in an
+                application-specific manner; for example, mesh element reference IDs or
+                mesh element names.
+              </xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:attribute name="sourceEntityRef" type="xs:string" use="required"/>
+              <xs:attribute name="targetEntityRef" type="xs:string" use="required"/>
+              <xs:attribute name="xref" type="ml:TransformIDType" use="optional"/>
+              <xs:attribute name="aref" type="ml:AttributeIDType" use="optional"/>
+              <xs:attribute name="name" type="xs:string" use="optional"/>
+            </xs:complexType>
+          </xs:element>
+
         </xs:choice>
       </xs:sequence>
       <xs:attribute name="version" type="xs:string" use="required"/>
@@ -275,6 +337,15 @@
     <xs:keyref name="PointReferenceKeyRef" refer="ml:PointReferenceKey">
       <xs:selector xpath=".//ml:*"/>
       <xs:field xpath="@pref"/>
+    </xs:keyref>
+
+    <xs:unique name="TransformIDKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@xid"/>
+    </xs:unique>
+    <xs:keyref name="TransformIDKeyRef" refer="ml:TransformIDKey">
+      <xs:selector xpath=".//ml:*"/>
+      <xs:field xpath="@xref"/>
     </xs:keyref>
   </xs:element>
 

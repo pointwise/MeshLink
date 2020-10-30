@@ -118,7 +118,9 @@ public:
     virtual MLINT getNumEdges() const;
 
     /// \brief Return array of MeshEdges in the MeshString
-    virtual std::vector<const MeshEdge *> getMeshEdges() const;
+    ///
+    /// Edges are returned in creation order.
+    virtual void getMeshEdges(std::vector<const MeshEdge *> &edges) const;
 
     /// Default constructor
     MeshString();
@@ -149,6 +151,9 @@ private:
     MeshTopoIDToNameMap     meshEdgeIDToNameMap_;
     /// Map edge application-defined reference string th edge name
     MeshTopoRefToNameMap    meshEdgeRefToNameMap_;
+
+    /// Serial counter as edges are added to the string (zero-based)
+    MLUINT edgeCounter_;
 };
 
 typedef std::map<std::string, MeshString *> MeshStringNameMap;

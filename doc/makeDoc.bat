@@ -8,4 +8,6 @@ set GVIZ_DIR="C:\vendor\Graphviz\bin"
 
 SET PATH=%PATH%;%GVIZ_DIR%
 
-%DOXYGEN% ml_doxygen
+set TODAY=%DATE%
+
+%DOXYGEN% ml_doxygen 

@@ -197,6 +197,11 @@ typedef MeshLinkObject MeshPointObj;
 typedef MeshLinkObject MeshEdgeObj;
 /** \brief Opaque pointer to a MeshFace object */
 typedef MeshLinkObject MeshFaceObj;
+/** \brief Opaque pointer to a MeshLinkTransform object */
+typedef MeshLinkObject MeshLinkTransformObj;
+typedef MeshLinkConstObject MeshLinkTransformConstObj;
+/** \brief Opaque pointer to a MeshElementLinkage object */
+typedef MeshLinkObject MeshElementLinkageObj;
 /** \brief Opaque pointer to a ParamVertex object */
 typedef MeshLinkObject ParamVertexObj;
 /** \brief Opaque pointer to a constant ParamVertex object */

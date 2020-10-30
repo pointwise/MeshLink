@@ -218,7 +218,7 @@ test_harness_cpp: $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME}
 	@echo "*** test_harness_cpp"
 	@echo "***"
 	@$(MAKE) -f $(THIS_FILE) FORCE_${HARNESS_CPP_NAME}
-	cd $(TEST_DIR) && $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME} sphere_ml.xml
+	cd $(TEST_DIR) && $(HARNESS_CPP_DIR)/$(DIST_DIR)/${HARNESS_CPP_FULLNAME} om6.xml
 
 test_harness_c: $(HARNESS_C_DIR)/$(DIST_DIR)/${HARNESS_C_FULLNAME}
 	@echo ""

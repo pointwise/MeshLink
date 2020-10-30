@@ -16,6 +16,8 @@
 #include <sstream>
 #include <string.h>
 #include <stdio.h>
+#include <istream>
+#include <iterator>
 
 GeometryKernelManager MeshAssociativity::geometry_kernel_manager_;
 
@@ -29,12 +31,18 @@ GeometryKernelManager MeshAssociativity::geometry_kernel_manager_;
 ***************************************************************************/
 MeshAssociativity::~MeshAssociativity()
 {
-    MeshModelNameMap::iterator mIter;
-    for (mIter = meshModelNameMap_.begin(); mIter != meshModelNameMap_.end(); ++mIter) {
-        delete mIter->second;
+    {
+        // Mesh Assoc owns the MeshModels
+        MeshModelNameMap::iterator mIter;
+        for (mIter = meshModelNameMap_.begin(); 
+            mIter != meshModelNameMap_.end(); ++mIter) {
+            delete mIter->second;
+        }
+        meshModelNameMap_.clear();
+        meshModelIDToNameMap_.clear();
     }
-    meshModelNameMap_.clear();
-    meshModelIDToNameMap_.clear();
+
+    clearMeshElementLinkages();
 }
 
 
@@ -124,6 +132,463 @@ MeshAssociativity::addAttribute(MeshLinkAttribute &att)
     return true;
 }
 
+/// \brief Return list of MeshLinkAttribute in the MeshAssociativity database
+std::vector<const MeshLinkAttribute *> 
+MeshAssociativity::getAttributes() const
+{
+    std::vector<const MeshLinkAttribute *> atts;
+    atts.resize(meshAttributeIDMap_.size());
+    MeshAttributeIDMap::const_iterator iter;
+    size_t i;
+    for (i = 0, iter = meshAttributeIDMap_.begin();
+        iter != meshAttributeIDMap_.end(); ++iter, ++i) {
+        atts[i] = &(iter->second);
+    }
+    return atts;
+}
+
+
+///////////////////////////////////////////////////////////////////
+// MeshLinkTransform Class
+///////////////////////////////////////////////////////////////////
+
+/// Default constructor
+MeshLinkTransform::MeshLinkTransform() :
+    xid_(-1),
+    aref_(MESH_TOPO_INVALID_REF),
+    is_valid_(false)
+{
+    name_.clear();
+}
+
+/// Constructor for an transform with a unique transform ID (AttID) and name.
+/// The transform's definition is given by its contents.
+MeshLinkTransform::MeshLinkTransform(MLINT xid, 
+    std::string &name, std::string &contents,
+    MeshAssociativity &meshAssoc) :
+    xid_(xid),
+    aref_(MESH_TOPO_INVALID_REF),
+    name_(name),
+    contents_(contents)
+{
+    std::vector<MLREAL> r;
+    std::stringstream ss(contents_);
+    MLREAL f;
+    while (r.size() < 17 && ss >> f) {
+        r.push_back(f);
+    }
+    if (r.size() == 16) {
+        int n = 0;
+        // PW quaternion output is column indexing fastest
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                xform_[i][j] = r.at(n++);
+            }
+        }
+        is_valid_ = true;
+    }
+}
+
+
+void
+MeshLinkTransform::getQuaternion(MLREAL xform_quaternion[4][4]) const
+{
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            xform_quaternion[i][j] = xform_[i][j];
+        }
+    }
+}
+
+
+void
+MeshLinkTransform::setAref(MLINT aref) { aref_ = aref; }
+
+bool
+MeshLinkTransform::hasAref() const {
+    return (aref_ != MESH_TOPO_INVALID_REF);
+}
+
+MLINT
+MeshLinkTransform::getAref() const
+{
+    if (hasAref()) {
+        return aref_;
+    }
+    else {
+        return MESH_TOPO_INVALID_REF;
+    }
+}
+
+/// \brief Get the XID of this MeshLinkTransform
+MLINT 
+MeshLinkTransform::getXID() const
+{
+    return xid_;
+}
+
+/// \brief Get the name attribute of this MeshLinkTransform
+const std::string & 
+MeshLinkTransform::getName() const
+{
+    return name_;
+}
+
+/// \brief Get the contents of this MeshLinkTransform
+const std::string & 
+MeshLinkTransform::getContents() const
+{
+    return contents_;
+}
+
+
+
+const MeshLinkTransform *
+MeshAssociativity::getTransformByID(const MLINT id) const
+{
+    MeshTransformIDMap::const_iterator iter;
+    iter = meshTransformIDMap_.find(id);
+    if (iter != meshTransformIDMap_.end()) {
+        const MeshLinkTransform *xform = &(iter->second);
+        return &(iter->second);
+    }
+    return NULL;
+}
+
+void
+MeshAssociativity::clearTransforms() {
+    meshTransformIDMap_.clear();
+    meshTransformNameToIDMap_.clear();
+}
+
+bool
+MeshAssociativity::addTransform(MeshLinkTransform &xform)
+{
+    if (NULL != getTransformByID(xform.xid_)) {
+        // xid already in use
+        return false;
+    }
+    meshTransformIDMap_[xform.xid_] = xform;
+
+    if (!xform.name_.empty()) {
+        meshTransformNameToIDMap_[xform.name_] = xform.xid_;
+    }
+    return true;
+}
+
+
+void
+MeshAssociativity::getTransforms(std::vector<const MeshLinkTransform *> &xforms) const
+{
+    xforms.clear();
+    xforms.resize(meshTransformIDMap_.size());
+    MeshTransformIDMap::const_iterator iter;
+    size_t i;
+    for (i = 0, iter = meshTransformIDMap_.begin();
+        iter != meshTransformIDMap_.end(); ++iter, ++i) {
+        xforms[i] = &(iter->second);
+    }
+    return;
+}
+
+size_t
+MeshAssociativity::getTransformCount() const
+{
+    return meshTransformIDMap_.size();
+}
+
+
+
+///////////////////////////////////////////////////////////////////
+// MeshElementLinkage Class
+///////////////////////////////////////////////////////////////////
+
+/// Default constructor
+MeshElementLinkage::MeshElementLinkage() :
+    aref_(MESH_TOPO_INVALID_REF),
+    xref_(MESH_TOPO_INVALID_REF),
+    is_valid_(false)
+{}
+
+/// Constructor for an transform with a unique transform ID (AttID) and name.
+/// The transform's definition is given by its contents.
+MeshElementLinkage::MeshElementLinkage(
+    std::string &name, 
+    std::string &sourceEntityRef,
+    std::string &targetEntityRef,
+    MeshAssociativity &meshAssoc) :
+    aref_(MESH_TOPO_INVALID_REF),
+    xref_(MESH_TOPO_INVALID_REF),
+    sourceEntityRef_(sourceEntityRef),
+    targetEntityRef_(targetEntityRef)
+{
+    MeshModel *model;
+    MeshSheet *sheet;
+    MeshString *string;
+
+    if (!meshAssoc.getMeshSheetByName(sourceEntityRef, &model, &sheet) &&
+        !meshAssoc.getMeshStringByName(sourceEntityRef, &model, &string)) {
+        // source doesn't map to sheet or string
+        is_valid_ = false;
+        return;
+    }
+
+    if (!meshAssoc.getMeshSheetByName(targetEntityRef, &model, &sheet) &&
+        !meshAssoc.getMeshStringByName(targetEntityRef, &model, &string)) {
+        // target doesn't map to sheet or string
+        is_valid_ = false;
+        return;
+    }
+
+    // name arg is allowed to be empty, setName ensures a unique name
+    setName(name);
+
+    is_valid_ = true;
+}
+
+void
+MeshElementLinkage::setAref(MLINT aref) { aref_ = aref; }
+
+bool
+MeshElementLinkage::hasAref() const {
+    return (aref_ != MESH_TOPO_INVALID_REF);
+}
+
+MLINT
+MeshElementLinkage::getAref() const
+{
+    if (hasAref()) {
+        return aref_;
+    }
+    else {
+        return MESH_TOPO_INVALID_REF;
+    }
+}
+
+bool
+MeshElementLinkage::setXref(MLINT xref,
+    MeshAssociativity &meshAssoc) {
+    if (NULL == meshAssoc.getTransformByID(xref)) return false;
+    xref_ = xref; 
+    return true;
+}
+
+bool
+MeshElementLinkage::hasXref() const {
+    return (xref_ != MESH_TOPO_INVALID_REF);
+}
+
+/// \brief Get the Transform XID referenced by this MeshElementLinkage
+///
+/// \param[out] xref the transform reference ID (XID) for this linkage
+bool 
+MeshElementLinkage::getXref(MLINT *xref) const
+{
+    if (hasXref()) {
+        *xref = xref_;
+        return true;
+    }
+    return false;
+}
+
+/// \brief Get the Transform referenced by this MeshElementLinkage
+///
+/// returns NULL if XREF is unset or invalid
+const MeshLinkTransform * 
+MeshElementLinkage::getTransform(const MeshAssociativity &meshAssoc) const
+{
+    MLINT xref;
+    if (!getXref(&xref)) return NULL;
+    return meshAssoc.getTransformByID(xref);
+}
+
+/// \brief Return the Entity references linked by this MeshElementLinkage
+///
+/// \param[out] sourceEntityRef reference to the source entity
+/// \param[out] targetEntityRef reference to the target entity
+void 
+MeshElementLinkage::getEntityRefs(
+    std::string &sourceEntityRef,
+    std::string &targetEntityRef) const
+
+{
+    sourceEntityRef = sourceEntityRef_;
+    targetEntityRef = targetEntityRef_;
+}
+
+void
+MeshElementLinkage::getName(const char **name) const
+{
+    *name = name_.c_str();
+}
+
+const std::string &
+MeshElementLinkage::getName() const
+{
+    return name_;
+}
+
+
+void
+MeshElementLinkage::setName(const std::string &name) {
+    if (name.empty()) {
+        if (name_.empty()) {
+            // generate new unique name
+            name_ = getNextName();
+        }
+    }
+    else {
+        name_ = name;
+    }
+}
+void
+MeshElementLinkage::setName(const char *nameCstr) {
+    std::string name;
+    if (nameCstr) {
+        name = nameCstr;
+    }
+    setName(name);
+}
+
+std::string
+MeshElementLinkage::getNextName()
+{
+    std::string basename = getBaseName();
+    MLUINT &counter = getNameCounter();
+    counter++;
+    std::ostringstream s;  s << counter;
+    std::string name = basename + s.str();
+    return name;
+}
+
+const std::string &
+MeshElementLinkage::getBaseName() const
+{
+    static const std::string base("ml_elemlink-");
+    return base;
+};
+
+MLUINT MeshElementLinkage::nameCounter_ = 0;
+
+MLUINT &
+MeshElementLinkage::getNameCounter() {
+    return nameCounter_;
+};
+
+
+
+void
+MeshAssociativity::clearMeshElementLinkages() {
+    // Mesh Assoc owns the MeshElementLinkages
+    MeshElementLinkageNameMap::iterator mIter;
+    for (mIter = meshElementLinkageNameMap_.begin();
+        mIter != meshElementLinkageNameMap_.end(); ++mIter) {
+        delete mIter->second;
+    }
+    meshElementLinkageNameMap_.clear();
+}
+
+
+
+bool
+MeshAssociativity::addMeshElementLinkage(MeshElementLinkage *link) {
+    if (!link) { return false; }
+    if (link->name_.empty()) {
+        MeshElementLinkage *existing = (MeshElementLinkage*)1;
+        while (NULL != existing) {
+            link->name_ = link->getNextName();
+            existing = getMeshElementLinkageByName(link->name_.c_str());
+        }
+    }
+    MeshElementLinkage *existing = getMeshElementLinkageByName(link->name_.c_str());
+    if (existing) {
+        return false;
+    }
+    meshElementLinkageNameMap_[link->name_] = link;
+
+    return true;
+}
+
+
+MeshElementLinkage*
+MeshAssociativity::getMeshElementLinkageByName(const std::string &name) const
+{
+    MeshElementLinkageNameMap::const_iterator mIter = meshElementLinkageNameMap_.find(name);
+    if (mIter == meshElementLinkageNameMap_.end()) {
+        return NULL;
+    }
+    return mIter->second;
+}
+
+
+void
+MeshAssociativity::getMeshElementLinkages(std::vector<MeshElementLinkage *> &links) const
+{
+    links.clear();
+    links.resize(meshElementLinkageNameMap_.size());
+    MeshElementLinkageNameMap::const_iterator iter;
+    size_t i;
+    for (i = 0, iter = meshElementLinkageNameMap_.begin(); 
+        iter != meshElementLinkageNameMap_.end(); ++iter, ++i) {
+        links[i] = iter->second;
+    }
+    return;
+}
+
+size_t
+MeshAssociativity::getMeshElementLinkageCount() const
+{
+    return meshElementLinkageNameMap_.size();
+}
+
+
+
+
+/// \brief Get MeshSheet by name
+///
+/// \param[in] name the name of the desired sheet
+/// \param[out] model containing the desired sheet
+/// \param[out] the desired sheet
+/// \return true if found
+bool 
+MeshAssociativity::getMeshSheetByName(const std::string &name,
+    MeshModel **model, MeshSheet **sheet) const
+{
+    MeshModelNameMap::const_iterator iter;
+    for (iter = meshModelNameMap_.begin(); iter != meshModelNameMap_.end(); ++iter) {
+        *model = iter->second;
+        if (NULL != (*sheet = (*model)->getMeshSheetByName(name))) {
+            return true;
+        }
+    }
+    *model = NULL;
+    *sheet = NULL;
+    return false;
+}
+
+/// \brief Get MeshString by name
+///
+/// \param[in] name the name of the desired string
+/// \param[out] model containing the desired string
+/// \param[out] the desired string
+/// \return true if found
+bool 
+MeshAssociativity::getMeshStringByName(const std::string &name,
+    MeshModel **model, MeshString **string) const
+{
+    MeshModelNameMap::const_iterator iter;
+    for (iter = meshModelNameMap_.begin(); iter != meshModelNameMap_.end(); ++iter) {
+        *model = iter->second;
+        if (NULL != (*string = (*model)->getMeshStringByName(name))) {
+            return true;
+        }
+    }
+    *model = NULL;
+    *string = NULL;
+    return false;
+}
+
+
 void
 MeshAssociativity::addGeometryFile(GeometryFile &file) {
     geometryFiles_.push_back(file);
@@ -195,6 +660,19 @@ MeshAssociativity::getGeometryGroupByName(const char* name)
 }
 
 
+MLINT
+MeshAssociativity::getGeometryGroupCount() const
+{
+    return geometry_group_manager_.getCount();
+}
+
+void
+MeshAssociativity::getGeometryGroupIDs(std::vector<MLINT> &gids) const
+{
+    geometry_group_manager_.getIDs(gids);
+}
+
+
 // Get geometry group by ID - returns NULL if not found
 GeometryGroup *
 MeshAssociativity::getGeometryGroupByID(MLINT id)
@@ -233,17 +711,17 @@ MeshAssociativity::setActiveGeometryKernelByName(const char *name)
     return geometry_kernel_manager_.setActiveByName(name);
 }
 
-std::vector<MeshModel *>
-MeshAssociativity::getMeshModels() const
+void
+MeshAssociativity::getMeshModels(std::vector<MeshModel *> &models) const
 {
-    std::vector<MeshModel *> models;
+    models.clear();
     models.resize(meshModelNameMap_.size());
     MeshModelNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshModelNameMap_.begin(); iter != meshModelNameMap_.end(); ++iter, ++i) {
         models[i] = iter->second;
     }
-    return models;
+    return;
 }
 
 size_t
@@ -313,9 +791,6 @@ GeometryKernelManager::setActiveByName(const char *name)
     return false;
 }
 
-#include <sstream>
-#include <istream>
-#include <iterator>
 
 
 
@@ -399,6 +874,56 @@ MeshLinkAttribute::buildGroupArefs(MeshAssociativity &meshAssoc) {
         group_arefs_.push_back(attid_);
     }
     return true;
+}
+
+
+/// Default constructor
+MeshLinkAttribute::MeshLinkAttribute() :
+    attid_(-1),
+    is_group_(false),
+    is_valid_(true)
+{}
+
+/// Constructor for an attribute with a unique attribute ID (AttID) and name.
+/// The attribute's definition is given by its contents.
+MeshLinkAttribute::MeshLinkAttribute(MLINT attid, std::string &name, std::string &contents,
+    bool is_group, MeshAssociativity &meshAssoc) :
+    attid_(attid),
+    name_(name),
+    contents_(contents),
+    is_group_(is_group)
+{
+    if (is_group) {
+        is_valid_ = buildGroupArefs(meshAssoc);
+    }
+    else {
+        is_valid_ = true;
+    }
+}
+
+/// \brief Get the AttID of this attribute.
+MLINT 
+MeshLinkAttribute::getAttID() const
+{
+    return attid_;
+}
+
+/// Whether this attribute is a group of other MeshLinkAttribute s.
+bool 
+MeshLinkAttribute::isGroup() const { return is_group_; }
+
+/// Whether this attribute is valid. An attribute may be invalid if it is a group
+/// of other attribute IDs, and any one of which do not exist.
+bool 
+MeshLinkAttribute::isValid() const { return is_valid_; }
+
+/// \brief Get the AttIDs referenced by this attribute.
+///
+/// If the %MeshLinkAttribute is a group, the AttIDs of the group
+/// members are returned, otherwise, this attribute's AttID is returned
+const std::vector<MLINT> & 
+MeshLinkAttribute::getAttributeIDs() const {
+    return group_arefs_;
 }
 
 /****************************************************************************

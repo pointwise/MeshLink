@@ -67,6 +67,18 @@ GeometryKernel::getProjectionEntityName(ProjectionData &projectionData, std::str
     return false;
 }
 
+bool
+GeometryKernel::getProjectionDistance(ProjectionData &projectionData, MLREAL &distance)
+{
+    return false;
+}
+
+bool
+GeometryKernel::getProjectionTolerance(ProjectionData &projectionData, MLREAL &tolerance)
+{
+    return false;
+}
+
 bool 
 GeometryKernel::evalXYZ(MLVector2D UV, const std::string &entityName, MLVector3D xyz)
 {
@@ -149,6 +161,18 @@ GeometryKernel::evalCurvatureOnSurface(
 {
     return false;
 }
+
+
+/// \brief Evaluate the model assembly tolerance on a surface entity
+bool 
+GeometryKernel::evalSurfaceTolerance(
+    const std::string &entityName,
+    MLREAL            &minTolerance,
+    MLREAL            &maxTolerance)
+{
+    return false;
+}
+
 
 
 /// Determine entity type 

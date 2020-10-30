@@ -157,6 +157,12 @@ public:
 
     GeometryGroup * getByID(MLINT id);
 
+    /// Return array of GeometryGroup IDs
+    void            getIDs(std::vector<MLINT> &idList) const;
+
+    /// Return count of GeometryGroups
+    MLINT           getCount() const;
+
 private:
     std::vector<GeometryGroup> geometry_groups_;
 };

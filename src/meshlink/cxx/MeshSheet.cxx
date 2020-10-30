@@ -34,7 +34,11 @@ MeshSheet::getNameCounter() {
 };
 
 MeshSheet::MeshSheet() :
-    MeshTopo() {};
+    MeshTopo() 
+{
+    faceEdgeCounter_ = 0;
+    faceCounter_ = 0;
+};
 
 MeshSheet::MeshSheet(
     MLINT mid,
@@ -45,6 +49,8 @@ MeshSheet::MeshSheet(
 {
     // name arg is allowed to be empty, setName ensures a unique name
     setName(name);
+    faceEdgeCounter_ = 0;
+    faceCounter_ = 0;
 };
 
 MeshSheet::MeshSheet(
@@ -57,6 +63,8 @@ MeshSheet::MeshSheet(
 {
     // name arg is allowed to be empty, setName ensures a unique name
     setName(name);
+    faceEdgeCounter_ = 0;
+    faceCounter_ = 0;
 };
 
 MeshSheet::~MeshSheet()
@@ -130,6 +138,9 @@ MeshSheet::addFaceEdge(MLINT i1, MLINT i2,
     MeshEdge *edge = new MeshEdge(i1, i2, mid, aref,
         gref, name, pv1, pv2);
     faceEdgeMap_[edge->getHash()] = edge;
+
+    /// Assign incremented faceEdgeCounter as faceEdge order
+    edge->setOrderCounter(faceEdgeCounter_++);
 }
 
 
@@ -160,6 +171,10 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3,
     if (mapID) {
         meshFaceIDToNameMap_[mid] = face->getName();
     }
+
+    /// Assign incremented faceCounter as face order
+    face->setOrderCounter(faceCounter_++);
+
     return true;
 }
 bool
@@ -188,6 +203,10 @@ MeshSheet::addFace(
     if (mapID) {
         meshFaceIDToNameMap_[mid] = face->getName();
     }
+
+    /// Assign incremented faceCounter as face order
+    face->setOrderCounter(faceCounter_++);
+
     return true;
 }
 
@@ -218,6 +237,10 @@ MeshSheet::addFace(MLINT i1, MLINT i2, MLINT i3, MLINT i4,
     if (mapID) {
         meshFaceIDToNameMap_[mid] = face->getName();
     }
+
+    /// Assign incremented faceCounter as face order
+    face->setOrderCounter(faceCounter_++);
+
     return true;
 }
 bool
@@ -247,6 +270,10 @@ MeshSheet::addFace(
     if (mapID) {
         meshFaceIDToNameMap_[mid] = face->getName();
     }
+
+    /// Assign incremented faceCounter as face order
+    face->setOrderCounter(faceCounter_++);
+
     return true;
 }
 
@@ -328,31 +355,39 @@ MeshSheet::getNumFaces() const
     return (MLINT)meshFaceNameMap_.size();
 }
 
-std::vector<const MeshEdge *> 
-MeshSheet::getFaceEdges() const
+void 
+MeshSheet::getFaceEdges(std::vector<const MeshEdge *> &edges) const
 {
-    std::vector<const MeshEdge *> edges;
+    edges.clear();
     edges.resize(faceEdgeMap_.size());
     std::map<pwiFnvHash::FNVHash, MeshEdge*>::const_iterator iter;
     size_t i;
     for (i = 0, iter = faceEdgeMap_.begin(); iter != faceEdgeMap_.end(); ++iter, ++i) {
         edges[i] = iter->second;
     }
-    return edges;
+
+    // sort by creation order in the MeshSheet
+    std::sort(edges.begin(), edges.end(), MeshTopo::OrderCompare);
+
+    return;
 }
 
 
-std::vector<const MeshFace *> 
-MeshSheet::getMeshFaces() const
+void 
+MeshSheet::getMeshFaces(std::vector<const MeshFace *> &faces) const
 {
-    std::vector<const MeshFace *> faces;
+    faces.clear();
     faces.resize(meshFaceNameMap_.size());
     MeshFaceNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshFaceNameMap_.begin(); iter != meshFaceNameMap_.end(); ++iter, ++i) {
         faces[i] = iter->second;
     }
-    return faces;
+
+    // sort by creation order in the MeshSheet
+    std::sort(faces.begin(), faces.end(), MeshTopo::OrderCompare);
+
+    return;
 }
 
 /****************************************************************************

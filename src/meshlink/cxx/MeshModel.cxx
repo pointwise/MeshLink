@@ -149,17 +149,17 @@ MeshModel::getMeshStringByRef(const std::string &ref) const
 }
 
 
-std::vector<MeshString *>
-MeshModel::getMeshStrings() const
+void
+MeshModel::getMeshStrings(std::vector<MeshString *> &strings) const
 {
-    std::vector<MeshString *> strings;
+    strings.clear();
     strings.resize(meshStringNameMap_.size());
     MeshStringNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshStringNameMap_.begin(); iter != meshStringNameMap_.end(); ++iter, ++i) {
         strings[i] = iter->second;
     }
-    return strings;
+    return;
 }
 
 
@@ -225,17 +225,17 @@ MeshModel::getMeshSheetByRef(const std::string &ref) const
 }
 
 
-std::vector<MeshSheet *>
-MeshModel::getMeshSheets() const
+void
+MeshModel::getMeshSheets(std::vector<MeshSheet *> &sheets) const
 {
-    std::vector<MeshSheet *> sheets;
+    sheets.clear();
     sheets.resize(meshSheetNameMap_.size());
     MeshSheetNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshSheetNameMap_.begin(); iter != meshSheetNameMap_.end(); ++iter, ++i) {
         sheets[i] = iter->second;
     }
-    return sheets;
+    return;
 }
 
 size_t
@@ -406,6 +406,7 @@ StringArray
 MeshModel::getMeshPointRefs() const
 {
     StringArray refs;
+    refs.reserve(meshPointRefToNameMap_.size());
     MeshTopoRefToNameMap::const_iterator iter = meshPointRefToNameMap_.begin();
     for (; iter != meshPointRefToNameMap_.end(); ++iter) {
         refs.push_back(iter->first);
@@ -470,17 +471,17 @@ MeshModel::addEdge(
     return true;
 }
 
-std::vector<const MeshEdge *>
-MeshModel::getMeshEdges() const
+void
+MeshModel::getMeshEdges(std::vector<const MeshEdge *> &edges) const
 {
-    std::vector<const MeshEdge *> edges;
+    edges.clear();
     edges.resize(meshEdgeNameMap_.size());
     MeshEdgeNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshEdgeNameMap_.begin(); iter != meshEdgeNameMap_.end(); ++iter, ++i) {
         edges[i] = iter->second;
     }
-    return edges;
+    return;
 }
 
 
@@ -1011,17 +1012,17 @@ MeshModel::addFace(
     return true;
 }
 
-std::vector<const MeshFace *>
-MeshModel::getMeshFaces() const
+void
+MeshModel::getMeshFaces(std::vector<const MeshFace *> &faces) const
 {
-    std::vector<const MeshFace *> faces;
+    faces.clear();
     faces.resize(meshFaceNameMap_.size());
     MeshFaceNameMap::const_iterator iter;
     size_t i;
     for (i = 0, iter = meshFaceNameMap_.begin(); iter != meshFaceNameMap_.end(); ++iter, ++i) {
         faces[i] = iter->second;
     }
-    return faces;
+    return;
 }
 
 

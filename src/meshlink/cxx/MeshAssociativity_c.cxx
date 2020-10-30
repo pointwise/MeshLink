@@ -209,7 +209,6 @@ MLSTATUS ML_getMeshModelByName(MeshAssociativityObj meshAssocObj,
     return ML_STATUS_ERROR;
 }
 
-
 MLSTATUS ML_addGeometryKernel(MeshAssociativityObj meshAssocObj, GeometryKernelObj geomKernelObj)
 {
     MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
@@ -398,6 +397,46 @@ MLSTATUS ML_getAttribute(MeshAssociativityObj meshAssocObj,
     return ML_STATUS_ERROR;
 }
 
+MLINT ML_getNumParamVerts(MeshTopoObj meshTopoObj)
+{
+    MLINT count = 0;
+    MeshTopo *meshTopo = (MeshTopo *)meshTopoObj;
+    if (meshTopo) {
+        count = (MLINT)meshTopo->getNumParamVerts();
+    }
+    return count;
+}
+
+MLSTATUS ML_getParamVerts(MeshModelObj meshTopoObj,
+    ParamVertexConstObj *pvObjs,
+    MLINT sizePVObj,
+    MLINT *numPVObjs
+)
+{
+    *numPVObjs = 0;
+    MeshTopo *meshTopo = (MeshTopo *)meshTopoObj;
+    if (meshTopo) {
+        MLINT count = ML_getNumParamVerts(meshTopoObj);
+        if (sizePVObj >= count) {
+            std::vector<const ParamVertex *> pv;
+            meshTopo->getParamVerts(pv);
+            *numPVObjs = (MLINT)pv.size();
+            MLINT i;
+            for (i = 0; i < *numPVObjs; ++i) {
+                pvObjs[i] = pv.at(i);
+            }
+            return ML_STATUS_OK;
+        }
+        else {
+            /* insufficient space */
+            return ML_STATUS_ERROR;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
+
+
+
 MLINT ML_getNumMeshModels(MeshAssociativityObj meshAssocObj)
 {
     MLINT count = 0;
@@ -419,7 +458,8 @@ MLSTATUS ML_getMeshModels(MeshAssociativityObj meshAssocObj,
     if (meshAssoc) {
         MLINT count = ML_getNumMeshModels(meshAssocObj);
         if (sizeModelObj >= count) {
-            std::vector<MeshModel *> models = meshAssoc->getMeshModels();
+            std::vector<MeshModel *> models;
+            meshAssoc->getMeshModels(models);
             *numModelObjs = (MLINT) models.size();
             MLINT i;
             for (i = 0; i < *numModelObjs; ++i) {
@@ -432,6 +472,21 @@ MLSTATUS ML_getMeshModels(MeshAssociativityObj meshAssocObj,
             return ML_STATUS_ERROR;
         }
 
+    }
+    return ML_STATUS_ERROR;
+}
+
+MLSTATUS ML_getModelMeshSheetByName(MeshModelObj meshModelObj,
+    const char *sheetname,
+    MeshSheetObj *meshSheetObj)
+{
+    MeshModel *meshModel = (MeshModel *)meshModelObj;
+    if (meshModel && sheetname && meshSheetObj) {
+        std::string strName = sheetname;
+        *meshSheetObj = meshModel->getMeshSheetByName(strName);
+        if (NULL != *meshSheetObj) {
+            return ML_STATUS_OK;
+        }
     }
     return ML_STATUS_ERROR;
 }
@@ -458,7 +513,8 @@ MLSTATUS ML_getMeshSheets(MeshModelObj meshModelObj,
     if (meshModel) {
         MLINT count = ML_getNumMeshSheets(meshModel);
         if (sizeSheetObj >= count) {
-            std::vector<MeshSheet *> sheets = meshModel->getMeshSheets();
+            std::vector<MeshSheet *> sheets;
+            meshModel->getMeshSheets(sheets);
             *numSheetObjs = (MLINT)sheets.size();
             MLINT i;
             for (i = 0; i < *numSheetObjs; ++i) {
@@ -475,6 +531,21 @@ MLSTATUS ML_getMeshSheets(MeshModelObj meshModelObj,
     return ML_STATUS_ERROR;
 }
 
+
+MLSTATUS ML_getModelMeshStringByName(MeshModelObj meshModelObj,
+    const char *stringname,
+    MeshStringObj *meshStringObj)
+{
+    MeshModel *meshModel = (MeshModel *)meshModelObj;
+    if (meshModel && stringname && meshStringObj) {
+        std::string strName = stringname;
+        *meshStringObj = meshModel->getMeshStringByName(strName);
+        if (NULL != *meshStringObj) {
+            return ML_STATUS_OK;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
 
 MLINT ML_getNumMeshStrings(MeshModelObj meshModelObj
 )
@@ -498,7 +569,8 @@ MLSTATUS ML_getMeshStrings(MeshModelObj meshModelObj,
     if (meshModel) {
         MLINT count = ML_getNumMeshStrings(meshModel);
         if (sizeStringObj >= count) {
-            std::vector<MeshString *> strings = meshModel->getMeshStrings();
+            std::vector<MeshString *> strings;
+            meshModel->getMeshStrings(strings);
             *numStringObjs = (MLINT)strings.size();
             MLINT i;
             for (i = 0; i < *numStringObjs; ++i) {
@@ -539,7 +611,8 @@ MLSTATUS ML_getSheetMeshFaces(MeshSheetObj meshSheetObj,
     if (meshSheet) {
         MLINT count = ML_getNumSheetMeshFaces(meshSheet);
         if (sizeFaceObj >= count) {
-            std::vector<const MeshFace *> faces = meshSheet->getMeshFaces();
+            std::vector<const MeshFace *> faces;
+            meshSheet->getMeshFaces(faces);
             *numFaceObjs = (MLINT)faces.size();
             MLINT i;
             for (i = 0; i < *numFaceObjs; ++i) {
@@ -578,7 +651,8 @@ MLSTATUS ML_getSheetMeshFaceEdges(MeshSheetObj meshSheetObj,
     if (meshSheet) {
         MLINT count = ML_getNumSheetMeshFaceEdges(meshSheet);
         if (sizeEdgeObj >= count) {
-            std::vector<const MeshEdge *> edges = meshSheet->getFaceEdges();
+            std::vector<const MeshEdge *> edges;
+            meshSheet->getFaceEdges(edges);
             *numEdgeObjs = (MLINT)edges.size();
             MLINT i;
             for (i = 0; i < *numEdgeObjs; ++i) {
@@ -619,7 +693,8 @@ MLSTATUS ML_getStringMeshEdges(MeshSheetObj meshStringObj,
     if (meshString) {
         MLINT count = ML_getNumStringMeshEdges(meshString);
         if (sizeEdgeObj >= count) {
-            std::vector<const MeshEdge *> edges = meshString->getMeshEdges();
+            std::vector<const MeshEdge *> edges;
+            meshString->getMeshEdges(edges);
             *numEdgeObjs = (MLINT)edges.size();
             MLINT i;
             for (i = 0; i < *numEdgeObjs; ++i) {
@@ -635,6 +710,257 @@ MLSTATUS ML_getStringMeshEdges(MeshSheetObj meshStringObj,
     return ML_STATUS_ERROR;
 }
 
+
+/**
+ * \brief Get array of MeshElementLinkages in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in,out] linkageObjs MeshElementLinkage object array
+ * @param[in] sizeLinkageObj MeshElementLinkage object array size
+ * @param[out] numLinkageObjs MeshElementLinkage object count
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getMeshElementLinkages(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj *linkageObjs,
+    MLINT sizeLinkageObj,
+    MLINT *numLinkageObjs
+)
+{
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc) {
+        MLINT count = ML_getNumMeshElementLinkages(meshAssoc);
+        if (sizeLinkageObj >= count) {
+            std::vector<MeshElementLinkage *> links;
+            meshAssoc->getMeshElementLinkages(links);
+            *numLinkageObjs = (MLINT)links.size();
+            MLINT i;
+            for (i = 0; i < *numLinkageObjs; ++i) {
+                linkageObjs[i] = (MeshElementLinkageObj)links.at(i);
+            }
+            return ML_STATUS_OK;
+        }
+        else {
+            /* insufficient space */
+            return ML_STATUS_ERROR;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
+
+/**
+ * \brief Get number of MeshElementLinkages in the MeshAssociativity database.
+ * @param[in] meshAssocObj MeshAssociativity object
+ * \returns MeshElementLinkage count
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLINT  ML_getNumMeshElementLinkages(
+    MeshAssociativityObj meshAssocObj)
+{
+    MLINT count = 0;
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc) {
+        count = meshAssoc->getMeshElementLinkageCount();
+    }
+    return count;
+}
+
+
+MLSTATUS ML_getMeshElementLinkageInfo(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj linkageObj,
+    char *nameBuf, MLINT nameBufLen,
+    char *sourceEntityRefBuf, MLINT sourceEntityRefBufLen,
+    char *targetEntityRefBuf, MLINT targetEntityRefBufLen,
+    MLINT attIDs[],
+    MLINT sizeAttIDs,
+    MLINT *numAttIDs)
+{
+    int status = ML_STATUS_OK;
+    *numAttIDs = 0;
+
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    MeshElementLinkage *link = (MeshElementLinkage *)(linkageObj);
+    if (meshAssoc && link && attIDs && numAttIDs) {
+        const std::string &name = link->getName();
+        copyString(nameBuf, nameBufLen, name);
+
+        std::string sourceEntityRef;
+        std::string targetEntityRef;
+        link->getEntityRefs(sourceEntityRef, targetEntityRef);
+
+        copyString(sourceEntityRefBuf, sourceEntityRefBufLen, sourceEntityRef);
+        copyString(targetEntityRefBuf, targetEntityRefBufLen, targetEntityRef);
+
+
+        if (ML_STATUS_OK == status) {
+            std::vector<MLINT> attIDvec;
+            if (link->hasAref()) {
+                MLINT aref = link->getAref();
+                const MeshLinkAttribute *att = meshAssoc->getAttributeByID(aref);
+                if (NULL != att) {
+                    if (att->isGroup()) {
+                        attIDvec = att->getAttributeIDs();
+                    }
+                    else {
+                        attIDvec.push_back(aref);
+                    }
+                }
+            }
+            *numAttIDs = (MLINT)attIDvec.size();
+            if (*numAttIDs <= sizeAttIDs) {
+                MLINT iAtt;
+                for (iAtt = 0; iAtt < *numAttIDs; ++iAtt) {
+                    attIDs[iAtt] = attIDvec[iAtt];
+                }
+                status = ML_STATUS_OK;
+            }
+            else {
+                /* insufficient space */
+                status = ML_STATUS_ERROR;
+                *numAttIDs = 0;
+            }
+        }
+    }
+    else {
+        return ML_STATUS_ERROR;
+    }
+    return status;
+}
+
+MLSTATUS ML_getMeshLinkTransformInfo(
+    MeshAssociativityObj meshAssocObj,
+    MeshLinkTransformConstObj xformObj,
+    char *nameBuf, MLINT nameBufLen,
+    MLINT attIDs[],
+    MLINT sizeAttIDs,
+    MLINT *numAttIDs)
+{
+    int status = ML_STATUS_OK;
+    *numAttIDs = 0;
+
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    MeshLinkTransform *xform = (MeshLinkTransform *)(xformObj);
+    if (meshAssoc && xform && attIDs && numAttIDs) {
+        const std::string &name = xform->getName();
+        copyString(nameBuf, nameBufLen, name);
+
+        if (ML_STATUS_OK == status) {
+            std::vector<MLINT> attIDvec;
+            if (xform->hasAref()) {
+                MLINT aref = xform->getAref();
+                const MeshLinkAttribute *att = meshAssoc->getAttributeByID(aref);
+                if (NULL != att) {
+                    if (att->isGroup()) {
+                        attIDvec = att->getAttributeIDs();
+                    }
+                    else {
+                        attIDvec.push_back(aref);
+                    }
+                }
+            }
+            *numAttIDs = (MLINT)attIDvec.size();
+            if (*numAttIDs <= sizeAttIDs) {
+                MLINT iAtt;
+                for (iAtt = 0; iAtt < *numAttIDs; ++iAtt) {
+                    attIDs[iAtt] = attIDvec[iAtt];
+                }
+                status = ML_STATUS_OK;
+            }
+            else {
+                /* insufficient space */
+                status = ML_STATUS_ERROR;
+                *numAttIDs = 0;
+            }
+        }
+    }
+    else {
+        return ML_STATUS_ERROR;
+    }
+    return status;
+}
+
+
+MLSTATUS ML_getMeshSheetByName(MeshAssociativityObj meshAssocObj,
+    const char *sheetname,
+    MeshModelObj *meshModel, MeshSheetObj *meshSheet)
+{
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc) {
+        MeshModel *model;
+        MeshSheet *sheet;
+        if (meshAssoc->getMeshSheetByName(sheetname, &model, &sheet)) {
+            *meshModel = model;
+            *meshSheet = sheet;
+            return ML_STATUS_OK;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
+
+
+MLSTATUS ML_getMeshStringByName(MeshAssociativityObj meshAssocObj,
+    const char *stringname,
+    MeshModelObj *meshModel, MeshStringObj *meshString)
+{
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc) {
+        MeshModel *model;
+        MeshString *string;
+        if (meshAssoc->getMeshStringByName(stringname, &model, &string)) {
+            *meshModel = model;
+            *meshString = string;
+            return ML_STATUS_OK;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
+
+
+
+/**
+ * \brief Get MeshLinkTransform associated with a MeshElementLinkage
+ * @param[in] meshAssocObj MeshAssociativity object
+ * @param[in] linkageObj MeshElementLinkage object
+ * @param[out] xformObj MeshLinkTransform object (null if none)
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getTransform(
+    MeshAssociativityObj meshAssocObj,
+    MeshElementLinkageObj linkageObj,
+    MeshLinkTransformConstObj *xformObj
+)
+{
+    *xformObj = NULL;
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    MeshElementLinkage *link = (MeshElementLinkage *)linkageObj;
+    if (meshAssoc && link) {
+        *xformObj = link->getTransform(*meshAssoc);
+        return ML_STATUS_OK;
+    }
+    return ML_STATUS_ERROR;
+}
+
+/**
+ * \brief Get the quaternion matrix associated with a MeshLinkTransform
+ * @param[in] xformObj MeshLinkTransform object
+ * @param[out] quat[4][4] quaternion matrix
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_getTransformQuaternion(
+    MeshLinkTransformConstObj xformObj,
+    MLREAL quat[4][4]
+)
+{
+    MeshLinkTransform *xform = (MeshLinkTransform *)xformObj;
+    if (xform) {
+        xform->getQuaternion(quat);
+        return ML_STATUS_OK;
+    }
+    return ML_STATUS_ERROR;
+}
 
 
 MLSTATUS ML_findHighestTopoPointByInd(MeshModelObj meshModelObj,
@@ -808,10 +1134,25 @@ MLSTATUS ML_getParamVerts(MeshTopoConstObj meshTopoObj,
         }
     }
 
-    if (pvs == NULL) return ML_STATUS_ERROR;
+    if (pvs == NULL && NULL != meshTopo) {
+        MLINT count = meshTopo->getNumParamVerts();
+        std::vector<const ParamVertex *> pv;
+        if (count > pvObjsArrLen) {
+            return ML_STATUS_ERROR;
+        }
+        *num_pvObjs = count;
+        meshTopo->getParamVerts(pv);
+        MLINT i;
+        for (i = 0; i < *num_pvObjs; ++i) {
+            pvObjsArr[i] = pv[i];
+        }
+    }
+    else {
+        if (pvs == NULL) return ML_STATUS_ERROR;
 
-    for (i = 0; i < *num_pvObjs; ++i) {
-        pvObjsArr[i] = pvs[i];
+        for (i = 0; i < *num_pvObjs; ++i) {
+            pvObjsArr[i] = pvs[i];
+        }
     }
 
     return ML_STATUS_OK;
@@ -899,6 +1240,9 @@ MLSTATUS ML_getMeshTopoInfo(
             }
         }
     }
+    else {
+        return ML_STATUS_ERROR;
+    }
     return status;
 }
 
@@ -931,6 +1275,9 @@ MLSTATUS ML_getMeshPointInfo(
         if (ML_STATUS_OK == status) {
             *pvObj = meshPoint->getParamVert();
         }
+    }
+    else {
+        return ML_STATUS_ERROR;
     }
     return status;
 }
@@ -988,7 +1335,8 @@ MLSTATUS ML_getMeshEdgeInfo(
         }
 
         if (ML_STATUS_OK == status) {
-            std::vector<ParamVertex*> PVvec = meshEdge->getParamVerts();
+            std::vector<ParamVertex*> PVvec;
+            meshEdge->getParamVerts(PVvec);
             *numpvObjs = (MLINT)PVvec.size();
             if (*numpvObjs <= sizeAttIDs) {
                 for (ipv = 0; ipv < *numpvObjs; ++ipv) {
@@ -1002,6 +1350,9 @@ MLSTATUS ML_getMeshEdgeInfo(
                 *numpvObjs = 0;
             }
         }
+    }
+    else {
+        return ML_STATUS_ERROR;
     }
     return status;
 }
@@ -1060,7 +1411,8 @@ MLSTATUS ML_getMeshFaceInfo(
         }
 
         if (ML_STATUS_OK == status) {
-            std::vector<ParamVertex*> PVvec = meshFace->getParamVerts();
+            std::vector<ParamVertex*> PVvec;
+            meshFace->getParamVerts(PVvec);
             MLINT num = (MLINT)PVvec.size();
             if (num <= sizeAttIDs) {
                 *numpvObjs = 0;
@@ -1077,9 +1429,52 @@ MLSTATUS ML_getMeshFaceInfo(
             }
         }
     }
+    else {
+        return ML_STATUS_ERROR;
+    }
     return status;
 }
 
+
+MLINT  ML_getNumGeometryGroups(
+    MeshAssociativityObj meshAssocObj)
+{
+    MLINT count = 0;
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc) {
+        count = meshAssoc->getGeometryGroupCount();
+    }
+    return count;
+}
+
+
+MLSTATUS ML_getGeometryGroupIDs(MeshAssociativityObj meshAssocObj,
+    MLINT IDs[],
+    MLINT sizeIDs,
+    MLINT *numIDs
+)
+{
+    MeshAssociativity *meshAssoc = (MeshAssociativity *)meshAssocObj;
+    if (meshAssoc && IDs && numIDs) {
+
+        std::vector<MLINT> IDvec;
+        meshAssoc->getGeometryGroupIDs(IDvec);
+            
+        *numIDs = (MLINT)IDvec.size();
+        if (*numIDs <= sizeIDs) {
+            MLINT i;
+            for (i = 0; i < *numIDs; ++i) {
+                IDs[i] = IDvec[i];
+            }
+            return ML_STATUS_OK;
+        }
+        else {
+            /* insufficient space */
+            return ML_STATUS_ERROR;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
 
 MLSTATUS ML_getGeometryGroupByID(
     MeshAssociativityObj meshAssocObj,
@@ -1292,6 +1687,33 @@ MLSTATUS ML_evalCurvatureOnSurface(
     return ML_STATUS_ERROR;
 }
 
+/**
+ * \brief Evaluate model assembly tolerances on geometric surface.
+ * @param[in] geomKernelObj GeometryKernel object
+ * @param[in] entityName surface name
+ * @param[out] minTolerance minimum assembly tolerance on boundary
+ * @param[out] maxCurvature maximum assembly tolerance on boundary
+ * \returns ML_STATUS_OK / ML_STATUS_ERROR
+ */
+/** @cond */ ML_EXTERN ML_STORAGE_CLASS /** @endcond */
+MLSTATUS ML_evalSurfaceTolerance(
+    GeometryKernelObj geomKernelObj,
+    const char *entityName,             /* Evaluation surface name */
+    MLREAL          *minTolerance,
+    MLREAL          *maxTolerance
+    )
+{
+    GeometryKernel *geomKernel = (GeometryKernel *)geomKernelObj;
+    if (geomKernel) {
+        if (geomKernel->evalSurfaceTolerance(entityName,
+            *minTolerance, *maxTolerance)) {
+            return ML_STATUS_OK;
+        }
+    }
+    return ML_STATUS_ERROR;
+}
+
+
 
 MLSTATUS ML_projectPoint(
     GeometryKernelObj geomKernelObj,
@@ -1318,7 +1740,9 @@ MLSTATUS ML_getProjectionInfo(
     ProjectionDataObj projectionDataObj,
     MLVector3D xyz,
     MLVector2D UV,
-    char *entityNameBuf, MLINT entityNameBufLen
+    char *entityNameBuf, MLINT entityNameBufLen,
+    MLREAL *distance,
+    MLREAL *tolerance
 )
 {
     GeometryKernel *geom_kernel = (GeometryKernel *)geomKernelObj;
@@ -1328,6 +1752,12 @@ MLSTATUS ML_getProjectionInfo(
         if (!geom_kernel->getProjectionXYZ(*projectionData, xyz) ||
             !geom_kernel->getProjectionUV(*projectionData, UV) ||
             !geom_kernel->getProjectionEntityName(*projectionData, name)) {
+            return ML_STATUS_ERROR;
+        }
+        if (NULL != distance && !geom_kernel->getProjectionDistance(*projectionData, *distance)) {
+            return ML_STATUS_ERROR;
+        }
+        if (NULL != tolerance && !geom_kernel->getProjectionTolerance(*projectionData, *tolerance)) {
             return ML_STATUS_ERROR;
         }
         copyString(entityNameBuf, entityNameBufLen, name);

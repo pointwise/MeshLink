@@ -192,10 +192,14 @@ public:
     virtual MLINT getNumFaces() const;
 
     /// \brief Return array of face-edges in the MeshSheet
-    virtual std::vector<const MeshEdge *> getFaceEdges() const;
+    ///
+    /// Face-edges are returned in creation order.
+    virtual void getFaceEdges(std::vector<const MeshEdge *> &faceEdges) const;
 
     /// \brief Return array of MeshFaces in the MeshSheet
-    virtual std::vector<const MeshFace *> getMeshFaces() const;
+    ///
+    /// Faces are returned in creation order.
+    virtual void getMeshFaces(std::vector<const MeshFace *> &faces) const;
 
     /// Default constructor
     MeshSheet();
@@ -223,12 +227,21 @@ private:
 
     /// Map face indices hash to face
     std::map<pwiFnvHash::FNVHash, MeshFace*> faceMap_; // not the owner
+
     /// Map face names to face
     MeshFaceNameMap         meshFaceNameMap_;  // owner
+
     /// Map face IDs to face names
     MeshTopoIDToNameMap     meshFaceIDToNameMap_;
+
     /// Map application-defined face reference string to face name
     MeshTopoRefToNameMap    meshFaceRefToNameMap_;
+
+    /// Serial counter as faceEdges are added to the sheet (zero-based)
+    MLUINT faceEdgeCounter_;
+
+    /// Serial counter as faces are added to the sheet (zero-based)
+    MLUINT faceCounter_;
 };
 
 typedef std::map<std::string, MeshSheet *> MeshSheetNameMap;
