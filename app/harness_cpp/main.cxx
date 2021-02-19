@@ -1768,7 +1768,8 @@ oneraM6_tests(MeshAssociativity &meshAssoc)
                 MLREAL expectedAvgCurvature = (expectedMinCurvature + expectedMaxCurvature) / 2.0;
                 MLREAL expectedGaussCurvature = expectedMinCurvature * expectedMaxCurvature;
                 MLVector3D expectedSurfaceNormal = { 0.5, -0.707, 0.5 };
-                MLVector3D expectedTangent = { -0.3, 0.3, 0.9 };
+                MLVector3D expectedTangent = { 0.0876790, -0.4544817, -0.8864303 };
+
 
                 MLVector3D        XYZ;              /* Evaluated location on surface */
                 MLVector3D        dXYZdU;           /* First partial derivative */
@@ -1798,7 +1799,9 @@ oneraM6_tests(MeshAssociativity &meshAssoc)
                     */
                 MLREAL          avg;               /* Average curvature */
                 MLREAL          gauss;             /* Gaussian curvature */
-                MLORIENT        orientation;        /* Orientation of surface in model */
+                MLORIENT        orientation;       /* Orientation of surface in model */
+                MLREAL          minTolerance;      /* minimum model assembly tolerance on the surface */
+                MLREAL          maxTolerance;      /* maximum model assembly tolerance on the surface */
 
                 if (geomKernel.evalCurvatureOnSurface(UV, surface_entity_name,
                     XYZ, dXYZdU, dXYZdV,
@@ -1854,6 +1857,24 @@ oneraM6_tests(MeshAssociativity &meshAssoc)
                     if (ML_ORIENT_SAME != orientation) {
                         ML_assert(0 == 1);
                         ret = 1;
+                    }
+
+                    // Determine the minimum and maximum physical tolerance required to
+                    // connect the surface boundaries with neighbors in the model.
+                    if (!geomKernel.evalSurfaceTolerance(surface_entity_name, minTolerance, maxTolerance)) {
+                        printf("\nSurface Model Assembly Test: failed\n");
+                        ML_assert(0 == 1);
+                        ret = 1;
+                    }
+                    else {
+                        MLREAL expectedMinTol = 1e-7;
+                        MLREAL expectedMaxTol = 2.0e-5;
+                        if (fabs(expectedMinTol - minTolerance) / expectedMinTol > 0.1 ||
+                            fabs(expectedMaxTol - maxTolerance) / expectedMaxTol > 0.1) {
+                            printf("\nSurface Model Assembly Test: failed\n");
+                            ML_assert(0 == 1);
+                            ret = 1;
+                        }
                     }
 
                     if (0 != ret) {
