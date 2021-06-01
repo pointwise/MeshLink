@@ -1,7 +1,7 @@
 MeshLink Library
 ========================
 
-(C) 2021 Cadence Design Systems, Inc.  All rights reserved worldwide.
+(Copyright) 2021 Cadence Design Systems, Inc.  All rights reserved worldwide.
 
 Introduction
 ~~~~~~~~~~~~
