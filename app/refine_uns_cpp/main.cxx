@@ -1,14 +1,24 @@
-﻿/***********************************************************************
-**  MeshLink Library Example
-**  Use MeshLink file to refine an unstructured tri mesh.
-**
-**  Read MeshLink file.
-**     + read NMB geometry file.
-**  Read input mesh VRML file.
-**  Create a refined mesh from the input mesh.
-**  Adhere associated mesh topology to geometry.
-**  Write refined mesh to VRML file.
-**/
+﻿/****************************************************************************
+ *
+ * (C) 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+ *
+ * This sample source code is not supported by Cadence Design Systems, Inc.
+ * It is provided freely for demonstration purposes only.
+ * SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ *
+ ***************************************************************************/
+
+/***********************************************************************
+ **  MeshLink Library Example
+ **  Use MeshLink file to refine an unstructured tri mesh.
+ **
+ **  Read MeshLink file.
+ **     + read NMB geometry file.
+ **  Read input mesh VRML file.
+ **  Create a refined mesh from the input mesh.
+ **  Adhere associated mesh topology to geometry.
+ **  Write refined mesh to VRML file.
+ **/
 
 // MeshLink Library Headers
 #include "Types.h"
@@ -266,3 +276,14 @@ int main(int argc, char** argv)
 
     return ret;
 }
+
+/****************************************************************************
+ *
+ * This file is licensed under the Cadence Public License Version 1.0 (the
+ * "License"), a copy of which is found in the included file named "LICENSE",
+ * and is distributed "AS IS." TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE
+ * LAW, CADENCE DISCLAIMS ALL WARRANTIES AND IN NO EVENT SHALL BE LIABLE TO
+ * ANY PARTY FOR ANY DAMAGES ARISING OUT OF OR RELATING TO USE OF THIS FILE.
+ * Please see the License for the full text of applicable terms.
+ *
+ ****************************************************************************/

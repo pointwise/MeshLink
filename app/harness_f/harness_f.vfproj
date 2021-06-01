@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ 
+  (C) 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+ 
+  This file is not supported by Cadence Design Systems, Inc.
+  It is provided freely for demonstration purposes only.
+  SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ 
+-->
+
 <VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{32ACE185-2CC6-433D-BB61-030431E2811F}">
 	<Platforms>
         <Platform Name="x64"/>
@@ -39,3 +50,14 @@
     </Files>
     <Globals/>
 </VisualStudioProject>
+
+<!--
+
+   This file is licensed under the Cadence Public License Version 1.0 (the
+   "License"), a copy of which is found in the included file named "LICENSE",
+   and is distributed "AS IS." TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE
+   LAW, CADENCE DISCLAIMS ALL WARRANTIES AND IN NO EVENT SHALL BE LIABLE TO
+   ANY PARTY FOR ANY DAMAGES ARISING OUT OF OR RELATING TO USE OF THIS FILE.
+   Please see the License for the full text of applicable terms.
+
+-->

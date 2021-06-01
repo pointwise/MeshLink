@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MeshLink version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://pointwise.com ../schema/MeshLink.xsd" xmlns="https://pointwise.com">
+
+<!--
+ 
+  (C) 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+ 
+  This file is not supported by Cadence Design Systems, Inc.
+  It is provided freely for demonstration purposes only.
+  SEE THE WARRANTY DISCLAIMER AT THE BOTTOM OF THIS FILE.
+ 
+-->
+
+<MeshLink version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://cadence.com ../schema/MeshLink.xsd" xmlns="https://cadence.com">
   <!-- Sun Mar 10 20:43:14 2019 -->
   <Attribute attid="1" name="mesh generator">Pointwise V18.3A1</Attribute>
   <Attribute attid="2" name="geometry format">NMB</Attribute>
@@ -515,3 +526,14 @@
     </MeshModelReference>
   </MeshFile>
 </MeshLink>
+
+<!--
+
+   This file is licensed under the Cadence Public License Version 1.0 (the
+   "License"), a copy of which is found in the included file named "LICENSE",
+   and is distributed "AS IS." TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE
+   LAW, CADENCE DISCLAIMS ALL WARRANTIES AND IN NO EVENT SHALL BE LIABLE TO
+   ANY PARTY FOR ANY DAMAGES ARISING OUT OF OR RELATING TO USE OF THIS FILE.
+   Please see the License for the full text of applicable terms.
+
+-->
